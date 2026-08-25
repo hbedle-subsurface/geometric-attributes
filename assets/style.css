@@ -268,6 +268,28 @@ a.card:hover {
 }
 .flag.next { background: var(--crimson); }
 
+/* --- landing page: section heads, hero buttons, about --------------------- */
+
+.hero-cta { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.sec-head { margin-bottom: 22px; max-width: 76ch; }
+.sec-head h2 {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem); letter-spacing: -0.02em;
+  margin: 0 0 8px; line-height: 1.05;
+}
+.sec-head p { margin: 0; color: var(--ink-soft); font-size: 15.5px; }
+
+.about {
+  border-top: 1px solid var(--rule);
+  padding: 30px 0 6px;
+}
+.about h2 {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--crimson); margin: 0 0 12px;
+}
+.about p { margin: 0 0 10px; color: var(--ink-soft); font-size: 15px; max-width: 78ch; }
+
 /* --- next module ---------------------------------------------------------- */
 
 .nextup {
