@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Geometric Attributes Actually Work</title>
+<meta name="description" content="Interactive modules on seismic geometric attributes: dip, dip steering, coherence and energy ratio similarity, curvature, and aberrancy. Built for teaching by AASPI at the University of Oklahoma.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <nav>
+      <a href="#modules">Modules</a>
+      <a href="#about">About</a>
+      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a>
+    </nav>
+  </header>
+
+  <!-- ================================ HERO ================================ -->
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">AASPI &nbsp;·&nbsp; University of Oklahoma</p>
+      <h1>Geometric attributes measure the <b>shape</b> of reflectors, not their strength.</h1>
+      <p class="lede">Coherence, curvature and aberrancy all answer questions about geometry: is this
+        reflector continuous, is it bent, is it flexed. Every one of them is computed from the same starting
+        point — an estimate of which way the reflector is going at every sample in the volume.</p>
+      <p class="lede">These modules open that up. Build a structure, watch the attribute being computed on it,
+        change the parameters that are usually left at their defaults, and see what happens to the answer.
+        Nothing to install, and nothing leaves your machine.</p>
+      <div class="hero-cta">
+        <a class="btn" href="modules/dip.html">Start with dip →</a>
+        <a class="btn ghost" href="#modules">See all modules</a>
+      </div>
+    </div>
+    <div class="hero-art"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas></div>
+  </section>
+
+  <!-- ============================== THE PREMISE ============================ -->
+  <section class="primer">
+    <div class="primer-item">
+      <h3>Attributes are computed, not measured</h3>
+      <p>Every geometric attribute is the output of an algorithm with parameters. Change the window, the
+        aperture or the dip search and the answer changes — sometimes a little, sometimes completely.</p>
+    </div>
+    <div class="primer-item">
+      <h3>They all stand on dip</h3>
+      <p>Coherence is measured along dip. Curvature is the derivative of the dip field. Aberrancy is the
+        derivative after that. Errors in dip do not stay in dip.</p>
+    </div>
+    <div class="primer-item">
+      <h3>Defaults are decisions</h3>
+      <p>Most attribute volumes are produced with whatever the software suggested. Those suggestions are
+        reasonable starting points, not answers, and they are rarely revisited.</p>
+    </div>
+  </section>
+
+  <!-- =============================== MODULES ============================== -->
+  <section id="modules" class="modules">
+    <div class="sec-head">
+      <h2>The modules</h2>
+      <p>In the order they build on each other. Each one isolates a single attribute, or a single decision
+        that goes into computing one.</p>
+    </div>
+
+    <div class="grid">
+
+      <a class="card" href="modules/dip.html">
+        <canvas class="thumb-canvas" data-thumb="dip"></canvas>
+        <div class="card-body">
+          <div class="card-no">01</div>
+          <h3>Dip — the foundation</h3>
+          <p>How dip is actually estimated: a brute-force search over candidate dips, scored by semblance.
+            Watch the search run, then break it.</p>
+          <div class="q">What is every other attribute standing on?</div>
+        </div>
+        <span class="flag next">Start here</span>
+      </a>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">02</div>
+          <h3>Dip steering</h3>
+          <p>The same coherence calculation, run along dip and then along horizontal windows, on the same
+            dipping data. One finds the fault; the other finds the bedding.</p>
+          <div class="q">Why does my coherence follow the structure?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">03</div>
+          <h3>Similarity &amp; the coherence family</h3>
+          <p>Cross-correlation, semblance, eigenstructure and energy ratio similarity computed side by side on
+            one dataset, so the differences are visible rather than described.</p>
+          <div class="q">Which coherence should I be running?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">04</div>
+          <h3>The analysis window</h3>
+          <p>Vertical height against lateral aperture, and what each does to a fault, a channel edge and a
+            stratigraphic boundary. The parameter with the largest effect and the least attention.</p>
+          <div class="q">Why did my fault get fat?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">05</div>
+          <h3>Curvature</h3>
+          <p>Most-positive and most-negative curvature, mean and Gaussian, shape index and curvedness — built
+            up from the dip field so you can see where each one comes from.</p>
+          <div class="q">What is k1 actually telling me?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">06</div>
+          <h3>Multispectral curvature</h3>
+          <p>Long- and short-wavelength curvature on the same structure. Different wavelengths reveal
+            different features, and the choice of operator length is an interpretation.</p>
+          <div class="q">Which wavelength shows my fractures?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">07</div>
+          <h3>Aberrancy</h3>
+          <p>The third derivative of structure. Aberrancy magnitude and azimuth pick out flexures and small
+            faults that curvature and coherence both step over.</p>
+          <div class="q">What is left that curvature missed?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">08</div>
+          <h3>Choosing an attribute</h3>
+          <p>One volume containing a fault, a flexure, a channel and an unconformity, with every attribute
+            from the previous modules run on it. Which finds what, and which cannot.</p>
+          <div class="q">Which attribute for which feature?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================== DISCLAIMER ============================= -->
+  <section class="disclaimer">
+    <h4>What this is, and what it is not</h4>
+    <p>These modules are <b>teaching models, built to make ideas visible</b>. The attribute algorithms are
+      implemented as the literature describes them, but on small synthetic datasets and in their plain
+      brute-force form, so the method can be read and watched rather than assumed. Each module lists what it
+      has left out and why.</p>
+    <p>This is not attribute software. For production work on real volumes, use
+      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> or your interpretation package. The numbers here
+      describe the model on the screen, not your survey.</p>
+  </section>
+
+  <!-- ================================ ABOUT =============================== -->
+  <section id="about" class="about">
+    <div class="about-copy">
+      <h2>About</h2>
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        Attribute Assisted Seismic Processing and Interpretation (AASPI) consortium.</p>
+      <p>Companion to <em>What Can You REALLY See in Seismic?</em>, which covers resolution — how thin a bed,
+        how small a fault, how narrow a feature. This set picks up where that one leaves off, and asks what
+        the attributes computed from that data are actually measuring.</p>
+      <p>Everything runs in the browser. No installation, no account, no data transmitted. Free to use or
+        adapt in your own courses with citation.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma —
+        with the <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.
+        Free to use or adapt in your own courses with citation.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="assets/seismic.js"></script>
+<script src="assets/attributes.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // hero: a folded, faulted section with dip bars laid over it
+  function drawHero() {
+    const c = document.getElementById('heroCanvas');
+    if (!c || !c.parentElement) return;
+    const w = c.parentElement.clientWidth, h = Math.max(220, Math.round(w * 0.62));
+    const ctx = SEIS.fitCanvas(c, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const NX = 160, NT = 220, DT = 0.002;
+    const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
+    const rnd = SEIS.mulberry32(4);
+    const refl = [];
+    for (let t = -500; t < NT + 500; t += 34) {
+      refl.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.06 + rnd() * 0.07) });
+    }
+    const shift = (ix) => 14 * Math.sin(2 * Math.PI * ix / 95) + (ix > 0.62 * NX ? 9 : 0);
+    const fld = new Float32Array(NX * NT);
+    for (let ix = 0; ix < NX; ix++) {
+      const sh = shift(ix);
+      fld.set(SEIS.traceFromSpikes(refl.map((R) => ({ t: (R.it + sh) * DT, r: R.r })),
+        0, DT, NT, wav), ix * NT);
+    }
+    let pk = 1e-6;
+    for (let i = 0; i < fld.length; i++) pk = Math.max(pk, Math.abs(fld[i]));
+    SEIS.drawVarDensity(ctx, fld, NX, NT, { x: 0, y: 0, w: w, h: h },
+      { cmap: SEIS.COLORMAPS.gray, clip: pk * 0.8 });
+    // dip bars, from the same scan the modules use
+    ctx.save();
+    ctx.strokeStyle = 'rgba(196,60,45,.95)'; ctx.lineWidth = 2;
+    for (let ix = 10; ix < NX - 10; ix += 13) {
+      for (let it = 18; it < NT - 18; it += 24) {
+        const r = ATTR.dipScan(fld, NX, NT, ix, it, { half: 2, kHalf: 5, pMax: 4, nP: 25 });
+        const x = (ix / NX) * w, y = (it / NT) * h;
+        const ex = 5.5 * (w / NX), ey = r.p * 5.5 * (h / NT);
+        ctx.beginPath(); ctx.moveTo(x - ex, y - ey); ctx.lineTo(x + ex, y + ey); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  function thumbDip(canvas) {
+    const w = canvas.parentElement.clientWidth, h = 118;
+    const ctx = SEIS.fitCanvas(canvas, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const NX = 140, NT = 160, DT = 0.002;
+    const shift = (ix) => 13 * Math.sin(2 * Math.PI * ix / 80) + (ix > 0.6 * NX ? 8 : 0);
+    const trueP = (ix) => 13 * (2 * Math.PI / 80) * Math.cos(2 * Math.PI * ix / 80);
+    const off = document.createElement('canvas');
+    off.width = NX; off.height = NT;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(NX, NT);
+    for (let it = 0; it < NT; it++) {
+      for (let ix = 0; ix < NX; ix++) {
+        const c = ATTR.MAPS.dip(trueP(ix) / 1.4);
+        const q = it * NX + ix;
+        img.data[q * 4] = c[0]; img.data[q * 4 + 1] = c[1];
+        img.data[q * 4 + 2] = c[2]; img.data[q * 4 + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(off, 0, 0, w, h);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.55)'; ctx.lineWidth = 1.4;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(0.6 * w, 0); ctx.lineTo(0.6 * w, h);
+    ctx.stroke(); ctx.restore();
+  }
+
+  function drawThumbs() {
+    document.querySelectorAll('.thumb-canvas').forEach((c) => {
+      if (c.dataset.thumb === 'dip') thumbDip(c);
+    });
+  }
+
+  function all() { drawHero(); drawThumbs(); }
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(all, 150); });
+  all();
+  document.fonts && document.fonts.ready.then(all);
+})();
+</script>
+</body>
+</html>
