@@ -1,229 +1,313 @@
-/* ===========================================================================
-   attributes.js — geometric attribute computation
-   "How Geometric Attributes Actually Work"
-   Heather Bedle / AASPI / University of Oklahoma
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Geometric Attributes Actually Work</title>
+<meta name="description" content="Interactive modules on seismic geometric attributes: dip, dip steering, coherence and energy ratio similarity, curvature, and aberrancy. Built for teaching by AASPI at the University of Oklahoma.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
 
-   Companion to seismic.js, which supplies wavelets, convolution, colour maps,
-   the FFT and the canvas helpers. This file holds the attribute algorithms
-   themselves, written the way the textbooks describe them rather than in any
-   optimised form, so the code can be read alongside the module that uses it.
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <nav>
+      <a href="#modules">Modules</a>
+      <a href="#about">About</a>
+      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a>
+    </nav>
+  </header>
 
-   Everything here is 2D (one inline). Crossline dip, dip azimuth and the true
-   3D forms arrive with the later modules; where a 2D form is a simplification
-   of a 3D one, the comment says so.
-   =========================================================================== */
+  <!-- ================================ HERO ================================ -->
+  <section class="hero">
+   <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">AASPI &nbsp;·&nbsp; University of Oklahoma</p>
+      <h1 class="title">Geometric attributes measure the <em>shape</em> of reflectors, not their strength.</h1>
+      <p class="lede">Coherence, curvature and aberrancy all answer questions about geometry: is this
+        reflector continuous, is it bent, is it flexed. Every one of them is computed from the same starting
+        point — an estimate of which way the reflector is going at every sample in the volume.</p>
+      <p class="lede">These modules open that up. Build a structure, watch the attribute being computed on it,
+        change the parameters that are usually left at their defaults, and see what happens to the answer.
+        Nothing to install, and nothing leaves your machine.</p>
+      <div class="hero-cta">
+        <a class="btn" href="modules/dip.html">Start with dip →</a>
+        <a class="btn ghost" href="#modules">See all modules</a>
+      </div>
+    </div>
+    <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
+      <div class="hero-cap"><span>dip estimated by semblance scan</span><b>every sample</b></div></div>
+   </div>
+  </section>
 
-const ATTR = (function () {
+  <!-- ============================== THE PREMISE ============================ -->
+  <section class="primer">
+   <div class="primer-grid">
+    <div>
+      <h3>Attributes are computed, not measured</h3>
+      <p>Every geometric attribute is the output of an algorithm with parameters. Change the window, the
+        aperture or the dip search and the answer changes — sometimes a little, sometimes completely.</p>
+    </div>
+    <div>
+      <h3>They all stand on dip</h3>
+      <p>Coherence is measured along dip. Curvature is the derivative of the dip field. Aberrancy is the
+        derivative after that. Errors in dip do not stay in dip.</p>
+    </div>
+    <div>
+      <h3>Defaults are decisions</h3>
+      <p>Most attribute volumes are produced with whatever the software suggested. Those suggestions are
+        reasonable starting points, not answers, and they are rarely revisited.</p>
+    </div>
+   </div>
+  </section>
+
+  <!-- =============================== MODULES ============================== -->
+  <section id="modules" class="modules">
+    <div class="sec-head">
+      <h2>The modules</h2>
+      <p>In the order they build on each other. Each one isolates a single attribute, or a single decision
+        that goes into computing one.</p>
+    </div>
+
+    <div class="card-grid">
+
+      <a class="card" href="modules/dip.html">
+        <canvas class="thumb-canvas" data-thumb="dip"></canvas>
+        <div class="card-body">
+          <div class="card-no">01</div>
+          <h3>Dip — the foundation</h3>
+          <p>How dip is actually estimated: a brute-force search over candidate dips, scored by semblance.
+            Watch the search run, then break it.</p>
+          <div class="q">What is every other attribute standing on?</div>
+        </div>
+        <span class="flag next">Start here</span>
+      </a>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">02</div>
+          <h3>Inline and crossline dip</h3>
+          <p>One dip component becomes two. The search becomes a grid of candidate orientations, and the
+            pair <b>p</b> and <b>q</b> turns into the dip magnitude and dip azimuth you co-render.</p>
+          <div class="q">What does dip azimuth actually show me?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">03</div>
+          <h3>Dip steering</h3>
+          <p>The same coherence calculation, run along dip and then along horizontal windows, on the same
+            dipping data. One finds the fault; the other finds the bedding.</p>
+          <div class="q">Why does my coherence follow the structure?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">04</div>
+          <h3>Similarity &amp; the coherence family</h3>
+          <p>Cross-correlation, semblance, eigenstructure and energy ratio similarity computed side by side on
+            one dataset, so the differences are visible rather than described.</p>
+          <div class="q">Which coherence should I be running?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">05</div>
+          <h3>The analysis window</h3>
+          <p>Vertical height against lateral aperture, and what each does to a fault, a channel edge and a
+            stratigraphic boundary. The parameter with the largest effect and the least attention.</p>
+          <div class="q">Why did my fault get fat?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">06</div>
+          <h3>Curvature</h3>
+          <p>Most-positive and most-negative curvature, mean and Gaussian, shape index and curvedness — built
+            up from the dip field so you can see where each one comes from.</p>
+          <div class="q">What is k1 actually telling me?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">07</div>
+          <h3>Multispectral curvature</h3>
+          <p>Long- and short-wavelength curvature on the same structure. Different wavelengths reveal
+            different features, and the choice of operator length is an interpretation.</p>
+          <div class="q">Which wavelength shows my fractures?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">08</div>
+          <h3>Aberrancy</h3>
+          <p>The third derivative of structure. Aberrancy magnitude and azimuth pick out flexures and small
+            faults that curvature and coherence both step over.</p>
+          <div class="q">What is left that curvature missed?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">09</div>
+          <h3>Choosing an attribute</h3>
+          <p>One volume containing a fault, a flexure, a channel and an unconformity, with every attribute
+            from the previous modules run on it. Which finds what, and which cannot.</p>
+          <div class="q">Which attribute for which feature?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================== DISCLAIMER ============================= -->
+  <section class="disclaimer">
+    <h4>What this is, and what it is not</h4>
+    <p>These modules are <b>teaching models, built to make ideas visible</b>. The attribute algorithms are
+      implemented as the literature describes them, but on small synthetic datasets and in their plain
+      brute-force form, so the method can be read and watched rather than assumed. Each module lists what it
+      has left out and why.</p>
+    <p>This is not attribute software. For production work on real volumes, use
+      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> or your interpretation package. The numbers here
+      describe the model on the screen, not your survey.</p>
+  </section>
+
+  <!-- ================================ ABOUT =============================== -->
+  <section id="about" class="about">
+    <div class="about-copy">
+      <h2>About</h2>
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        Attribute Assisted Seismic Processing and Interpretation (AASPI) consortium.</p>
+      <p>Companion to <em>What Can You REALLY See in Seismic?</em>, which covers resolution — how thin a bed,
+        how small a fault, how narrow a feature. This set picks up where that one leaves off, and asks what
+        the attributes computed from that data are actually measuring.</p>
+      <p>Everything runs in the browser. No installation, no account, no data transmitted. Free to use or
+        adapt in your own courses with citation.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma —
+        with the <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.
+        Free to use or adapt in your own courses with citation.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="assets/seismic.js"></script>
+<script src="assets/attributes.js"></script>
+<script>
+(function () {
   'use strict';
 
-  /* ---------------------------------------------------------------------
-     SEMBLANCE
-
-     The quantity nearly every geometric attribute is built on. For J traces
-     over a window of K samples,
-
-         semblance = mean over k of ( sum_j a_jk )^2
-                     -------------------------------------
-                     J * mean over k of sum_j a_jk^2
-
-     It is 1 when every trace in the window is identical and falls toward 1/J
-     when they are unrelated. Marfurt et al. (1998) introduced it as a coherence
-     measure; here it is also the thing a dip scan maximises.
-     --------------------------------------------------------------------- */
-
-  function semblance(gather, J, K) {
-    let num = 0, den = 0;
-    for (let k = 0; k < K; k++) {
-      let s = 0, ss = 0;
-      for (let j = 0; j < J; j++) {
-        const v = gather[j * K + k];
-        s += v; ss += v * v;
-      }
-      num += s * s;
-      den += ss;
+  // hero: a folded, faulted section with dip bars laid over it
+  function drawHero() {
+    const c = document.getElementById('heroCanvas');
+    if (!c || !c.parentElement) return;
+    const w = c.parentElement.clientWidth, h = Math.max(220, Math.round(w * 0.62));
+    const ctx = SEIS.fitCanvas(c, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const NX = 160, NT = 220, DT = 0.002;
+    const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
+    const rnd = SEIS.mulberry32(4);
+    const refl = [];
+    for (let t = -500; t < NT + 500; t += 34) {
+      refl.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.06 + rnd() * 0.07) });
     }
-    if (den < 1e-20) return 0;
-    return num / (J * den);
-  }
-
-  /* ---------------------------------------------------------------------
-     SAMPLING ALONG A DIP
-
-     A candidate dip p is a time shift per trace. Gathering along it means
-     reading each neighbouring trace at a time offset of p times its distance
-     from the centre, with linear interpolation because that offset is almost
-     never a whole sample.
-     --------------------------------------------------------------------- */
-
-  function gatherAlongDip(field, nx, nt, ix, it, p, half, kHalf, out) {
-    const J = 2 * half + 1, K = 2 * kHalf + 1;
-    for (let j = -half; j <= half; j++) {
-      const jx = Math.min(nx - 1, Math.max(0, ix + j));
-      const shift = p * j;                       // samples, may be fractional
-      for (let k = -kHalf; k <= kHalf; k++) {
-        const pos = it + k + shift;
-        const i0 = Math.floor(pos), f = pos - i0;
-        let v = 0;
-        if (i0 >= 0 && i0 < nt - 1) {
-          v = field[jx * nt + i0] * (1 - f) + field[jx * nt + i0 + 1] * f;
-        } else if (i0 >= 0 && i0 < nt) {
-          v = field[jx * nt + i0];
-        }
-        out[(j + half) * K + (k + kHalf)] = v;
+    const shift = (ix) => 14 * Math.sin(2 * Math.PI * ix / 95) + (ix > 0.62 * NX ? 9 : 0);
+    const fld = new Float32Array(NX * NT);
+    for (let ix = 0; ix < NX; ix++) {
+      const sh = shift(ix);
+      fld.set(SEIS.traceFromSpikes(refl.map((R) => ({ t: (R.it + sh) * DT, r: R.r })),
+        0, DT, NT, wav), ix * NT);
+    }
+    let pk = 1e-6;
+    for (let i = 0; i < fld.length; i++) pk = Math.max(pk, Math.abs(fld[i]));
+    SEIS.drawVarDensity(ctx, fld, NX, NT, { x: 0, y: 0, w: w, h: h },
+      { cmap: SEIS.COLORMAPS.gray, clip: pk * 0.8 });
+    // dip bars, from the same scan the modules use
+    ctx.save();
+    ctx.strokeStyle = 'rgba(196,60,45,.95)'; ctx.lineWidth = 2;
+    for (let ix = 10; ix < NX - 10; ix += 13) {
+      for (let it = 18; it < NT - 18; it += 24) {
+        const r = ATTR.dipScan(fld, NX, NT, ix, it, { half: 2, kHalf: 5, pMax: 4, nP: 25 });
+        const x = (ix / NX) * w, y = (it / NT) * h;
+        const ex = 5.5 * (w / NX), ey = r.p * 5.5 * (h / NT);
+        ctx.beginPath(); ctx.moveTo(x - ex, y - ey); ctx.lineTo(x + ex, y + ey); ctx.stroke();
       }
     }
-    return out;
+    ctx.restore();
   }
 
-  /* ---------------------------------------------------------------------
-     DIP SCAN
-
-     The estimator: try a fan of candidate dips, gather along each, and keep
-     the one whose semblance is highest. This is the discrete dip search of
-     Marfurt et al. (1998). It is deliberately brute force — the point of the
-     module is to let a student watch the search happen and see the winning
-     dip fall out of a curve, rather than appear from a closed form.
-
-     Returns { p, sem, curve } with p in samples per trace, and curve holding
-     the semblance at every candidate so the search can be plotted.
-     --------------------------------------------------------------------- */
-
-  function dipScan(field, nx, nt, ix, it, opts) {
-    const o = opts || {};
-    const half = o.half === undefined ? 2 : o.half;       // traces either side
-    const kHalf = o.kHalf === undefined ? 5 : o.kHalf;    // samples either side
-    const pMax = o.pMax === undefined ? 4 : o.pMax;       // samples per trace
-    const nP = o.nP === undefined ? 41 : o.nP;
-
-    const J = 2 * half + 1, K = 2 * kHalf + 1;
-    const buf = new Float64Array(J * K);
-    const curve = new Float64Array(nP);
-    let best = -1, bestP = 0, bestI = 0;
-
-    for (let i = 0; i < nP; i++) {
-      const p = -pMax + (2 * pMax * i) / (nP - 1);
-      gatherAlongDip(field, nx, nt, ix, it, p, half, kHalf, buf);
-      const s = semblance(buf, J, K);
-      curve[i] = s;
-      if (s > best) { best = s; bestP = p; bestI = i; }
-    }
-
-    // Parabolic refinement on the winning sample, so the estimate is not
-    // quantised to the candidate spacing. Real implementations do the same.
-    let p = bestP;
-    if (bestI > 0 && bestI < nP - 1) {
-      const a = curve[bestI - 1], b = curve[bestI], c = curve[bestI + 1];
-      const den = a - 2 * b + c;
-      if (Math.abs(den) > 1e-12) {
-        const step = (2 * pMax) / (nP - 1);
-        p = bestP - 0.5 * step * (c - a) / den;
+  function thumbDip(canvas) {
+    const w = canvas.parentElement.clientWidth, h = 118;
+    const ctx = SEIS.fitCanvas(canvas, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const NX = 140, NT = 160, DT = 0.002;
+    const shift = (ix) => 13 * Math.sin(2 * Math.PI * ix / 80) + (ix > 0.6 * NX ? 8 : 0);
+    const trueP = (ix) => 13 * (2 * Math.PI / 80) * Math.cos(2 * Math.PI * ix / 80);
+    const off = document.createElement('canvas');
+    off.width = NX; off.height = NT;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(NX, NT);
+    for (let it = 0; it < NT; it++) {
+      for (let ix = 0; ix < NX; ix++) {
+        const c = ATTR.MAPS.dip(trueP(ix) / 1.4);
+        const q = it * NX + ix;
+        img.data[q * 4] = c[0]; img.data[q * 4 + 1] = c[1];
+        img.data[q * 4 + 2] = c[2]; img.data[q * 4 + 3] = 255;
       }
     }
-    return { p, sem: best, curve, pMax, nP };
+    octx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(off, 0, 0, w, h);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.55)'; ctx.lineWidth = 1.4;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(0.6 * w, 0); ctx.lineTo(0.6 * w, h);
+    ctx.stroke(); ctx.restore();
   }
 
-  /**
-   * Dip everywhere, on a decimated grid.
-   *
-   * Production code estimates dip at every sample; this decimates and
-   * interpolates for display, because a full-density scan of a few hundred by
-   * a few hundred with forty candidate dips is tens of millions of operations
-   * and would make the sliders stutter. The decimation is a display choice,
-   * not part of the method, and the module says so.
-   */
-  function dipField(field, nx, nt, opts) {
-    const o = opts || {};
-    const dx = o.decX || 2, dt = o.decT || 3;
-    const gx = Math.ceil(nx / dx), gt = Math.ceil(nt / dt);
-    const p = new Float32Array(gx * gt);
-    const sem = new Float32Array(gx * gt);
-    for (let a = 0; a < gx; a++) {
-      const ix = Math.min(nx - 1, a * dx);
-      for (let b = 0; b < gt; b++) {
-        const it = Math.min(nt - 1, b * dt);
-        const r = dipScan(field, nx, nt, ix, it, o);
-        p[a * gt + b] = r.p;
-        sem[a * gt + b] = r.sem;
-      }
-    }
-    return { p, sem, gx, gt, decX: dx, decT: dt };
+  function drawThumbs() {
+    document.querySelectorAll('.thumb-canvas').forEach((c) => {
+      if (c.dataset.thumb === 'dip') thumbDip(c);
+    });
   }
 
-  // bilinear read from a decimated grid, in full-resolution coordinates
-  function sampleGrid(g, arr, ix, it) {
-    const a = Math.min(g.gx - 1.001, Math.max(0, ix / g.decX));
-    const b = Math.min(g.gt - 1.001, Math.max(0, it / g.decT));
-    const a0 = Math.floor(a), b0 = Math.floor(b);
-    const fa = a - a0, fb = b - b0;
-    const v00 = arr[a0 * g.gt + b0], v10 = arr[(a0 + 1) * g.gt + b0];
-    const v01 = arr[a0 * g.gt + b0 + 1], v11 = arr[(a0 + 1) * g.gt + b0 + 1];
-    return (v00 * (1 - fa) + v10 * fa) * (1 - fb) + (v01 * (1 - fa) + v11 * fa) * fb;
-  }
-
-  /* ---------------------------------------------------------------------
-     UNIT CONVERSIONS
-
-     Dip is computed in samples per trace, which is the natural unit for the
-     algorithm and a meaningless one for an interpreter. These convert it into
-     the two forms people actually quote.
-     --------------------------------------------------------------------- */
-
-  // samples/trace -> milliseconds per trace
-  const dipToMsPerTrace = (p, dtSec) => p * dtSec * 1000;
-
-  // samples/trace -> geological dip in degrees, given trace spacing and velocity.
-  // Time dip dt/dx relates to true dip theta by dt/dx = 2 sin(theta) / V.
-  function dipToDegrees(p, dtSec, dxM, vMs) {
-    const timeDip = (p * dtSec) / dxM;          // s per m, two-way
-    const s = (timeDip * vMs) / 2;
-    return Math.abs(s) >= 1 ? 90 * Math.sign(s) : Math.asin(s) * 180 / Math.PI;
-  }
-
-  /* ---------------------------------------------------------------------
-     COLOUR MAPS FOR ATTRIBUTES
-
-     Attribute displays have their own conventions, and they matter. Dip is
-     signed, so it needs a diverging map with a neutral centre. Coherence runs
-     0 to 1 and is shown with low values dark, because faults are what you are
-     looking for and they should read as the ink on the page.
-     --------------------------------------------------------------------- */
-
-  function ramp(stops, signed) {
-    return function (u) {
-      const v = signed ? (Math.max(-1, Math.min(1, u)) + 1) / 2
-                       : Math.max(0, Math.min(1, u));
-      const q = v * (stops.length - 1);
-      const i = Math.min(stops.length - 2, Math.floor(q)), f = q - i;
-      const a = stops[i], b = stops[i + 1];
-      return [Math.round(a[0] + (b[0] - a[0]) * f),
-              Math.round(a[1] + (b[1] - a[1]) * f),
-              Math.round(a[2] + (b[2] - a[2]) * f)];
-    };
-  }
-
-  const MAPS = {
-    // signed dip: brown for one direction, teal for the other, pale at flat.
-    // Avoids red/green, and the two ends are told apart by lightness as well
-    // as hue so it survives greyscale printing.
-    dip: ramp([
-      [92, 48, 12], [150, 96, 32], [205, 165, 105], [246, 244, 238],
-      [140, 197, 200], [46, 132, 150], [16, 62, 88],
-    ], true),
-    // coherence: 1 is white, 0 is black. Discontinuities are the ink.
-    coherence: ramp([
-      [8, 10, 12], [58, 62, 68], [122, 128, 134], [190, 194, 198], [252, 252, 250],
-    ], false),
-    // semblance during a scan, warm so it reads against the crimson accent
-    scan: ramp([
-      [252, 250, 246], [253, 231, 160], [247, 190, 90], [233, 131, 60],
-      [196, 60, 45], [110, 16, 20],
-    ], false),
-  };
-
-  /* --------------------------------------------------------------------- */
-
-  return {
-    semblance, gatherAlongDip, dipScan, dipField, sampleGrid,
-    dipToMsPerTrace, dipToDegrees, MAPS, ramp,
-  };
+  function all() { drawHero(); drawThumbs(); }
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(all, 150); });
+  all();
+  document.fonts && document.fonts.ready.then(all);
 })();
+</script>
+</body>
+</html>
