@@ -706,16 +706,25 @@ const SEIS = (function () {
         p.set(k, typeof state[k] === 'boolean' ? (state[k] ? 1 : 0) : state[k]);
       }
       const q = p.toString();
-      history.replaceState(null, '', q ? '?' + q : location.pathname);
+      // Opening a module straight off disk gives a file:// URL, and browsers
+      // refuse to replaceState on those. That is not a failure worth shouting
+      // about, so the link-sharing feature simply goes quiet.
+      try {
+        history.replaceState(null, '', q ? '?' + q : location.pathname);
+      } catch (e) { /* file:// — no shareable URL to write */ }
     }, 250);
   }
 
   function copyLink(btn) {
-    navigator.clipboard.writeText(location.href).then(() => {
+    const done = (msg) => {
       const old = btn.textContent;
-      btn.textContent = 'Link copied';
+      btn.textContent = msg;
       setTimeout(() => (btn.textContent = old), 1600);
-    });
+    };
+    if (!navigator.clipboard) return done('Copy from the address bar');
+    navigator.clipboard.writeText(location.href)
+      .then(() => done('Link copied'))
+      .catch(() => done('Copy from the address bar'));
   }
 
   function savePNG(canvas, name) {
