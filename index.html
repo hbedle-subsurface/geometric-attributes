@@ -24,9 +24,10 @@
 
   <!-- ================================ HERO ================================ -->
   <section class="hero">
+   <div class="hero-grid">
     <div class="hero-copy">
       <p class="eyebrow">AASPI &nbsp;·&nbsp; University of Oklahoma</p>
-      <h1>Geometric attributes measure the <b>shape</b> of reflectors, not their strength.</h1>
+      <h1 class="title">Geometric attributes measure the <em>shape</em> of reflectors, not their strength.</h1>
       <p class="lede">Coherence, curvature and aberrancy all answer questions about geometry: is this
         reflector continuous, is it bent, is it flexed. Every one of them is computed from the same starting
         point — an estimate of which way the reflector is going at every sample in the volume.</p>
@@ -38,26 +39,30 @@
         <a class="btn ghost" href="#modules">See all modules</a>
       </div>
     </div>
-    <div class="hero-art"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas></div>
+    <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
+      <div class="hero-cap"><span>dip estimated by semblance scan</span><b>every sample</b></div></div>
+   </div>
   </section>
 
   <!-- ============================== THE PREMISE ============================ -->
   <section class="primer">
-    <div class="primer-item">
+   <div class="primer-grid">
+    <div>
       <h3>Attributes are computed, not measured</h3>
       <p>Every geometric attribute is the output of an algorithm with parameters. Change the window, the
         aperture or the dip search and the answer changes — sometimes a little, sometimes completely.</p>
     </div>
-    <div class="primer-item">
+    <div>
       <h3>They all stand on dip</h3>
       <p>Coherence is measured along dip. Curvature is the derivative of the dip field. Aberrancy is the
         derivative after that. Errors in dip do not stay in dip.</p>
     </div>
-    <div class="primer-item">
+    <div>
       <h3>Defaults are decisions</h3>
       <p>Most attribute volumes are produced with whatever the software suggested. Those suggestions are
         reasonable starting points, not answers, and they are rarely revisited.</p>
     </div>
+   </div>
   </section>
 
   <!-- =============================== MODULES ============================== -->
@@ -68,7 +73,7 @@
         that goes into computing one.</p>
     </div>
 
-    <div class="grid">
+    <div class="card-grid">
 
       <a class="card" href="modules/dip.html">
         <canvas class="thumb-canvas" data-thumb="dip"></canvas>
@@ -86,6 +91,18 @@
         <div class="thumb"></div>
         <div class="card-body">
           <div class="card-no">02</div>
+          <h3>Inline and crossline dip</h3>
+          <p>One dip component becomes two. The search becomes a grid of candidate orientations, and the
+            pair <b>p</b> and <b>q</b> turns into the dip magnitude and dip azimuth you co-render.</p>
+          <div class="q">What does dip azimuth actually show me?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">03</div>
           <h3>Dip steering</h3>
           <p>The same coherence calculation, run along dip and then along horizontal windows, on the same
             dipping data. One finds the fault; the other finds the bedding.</p>
@@ -97,7 +114,7 @@
       <div class="card planned">
         <div class="thumb"></div>
         <div class="card-body">
-          <div class="card-no">03</div>
+          <div class="card-no">04</div>
           <h3>Similarity &amp; the coherence family</h3>
           <p>Cross-correlation, semblance, eigenstructure and energy ratio similarity computed side by side on
             one dataset, so the differences are visible rather than described.</p>
@@ -109,7 +126,7 @@
       <div class="card planned">
         <div class="thumb"></div>
         <div class="card-body">
-          <div class="card-no">04</div>
+          <div class="card-no">05</div>
           <h3>The analysis window</h3>
           <p>Vertical height against lateral aperture, and what each does to a fault, a channel edge and a
             stratigraphic boundary. The parameter with the largest effect and the least attention.</p>
@@ -121,7 +138,7 @@
       <div class="card planned">
         <div class="thumb"></div>
         <div class="card-body">
-          <div class="card-no">05</div>
+          <div class="card-no">06</div>
           <h3>Curvature</h3>
           <p>Most-positive and most-negative curvature, mean and Gaussian, shape index and curvedness — built
             up from the dip field so you can see where each one comes from.</p>
@@ -133,7 +150,7 @@
       <div class="card planned">
         <div class="thumb"></div>
         <div class="card-body">
-          <div class="card-no">06</div>
+          <div class="card-no">07</div>
           <h3>Multispectral curvature</h3>
           <p>Long- and short-wavelength curvature on the same structure. Different wavelengths reveal
             different features, and the choice of operator length is an interpretation.</p>
@@ -145,7 +162,7 @@
       <div class="card planned">
         <div class="thumb"></div>
         <div class="card-body">
-          <div class="card-no">07</div>
+          <div class="card-no">08</div>
           <h3>Aberrancy</h3>
           <p>The third derivative of structure. Aberrancy magnitude and azimuth pick out flexures and small
             faults that curvature and coherence both step over.</p>
@@ -157,7 +174,7 @@
       <div class="card planned">
         <div class="thumb"></div>
         <div class="card-body">
-          <div class="card-no">08</div>
+          <div class="card-no">09</div>
           <h3>Choosing an attribute</h3>
           <p>One volume containing a fault, a flexure, a channel and an unconformity, with every attribute
             from the previous modules run on it. Which finds what, and which cannot.</p>
