@@ -755,9 +755,12 @@ const SEIS = (function () {
         'background:#841617', 'color:#fff', 'padding:12px 18px',
         'font:13px/1.5 ui-monospace,Menlo,monospace', 'box-shadow:0 2px 10px rgba(0,0,0,.3)',
       ].join(';'));
-      el.textContent = 'This page stopped drawing: ' + msg +
+      el.textContent = 'This page stopped drawing: ' + msg + '  [in ' + where + ']' +
         (likelyStale
           ? '  —  this usually means assets/seismic.js is older than the module using it. Upload the current assets/seismic.js and reload.'
+          : '') +
+        (/Unexpected token/.test(msg)
+          ? '  —  a script was handed something other than JavaScript. The file named above is the one to check.'
           : '');
       const dismiss = document.createElement('span');
       dismiss.textContent = '  [dismiss]';
