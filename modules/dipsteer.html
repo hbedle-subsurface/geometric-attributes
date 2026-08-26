@@ -48,10 +48,11 @@
 
     <div class="ctl" style="margin-top:14px;max-width:520px">
       <label for="dip">Dip of the bed <span class="val" id="dipV">2.00 ms per trace</span></label>
-      <input type="range" id="dip" min="0" max="8" step="0.1" value="2">
+      <input type="range" id="dip" min="-12" max="12" step="0.1" value="2">
     </div>
     <p class="hint-line" style="margin:-8px 0 16px;max-width:84ch">At zero the two windows are the same
-      window. Increase the dip and they separate.</p>
+      window. Move the dip either way and they separate; a negative dip simply tilts the bed the other way,
+      and the horizontal window is equally wrong about it.</p>
 
     <div class="sec-row" id="row1">
       <div class="panel-col">
@@ -85,11 +86,21 @@
       <h3>Step 2 &nbsp;·&nbsp; When does the horizontal window fail?</h3>
       <span class="hint">It depends on the wavelet, not on the geology</span>
     </div>
+    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Think of it as two lengths of time competing. The first is how much the reflector's arrival time
+      changes from one end of the window to the other — the dip multiplied by the width of the aperture. The
+      second is the period of the wavelet, the time from one peak to the next.</p>
+    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      While the first is a small fraction of the second, the traces still broadly overlap and the window
+      sees one event. As it grows toward half a period, the far end of the window is reading a trough where
+      the near end reads a peak, and the window is being shown two opposite things and asked whether they
+      agree. That is the whole mechanism, and it explains why the failure point depends on the
+      <em>wavelet</em> rather than on anything geological.</p>
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      The curve below sweeps the bed dip and plots both scores. The steered window stays at 1.0 the whole
-      way, because a continuous reflector is continuous. The horizontal window falls away, and where it
-      falls depends on how much time shift builds up across the aperture compared with the period of the
-      wavelet.</p>
+      The curve sweeps the bed dip and plots both scores. The steered window holds at 1.0 the whole way,
+      because a continuous reflector is continuous no matter how steeply it sits. Watch where the grey curve
+      crosses the dashed line, and watch the box below that reports the shift as a fraction of a period at
+      that crossing.</p>
 
     <canvas id="c2" aria-label="Similarity plotted against bed dip for a horizontal and a dip-steered window"></canvas>
 
@@ -151,27 +162,22 @@
       identical windows and identical arithmetic, differing only in whether the window is steered. Dark is
       low coherence.</p>
 
-    <div class="sec-row" id="row3">
-      <div class="panel-col">
-        <p class="sublabel"><b>1</b> The seismic
-          <span class="note">fold, with a fault at trace 89</span></p>
-        <canvas id="c3seis" aria-label="Seismic section showing a folded sequence cut by a fault"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>2</b> Coherence, dip-steered
-          <span class="note">window follows the bed</span></p>
-        <canvas id="c3dip" aria-label="Coherence computed with a dip-steered window"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>3</b> Coherence, horizontal window
-          <span class="note">same window, never steered</span></p>
-        <canvas id="c3flat" aria-label="Coherence computed with a horizontal window"></canvas>
-      </div>
-    </div>
+    <p class="sublabel"><b>1</b> The seismic
+      <span class="note">a gently folded sequence cut by a normal fault dipping about 65°</span></p>
+    <canvas id="c3seis" aria-label="Seismic section showing a folded sequence cut by a dipping fault"></canvas>
+
+    <p class="sublabel" style="margin-top:16px"><b>2</b> Coherence, dip-steered
+      <span class="note">the window follows the bed</span></p>
+    <canvas id="c3dip" aria-label="Coherence computed with a dip-steered window"></canvas>
+
+    <p class="sublabel" style="margin-top:16px"><b>3</b> Coherence, horizontal window
+      <span class="note">the same window, never steered</span></p>
+    <canvas id="c3flat" aria-label="Coherence computed with a horizontal window"></canvas>
 
     <div class="legend">
-      <span>Panels 2 and 3 share one grey scale, black at 0.5 and white at 1.0, so they can be compared
-        directly. The fault is one trace wide and vertical in both.</span>
+      <span>The seismic is displayed as variable density, the way a section of this many traces normally is.
+        Panels 2 and 3 share one grey scale, black at 0.5 and white at 1.0, so they can be compared
+        directly. The fault cuts obliquely across the reflectors, which is what makes the dark stripe lean.</span>
     </div>
 
     <div class="ctl" style="margin-top:14px;max-width:520px">
@@ -182,11 +188,11 @@
       way. The unsteered one was already dark on the flanks before any noise was added.</p>
 
     <div class="stats">
-      <div class="stat"><span>Steered: coherence on the bedding</span><b id="s3a">—</b></div>
-      <div class="stat"><span>Steered: coherence at the fault</span><b id="s3b">—</b></div>
-      <div class="stat"><span>Flat: coherence on the bedding</span><b id="s3c">—</b></div>
-      <div class="stat"><span>Flat: coherence at the fault</span><b id="s3d">—</b></div>
-      <div class="stat key"><span>Separation between fault and worst bedding</span><b id="s3e">—</b></div>
+      <div class="stat"><span>Steered: bedding, and its worst value</span><b id="s3a">—</b></div>
+      <div class="stat"><span>Steered: the darkest point on each row</span><b id="s3b">—</b></div>
+      <div class="stat"><span>Flat: bedding, and its worst value</span><b id="s3c">—</b></div>
+      <div class="stat"><span>Flat: the darkest point on each row</span><b id="s3d">—</b></div>
+      <div class="stat key"><span>How often the darkest point is the fault</span><b id="s3e">—</b></div>
       <div class="stat wide"><span>What this means for picking</span><b id="s3f">—</b></div>
     </div>
   </section>
@@ -207,22 +213,17 @@
       <input type="range" id="bias" min="-4" max="4" step="0.25" value="0">
     </div>
 
-    <div class="sec-row" id="row4">
-      <div class="panel-col">
-        <p class="sublabel"><b>1</b> Coherence, steered by the wrong dip
-          <span class="note">same grey scale as step 3</span></p>
-        <canvas id="c4map" aria-label="Coherence computed with a deliberately incorrect dip"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>2</b> What the error costs
-          <span class="note">bedding and fault coherence against dip error</span></p>
-        <canvas id="c4curve" aria-label="Coherence on bedding and at the fault plotted against dip error"></canvas>
-      </div>
-    </div>
+    <p class="sublabel"><b>1</b> Coherence, steered by the wrong dip
+      <span class="note">same grey scale as step 3</span></p>
+    <canvas id="c4map" aria-label="Coherence computed with a deliberately incorrect dip"></canvas>
+
+    <p class="sublabel" style="margin-top:16px"><b>2</b> What the error costs
+      <span class="note">bedding and fault coherence against the size of the error</span></p>
+    <canvas id="c4curve" aria-label="Coherence on bedding and at the fault plotted against dip error"></canvas>
 
     <div class="stats" style="margin-top:14px">
       <div class="stat"><span>Coherence on the bedding</span><b id="s4a">—</b></div>
-      <div class="stat"><span>Coherence at the fault</span><b id="s4b">—</b></div>
+      <div class="stat"><span>The darkest point on each row</span><b id="s4b">—</b></div>
       <div class="stat key"><span>Separation between them</span><b id="s4c">—</b></div>
       <div class="stat"><span>Steepest dip in this section</span><b id="s4d">—</b></div>
       <div class="stat wide"><span>Verdict</span><b id="s4e">—</b></div>
@@ -237,39 +238,42 @@
         <li><b>Find the tolerance of an unsteered window.</b> In step 2, leave the frequency at 30 Hz and
           five traces, and read the dip at which the flat window drops below 0.8. Then double the frequency
           and read it again.
-          <span class="ans">About 1.6 ms per trace at 30 Hz and about 0.8 at 60 Hz, so doubling the
-            frequency halves the tolerance. At 25 m bins and 3000 m/s, 1.6 ms per trace is a geological dip
-            of roughly 5.5 degrees. An unsteered coherence volume is therefore usable on almost nothing:
-            gentle regional dip is already enough to break it.</span></li>
+          <span class="ans">1.69 ms per trace at 30 Hz and 0.94 at 60 Hz, so doubling the frequency roughly
+            halves the tolerance. At 25 m bins and 3000 m/s those are geological dips of 5.8 and 3.2
+            degrees. An unsteered coherence volume is therefore usable on almost nothing: gentle regional
+            dip is already enough to break it, and better data makes it worse rather than better.</span></li>
         <li><b>Check that the failure is about the wavelet, not the dip.</b> Try several combinations of
           frequency and aperture in step 2, and each time read the "shift as a fraction of one period"
           box at the dip where the flat curve crosses 0.8.
-          <span class="ans">It lands between about 15 and 22 percent every time, whatever the frequency and
-            whatever the aperture. That is the actual rule, and it is worth carrying around: a horizontal
-            window survives only while the time shift accumulated across it stays under about a fifth of a
-            period. Everything else follows from that, including why higher frequency data needs better dip
-            estimates rather than fewer.</span></li>
+          <span class="ans">It lands between about 15 and 22 percent every time. Nine combinations of
+            frequency and aperture give crossings ranging from 5.06 ms per trace down to 0.56, a spread of
+            nine to one, and every one of them corresponds to the same fraction of a period. That is the
+            actual rule, and it is worth carrying around: a horizontal window survives only while the time
+            shift accumulated across it stays under about a fifth of a period.</span></li>
         <li><b>Compare the two volumes as an interpreter would.</b> In step 3, look at the steered and
           unsteered panels and ask which anomalies you would pick as faults.
-          <span class="ans">On the steered panel the bedding sits at 0.999 and the fault at 0.66, so the
-            fault is the only dark feature and there is no overlap at all. On the unsteered panel the
-            bedding averages 0.86 but drops to 0.70 on the steepest flanks, while the fault sits at 0.55.
-            The gap between the fault and the worst bedding has shrunk from 0.34 to 0.14, and the dark
-            fabric on the flanks is now within reach of the fault anomaly. Anyone auto-tracking this volume
-            would extract the fold flanks as faults.</span></li>
-        <li><b>Give the steering a small, plausible error.</b> In step 4, set the error to 0.5 ms per trace
-          and read the separation.
-          <span class="ans">Bedding coherence falls from 0.999 to about 0.98 and the separation from the
-            fault narrows by roughly a tenth. That is a small error by the standards of module 01 — smaller
-            than the effect of coarsening the dip search step to 2 ms — and it has already spent part of
-            your fault contrast. Steering is not a switch that is either on or off; the quality of the dip
-            volume is carried directly into every attribute computed from it.</span></li>
+          <span class="ans">On the steered panel the bedding is a flat 1.000 everywhere against a fault at
+            0.55, so the darkest point on a row is the fault 99% of the time and any threshold in between
+            works. On the unsteered panel the bedding averages 0.86 but falls to 0.69 on the steepest
+            flanks, against a fault at 0.45. The darkest point is still the fault 72% of the time, but on
+            the other 28% of rows a fold flank is darker than the fault, and no single threshold captures
+            the fault everywhere without also capturing bedding. The fault has not become weaker; it has
+            acquired competition.</span></li>
+        <li><b>Give the steering a small, plausible error.</b> In step 4, step the error through 0.25, 0.5
+          and 1 ms per trace and watch the bedding value.
+          <span class="ans">Bedding coherence falls 1.000, 0.994, 0.977, 0.913 as the error goes 0, 0.25,
+            0.5, 1 ms per trace, while the fault barely moves from 0.55 — the whole cost comes out of the
+            background rather than out of the anomaly. By 1 ms per trace the separation has dropped from
+            0.450 to 0.396. These are small errors by the standards of module 01, and they are already
+            being spent. Steering is not a switch that is either on or off.</span></li>
         <li><b>Push the error past the structure itself.</b> Set the error to 2 ms per trace and compare it
           with the steepest dip in the section, shown in the readout.
-          <span class="ans">The steepest true dip is about 2 ms per trace, so an error of 2 is a hundred
-            percent error, and bedding coherence collapses to about 0.70 — the same value the unsteered
-            window gave on the flanks. Steering by a badly wrong dip is no better than not steering, and it
-            is more dangerous, because the volume was labelled as dip-steered.</span></li>
+          <span class="ans">The steepest true dip is 1.96 ms per trace, so an error of 2 is a hundred
+            percent error, and bedding coherence collapses to 0.703 — almost exactly the 0.694 the
+            unsteered window gave on its worst flanks. Steering by a badly wrong dip has landed in the same
+            place as not steering at all, and it is more dangerous, because the volume is labelled as
+            dip-steered. Push on to 4 ms per trace and the darkest point on a row is the fault only 12% of
+            the time: the attribute is now imaging the error.</span></li>
       </ol>
     </div>
 
@@ -295,8 +299,11 @@
     <summary>Method, assumptions, and where to read more</summary>
     <p>Steps 1 and 2 use a single reflector across a small patch of traces, built by convolving one
       reflection coefficient with a Ricker wavelet and shifting each trace by the bed dip. Steps 3 and 4 use
-      a 140-trace section at 2 ms sampling containing a folded sequence of reflectors cut by a vertical
-      fault of 18 ms throw at trace 89. The dip field is estimated with the discrete semblance search of
+      a 160-trace section at 2 ms sampling containing a gently folded sequence with a regional dip, cut by
+      a normal fault of 20 ms throw dipping about 65 degrees. Because the fault plane is oblique to the
+      reflectors it crosses each one at a different trace, which is why the coherence anomaly leans. Fault
+      values quoted in the exercises are the darkest point found on each time row, which is what an
+      interpreter or an autotracker responds to, rather than an average over a fixed band. The dip field is estimated with the discrete semblance search of
       module 01 rather than being supplied analytically, so the steered result carries whatever error that
       search makes.</p>
     <p>The similarity measure used throughout is semblance, computed on the real trace over a window of
@@ -403,8 +410,16 @@
   const DXM = 25, VEL = 3000;
 
   const PN = 15, PT = 161, PCX = 7, PCT = 80;      // the patch, steps 1 and 2
-  const NX = 140, NT = 200;                        // the section, steps 3 and 4
-  const XF = 88, THROW = 18, FOLDA = 30, FOLDL = 95;
+  const NX = 160, NT = 220;                        // the section, steps 3 and 4
+  const THROW = 20, FOLDA = 22, FOLDL = 130, REG = 0.9;
+
+  /* A real fault is not vertical. This one dips about 65 degrees, which at
+     25 m bins and 3000 m/s is 7.8 ms of throw position per trace, so the
+     fault plane moves right by one trace every four samples as it goes down.
+     Where it cuts each reflector therefore depends on that reflector's time. */
+  const FAULT_SLOPE = 1 / 3.9;                     // traces per sample
+  const FAULT_X0 = 52;                             // trace at the top of the section
+  const faultTraceAt = (t0) => FAULT_X0 + FAULT_SLOPE * t0;
 
   const DEF = {
     dip: 2, f: 30, half: 2, kHalf: 10,
@@ -443,22 +458,25 @@
 
   /* ------------------------ the section, steps 3-4 --------------------- */
 
-  const shiftAt = (ix) => msToP(FOLDA) * Math.sin(2 * Math.PI * ix / FOLDL) +
-    (ix > XF ? msToP(THROW) : 0);
-  const trueDipMs = (ix) => FOLDA * (2 * Math.PI / FOLDL) * Math.cos(2 * Math.PI * ix / FOLDL);
+  // structural shift of a reflector whose un-faulted time index is t0
+  const shiftAt = (ix, t0) => msToP(REG) * (ix - NX / 2) +
+    msToP(FOLDA) * Math.sin(2 * Math.PI * ix / FOLDL) +
+    (ix > faultTraceAt(t0) ? msToP(THROW) : 0);
+  const trueDipMs = (ix) => REG +
+    FOLDA * (2 * Math.PI / FOLDL) * Math.cos(2 * Math.PI * ix / FOLDL);
 
   let SECT = new Float32Array(NX * NT), SPEAK = 1;
   function buildSection() {
     const wav = SEIS.makeWavelet({ type: 'ricker', f: S.f });
     const rnd = SEIS.mulberry32(7);
     const beds = [];
-    for (let t = -40; t < NT + 40; t += 28) {
-      beds.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.06 + rnd() * 0.06) });
+    for (let t = -40; t < NT + 40; t += 26) {
+      beds.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.035 + rnd() * 0.075) });
     }
     const f = new Float32Array(NX * NT);
     for (let ix = 0; ix < NX; ix++) {
-      const sh = shiftAt(ix);
-      f.set(SEIS.traceFromSpikes(beds.map((b) => ({ t: (b.it + sh) * DT, r: b.r })),
+      f.set(SEIS.traceFromSpikes(
+        beds.map((b) => ({ t: (b.it + shiftAt(ix, b.it)) * DT, r: b.r })),
         0, DT, NT, wav), ix * NT);
     }
     let pk = 1e-6;
@@ -475,7 +493,7 @@
 
   let GRID = null, COHD = null, COHF = null, COHB = null, BIASCURVE = null;
 
-  const winOpts = () => ({ half: S.half, kHalf: S.kHalf, decX: 2, decT: 2 });
+  const winOpts = () => ({ half: S.half, kHalf: S.kHalf, decX: 1, decT: 2 });
 
   function biasedGrid(ms) {
     if (!GRID || Math.abs(ms) < 1e-9) return GRID;
@@ -489,23 +507,34 @@
      The worst bedding value matters more than the mean: it is what an
      autotracker will confuse with a fault. */
   function split(c) {
-    const bed = [], flt = [];
-    for (let a = 0; a < c.gx; a++) {
-      const ix = a * c.decX;
-      for (let b = 6; b < c.gt - 6; b++) {
-        (Math.abs(ix - XF) <= 3 ? flt : bed).push(c.c[a * c.gt + b]);
+    const bed = [];
+    let darkSum = 0, rows = 0, hits = 0;
+    for (let b = 6; b < c.gt - 6; b++) {
+      const it = b * c.decT;
+      // the fault leans, so where it sits depends on the time being sampled
+      const expect = faultTraceAt(it - msToP(THROW) / 2);
+      let worst = 2, worstA = 0;
+      for (let a = 2; a < c.gx - 2; a++) {
+        const v = c.c[a * c.gt + b];
+        if (v < worst) { worst = v; worstA = a * c.decX; }
+        if (Math.abs(a * c.decX - expect) > 10) bed.push(v);
       }
+      darkSum += worst; rows++;
+      if (Math.abs(worstA - expect) <= 6) hits++;
     }
     const mean = (v) => v.reduce((x, y) => x + y, 0) / Math.max(1, v.length);
     bed.sort((x, y) => x - y);
     return {
-      bedMean: mean(bed), bedWorst: bed[Math.floor(0.05 * bed.length)] || 0, fault: mean(flt),
+      bedMean: mean(bed),
+      bedWorst: bed[Math.floor(0.05 * bed.length)] || 0,
+      darkest: darkSum / Math.max(1, rows),
+      hit: hits / Math.max(1, rows),
     };
   }
 
   function computeSection() {
     GRID = ATTR.dipField(SECT, NX, NT,
-      { half: S.half, kHalf: S.kHalf, pMax: msToP(8), nP: 33, decX: 2, decT: 2 });
+      { half: S.half, kHalf: S.kHalf, pMax: msToP(9), nP: 37, decX: 1, decT: 2 });
     COHD = cohField(SECT, NX, NT, Object.assign(winOpts(), { grid: GRID }));
     COHF = cohField(SECT, NX, NT, Object.assign(winOpts(), { grid: null }));
     computeBias();
@@ -515,7 +544,7 @@
     const xs = [-4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4];
     BIASCURVE = xs.map((b) => {
       const st = split(cohField(SECT, NX, NT, Object.assign(winOpts(), { grid: biasedGrid(b) })));
-      return { b, bed: st.bedMean, flt: st.fault };
+      return { b, bed: st.bedMean, flt: st.darkest };
     });
   }
 
@@ -671,7 +700,7 @@
 
   /* ------------------------------- step 2 ------------------------------ */
 
-  const DIPMAX = 8;
+  const DIPMAX = 12;
   function curveData() {
     const n = 65, flat = [], steer = [];
     for (let i = 0; i < n; i++) {
@@ -718,8 +747,13 @@
     ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
     ctx.beginPath(); ctx.moveTo(X(S.dip), R.y); ctx.lineTo(X(S.dip), R.y + R.h); ctx.stroke();
     ctx.restore();
-    SEIS.tag(ctx, X(0.2), Y(1) - 14, 'dip-steered', CRIM);
-    SEIS.tag(ctx, clamp(X(DIPMAX * 0.55), R.x, R.x + R.w - 110), Y(0.16), 'horizontal window', SLATE);
+    SEIS.tag(ctx, R.x + 10, Y(1) + 10, 'dip-steered \u2014 always 1.0', CRIM);
+    SEIS.tag(ctx, clamp(X(DIPMAX * 0.52), R.x + 10, R.x + R.w - 130), Y(0.30),
+      'horizontal window', SLATE);
+    if (CURVE.crit !== null) {
+      SEIS.tag(ctx, clamp(X(CURVE.crit) + 8, R.x + 10, R.x + R.w - 120), Y(0.80) - 10,
+        'crosses 0.8 here', TEAL);
+    }
     SEIS.frame(ctx, R);
     SEIS.axisBottom(ctx, R, 0, DIPMAX, 'dip of the bed (ms per trace)',
       (v) => v.toFixed(0), { ticks: 5 });
@@ -752,27 +786,37 @@
     if (extras) extras(ctx, R);
     SEIS.frame(ctx, R);
     SEIS.axisLeft(ctx, R, 0, (NT - 1) * DT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 4 });
-    SEIS.axisBottom(ctx, R, 1, NX, 'trace', (v) => v.toFixed(0), { ticks: 4 });
+    SEIS.axisBottom(ctx, R, 1, NX, 'trace', (v) => v.toFixed(0), { ticks: 6 });
   }
 
   function drawStep3() {
     if (!COHD) return;
-    const w = rowWidth('row3', 3);
-    const h = clamp(Math.round(w * 0.82), 260, 340);
-    tracePanel('c3seis', SECT, NX, NT, SPEAK, w, h, {});
+    const w = pw($('c3seis'));
+    const h = clamp(Math.round(w * 0.30), 200, 280);
+    // 160 traces of wiggle is an unreadable smear; a section this wide is
+    // normally displayed as variable density, so display it that way
+    const ctx = SEIS.fitCanvas($('c3seis'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    SEIS.drawVarDensity(ctx, SECT, NX, NT, R,
+      { cmap: SEIS.COLORMAPS.gray, clip: SPEAK * 0.7 });
+    SEIS.frame(ctx, R);
+    SEIS.axisLeft(ctx, R, 0, (NT - 1) * DT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 4 });
+    SEIS.axisBottom(ctx, R, 1, NX, 'trace', (v) => v.toFixed(0), { ticks: 6 });
     cohPanel('c3dip', COHD, w, h);
     cohPanel('c3flat', COHF, w, h);
   }
 
   function drawStep4() {
     if (!COHB || !BIASCURVE) return;
-    const w = rowWidth('row4', 2);
-    const h = clamp(Math.round(w * 0.62), 260, 340);
+    const w = pw($('c4map'));
+    const h = clamp(Math.round(w * 0.30), 200, 280);
     cohPanel('c4map', COHB, w, h);
 
-    const ctx = SEIS.fitCanvas($('c4curve'), w, h);
-    ctx.clearRect(0, 0, w, h);
-    const R = { x: 58, y: 14, w: w - 72, h: h - 14 - 44 };
+    const hc = 250;
+    const ctx = SEIS.fitCanvas($('c4curve'), w, hc);
+    ctx.clearRect(0, 0, w, hc);
+    const R = { x: 58, y: 14, w: w - 72, h: hc - 14 - 44 };
     const X = (b) => R.x + ((b + 4) / 8) * R.w;
     const Y = (v) => R.y + R.h - clamp(v, 0, 1) * R.h;
     SEIS.axisLeft(ctx, R, 0, 1, 'coherence', (v) => v.toFixed(1),
@@ -840,23 +884,23 @@
     if (COHD && COHF) {
       const d = split(COHD), f = split(COHF);
       $('s3a').textContent = d.bedMean.toFixed(3) + '  (worst ' + d.bedWorst.toFixed(3) + ')';
-      $('s3b').textContent = d.fault.toFixed(3);
+      $('s3b').textContent = d.darkest.toFixed(3);
       $('s3c').textContent = f.bedMean.toFixed(3) + '  (worst ' + f.bedWorst.toFixed(3) + ')';
-      $('s3d').textContent = f.fault.toFixed(3);
-      const gd = d.bedWorst - d.fault, gf = f.bedWorst - f.fault;
-      $('s3e').textContent = 'steered ' + gd.toFixed(3) + '   vs   flat ' + gf.toFixed(3);
-      $('s3f').textContent = gf <= 0
-        ? 'On the unsteered volume the fold flanks are darker than the fault. The fault is not the ' +
-          'strongest anomaly in the image.'
-        : 'The steered volume separates the fault from the bedding by ' + (gd / Math.max(gf, 1e-6)).toFixed(1) +
-          ' times the margin the unsteered one manages.';
+      $('s3d').textContent = f.darkest.toFixed(3);
+      $('s3e').textContent = 'steered ' + (100 * d.hit).toFixed(0) + '%   vs   flat ' +
+        (100 * f.hit).toFixed(0) + '%';
+      $('s3f').textContent = 'Take the darkest point on each row as your fault pick. The steered ' +
+        'volume gets it right ' + (100 * d.hit).toFixed(0) + '% of the time against a background of ' +
+        d.bedMean.toFixed(2) + '. The unsteered one gets it right ' + (100 * f.hit).toFixed(0) +
+        '% of the time; the rest of the time the darkest thing on the row is a fold flank.';
     }
 
     if (COHB) {
       const b = split(COHB);
       $('s4a').textContent = b.bedMean.toFixed(3);
-      $('s4b').textContent = b.fault.toFixed(3);
-      $('s4c').textContent = (b.bedMean - b.fault).toFixed(3);
+      $('s4b').textContent = b.darkest.toFixed(3);
+      $('s4c').textContent = (b.bedMean - b.darkest).toFixed(3) + '   \u00b7  fault found ' +
+        (100 * b.hit).toFixed(0) + '%';
       let steepest = 0;
       for (let ix = 0; ix < NX; ix++) steepest = Math.max(steepest, Math.abs(trueDipMs(ix)));
       $('s4d').textContent = steepest.toFixed(2) + ' ms/trace';
