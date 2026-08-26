@@ -747,6 +747,14 @@ const SEIS = (function () {
     window.addEventListener('error', function (ev) {
       if (document.getElementById('seis-error-banner')) return;
       const msg = (ev && ev.message) || 'Unknown error';
+      // Naming the file and line is the difference between a two-minute fix and
+      // an afternoon. A SyntaxError reported against a .js file means that file
+      // came back as something other than JavaScript; reported against the page
+      // itself, it is in the module's own inline script.
+      const where = (ev && ev.filename)
+        ? String(ev.filename).replace(/^.*\//, '') +
+          (ev.lineno ? ':' + ev.lineno + (ev.colno ? ':' + ev.colno : '') : '')
+        : 'source unknown';
       const likelyStale = /is not a function|is not defined|undefined/.test(msg);
       const el = document.createElement('div');
       el.id = 'seis-error-banner';
