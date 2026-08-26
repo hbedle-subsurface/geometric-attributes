@@ -508,25 +508,159 @@
 (function () {
   'use strict';
 
-  const need = ['covarianceAnalytic', 'jacobiEigen', 'outerProduct', 'eigenCoherence',
-                'energyRatio', 'sobelEdge', 'totalEnergy', 'constantTestVector'];
-  const missingLib = [];
-  if (typeof SEIS === 'undefined') missingLib.push('assets/seismic.js');
-  if (typeof ATTR === 'undefined') missingLib.push('assets/attributes.js');
-  if (!missingLib.length && (!SEIS.hilbert || need.some((k) => !ATTR[k]))) {
-    missingLib.push('a current assets/seismic.js and assets/attributes.js');
-  }
-  if (missingLib.length) {
+  if (typeof SEIS === 'undefined' || typeof ATTR === 'undefined') {
+    const missing = [];
+    if (typeof SEIS === 'undefined') missing.push('assets/seismic.js');
+    if (typeof ATTR === 'undefined') missing.push('assets/attributes.js');
     const el = document.createElement('div');
     el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
       'font:13px/1.6 ui-monospace,Menlo,monospace');
-    el.textContent = 'This module needs ' + missingLib.join(' and ') +
-      '. It expects them one directory up, at ../assets/, and this module uses functions added ' +
-      'for it, so an older copy of those files will not work.';
+    el.textContent = 'This module could not load ' + missing.join(' and ') +
+      '. It expects them one directory up, at ../assets/, and file names are ' +
+      'case-sensitive on GitHub Pages.';
     const w = document.querySelector('.wrap');
     (w || document.body).insertBefore(el, w ? w.firstChild : null);
     return;
   }
+
+  /* ---------------------------------------------------------------------
+     The coherence-family maths arrived with a later assets/attributes.js,
+     and the Hilbert transform with a later assets/seismic.js. Everything
+     needed is defined here as a fallback, built only on functions that have
+     been in those files from the start, so this module runs against any
+     version of them and picks up the shared code when it is present.
+     --------------------------------------------------------------------- */
+
+  const hilbert = SEIS.hilbert || function (x) {
+    const n0 = x.length;
+    let n = 1;
+    while (n < 2 * n0) n *= 2;
+    const re = new Float64Array(n), im = new Float64Array(n);
+    for (let i = 0; i < n0; i++) re[i] = x[i];
+    SEIS.fft(re, im, false);
+    for (let k = 1; k < n; k++) {
+      if (k === n / 2) continue;
+      if (k < n / 2) { re[k] *= 2; im[k] *= 2; } else { re[k] = 0; im[k] = 0; }
+    }
+    SEIS.fft(re, im, true);
+    const out = new Float32Array(n0);
+    for (let i = 0; i < n0; i++) out[i] = im[i];
+    return out;
+  };
+
+  const covarianceAnalytic = ATTR.covarianceAnalytic || function (d, dH, J, K) {
+    const C = new Float64Array(J * J);
+    for (let m = 0; m < J; m++) {
+      for (let n = m; n < J; n++) {
+        let sum = 0;
+        for (let k = 0; k < K; k++) {
+          sum += d[m * K + k] * d[n * K + k] + dH[m * K + k] * dH[n * K + k];
+        }
+        C[m * J + n] = sum; C[n * J + m] = sum;
+      }
+    }
+    return C;
+  };
+
+  const totalEnergy = ATTR.totalEnergy || function (C, J) {
+    let e = 0;
+    for (let m = 0; m < J; m++) e += C[m * J + m];
+    return e;
+  };
+
+  const jacobiEigen = ATTR.jacobiEigen || function (Cin, J) {
+    const A = Float64Array.from(Cin);
+    const V = new Float64Array(J * J);
+    for (let i = 0; i < J; i++) V[i * J + i] = 1;
+    for (let sweep = 0; sweep < 60; sweep++) {
+      let off = 0;
+      for (let p = 0; p < J; p++) for (let q = p + 1; q < J; q++) off += A[p * J + q] * A[p * J + q];
+      if (off < 1e-22) break;
+      for (let p = 0; p < J; p++) {
+        for (let q = p + 1; q < J; q++) {
+          const apq = A[p * J + q];
+          if (Math.abs(apq) < 1e-24) continue;
+          const th = (A[q * J + q] - A[p * J + p]) / (2 * apq);
+          const t = Math.sign(th || 1) / (Math.abs(th) + Math.sqrt(th * th + 1));
+          const c = 1 / Math.sqrt(t * t + 1), sn = t * c;
+          for (let k = 0; k < J; k++) {
+            const akp = A[k * J + p], akq = A[k * J + q];
+            A[k * J + p] = c * akp - sn * akq; A[k * J + q] = sn * akp + c * akq;
+          }
+          for (let k = 0; k < J; k++) {
+            const apk = A[p * J + k], aqk = A[q * J + k];
+            A[p * J + k] = c * apk - sn * aqk; A[q * J + k] = sn * apk + c * aqk;
+          }
+          for (let k = 0; k < J; k++) {
+            const vkp = V[k * J + p], vkq = V[k * J + q];
+            V[k * J + p] = c * vkp - sn * vkq; V[k * J + q] = sn * vkp + c * vkq;
+          }
+        }
+      }
+    }
+    const idx = [];
+    for (let i = 0; i < J; i++) idx.push(i);
+    idx.sort((a, b) => A[b * J + b] - A[a * J + a]);
+    const values = new Float64Array(J), vectors = [];
+    idx.forEach((src, j) => {
+      values[j] = Math.max(0, A[src * J + src]);
+      const v = new Float64Array(J);
+      for (let k = 0; k < J; k++) v[k] = V[k * J + src];
+      vectors.push(v);
+    });
+    return { values, vectors };
+  };
+
+  const outerProduct = ATTR.outerProduct || function (C, J, r, E) {
+    let num = 0;
+    for (let m = 0; m < J; m++) for (let n = 0; n < J; n++) num += r[m] * C[m * J + n] * r[n];
+    return E > 1e-20 ? num / E : 0;
+  };
+
+  const constantTestVector = ATTR.constantTestVector || function (J) {
+    const r = new Float64Array(J), v = 1 / Math.sqrt(J);
+    for (let i = 0; i < J; i++) r[i] = v;
+    return r;
+  };
+
+  const eigenCoherence = ATTR.eigenCoherence || function (values) {
+    let sum = 0;
+    for (let i = 0; i < values.length; i++) sum += values[i];
+    return sum > 1e-20 ? values[0] / sum : 0;
+  };
+
+  const energyRatio = ATTR.energyRatio || function (values, L) {
+    const keep = Math.max(1, Math.min(L || 1, values.length));
+    let coh = 0, tot = 0;
+    for (let i = 0; i < values.length; i++) {
+      tot += values[i];
+      if (i < keep) coh += values[i];
+    }
+    return tot > 1e-20 ? coh / tot : 0;
+  };
+
+  const sobelEdge = ATTR.sobelEdge || function (d, dH, J, K) {
+    const der = (arr, k) => {
+      let g = 0;
+      for (let j = 1; j < J - 1; j++) g += (arr[(j + 1) * K + k] - arr[(j - 1) * K + k]) / 2;
+      return g;
+    };
+    const derAbs = (arr, k) => {
+      let g = 0;
+      for (let j = 1; j < J - 1; j++) {
+        g += (Math.abs(arr[(j + 1) * K + k]) + Math.abs(arr[(j - 1) * K + k])) / 2;
+      }
+      return g;
+    };
+    let num = 0, den = 0;
+    for (let k = 0; k < K; k++) {
+      const a = der(d, k), b = der(dH, k);
+      num += a * a + b * b;
+      const p = derAbs(d, k), q = derAbs(dH, k);
+      den += p * p + q * q;
+    }
+    return den > 1e-20 ? Math.sqrt(num) / Math.sqrt(den) : 0;
+  };
 
   const $ = (id) => document.getElementById(id);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -621,7 +755,7 @@
       for (let i = 0; i < f.length; i++) f[i] += a * nz[i];
     }
     const h = new Float32Array(WN * WT);
-    for (let j = 0; j < WN; j++) h.set(SEIS.hilbert(f.subarray(j * WT, (j + 1) * WT)), j * WT);
+    for (let j = 0; j < WN; j++) h.set(hilbert(f.subarray(j * WT, (j + 1) * WT)), j * WT);
     let pk = 1e-6;
     for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
     return { f, h, pk };
@@ -644,15 +778,15 @@
   }
 
   function analyse(w, L) {
-    const C = ATTR.covarianceAnalytic(w.d, w.dH, w.J, w.K);
-    const E = ATTR.totalEnergy(C, w.J);
-    const e = ATTR.jacobiEigen(C, w.J);
-    const semb = ATTR.outerProduct(C, w.J, ATTR.constantTestVector(w.J), E);
+    const C = covarianceAnalytic(w.d, w.dH, w.J, w.K);
+    const E = totalEnergy(C, w.J);
+    const e = jacobiEigen(C, w.J);
+    const semb = outerProduct(C, w.J, constantTestVector(w.J), E);
     return {
       C, E, e, semb,
-      eig: ATTR.eigenCoherence(e.values),
-      er: ATTR.energyRatio(e.values, L || 1),
-      sob: ATTR.sobelEdge(w.d, w.dH, w.J, w.K),
+      eig: eigenCoherence(e.values),
+      er: energyRatio(e.values, L || 1),
+      sob: sobelEdge(w.d, w.dH, w.J, w.K),
     };
   }
 
@@ -682,7 +816,7 @@
       for (let j = 0; j < w.J; j++) r[j] /= n;
       return r;
     }
-    return ATTR.constantTestVector(w.J);
+    return constantTestVector(w.J);
   }
 
   /* =====================================================================
@@ -717,7 +851,7 @@
     pk = 1e-6;
     for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
     const h = new Float32Array(ZN * ZT);
-    for (let ix = 0; ix < ZN; ix++) h.set(SEIS.hilbert(f.subarray(ix * ZT, (ix + 1) * ZT)), ix * ZT);
+    for (let ix = 0; ix < ZN; ix++) h.set(hilbert(f.subarray(ix * ZT, (ix + 1) * ZT)), ix * ZT);
     ZF = f; ZH = h; ZPEAK = pk;
   }
 
@@ -743,16 +877,16 @@
             dH[j * K + k] = ZH[xx * ZT + tt];
           }
         }
-        const C = ATTR.covarianceAnalytic(d, dH, J, K);
-        const E = ATTR.totalEnergy(C, J);
-        const ev = ATTR.jacobiEigen(C, J);
-        const sm = ATTR.outerProduct(C, J, ATTR.constantTestVector(J), E);
+        const C = covarianceAnalytic(d, dH, J, K);
+        const E = totalEnergy(C, J);
+        const ev = jacobiEigen(C, J);
+        const sm = outerProduct(C, J, constantTestVector(J), E);
         const q = a * gt + b;
         out.semb[q] = sm;
-        out.eig[q] = ATTR.eigenCoherence(ev.values);
-        out.er[q] = ATTR.energyRatio(ev.values, S.npc);
+        out.eig[q] = eigenCoherence(ev.values);
+        out.er[q] = energyRatio(ev.values, S.npc);
         out.var[q] = 1 - sm;
-        out.sob[q] = ATTR.sobelEdge(d, dH, J, K);
+        out.sob[q] = sobelEdge(d, dH, J, K);
       }
     }
     ZATT = out;
@@ -1020,7 +1154,7 @@
     SEIS.frame(ctx, R);
     SEIS.axisLeft(ctx, R, -1, 1, 'weight', (v) => v.toFixed(1), { flip: true, ticks: 3 });
 
-    const outer = ATTR.outerProduct(A.C, J, r, A.E);
+    const outer = outerProduct(A.C, J, r, A.E);
     barChart('c4bars', [
       { label: 'semblance', v: A.semb },
       { label: 'eigenstructure', v: A.eig, hi: true },
