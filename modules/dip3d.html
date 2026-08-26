@@ -213,16 +213,22 @@
       <h3>Step 5 &nbsp;·&nbsp; Putting the two components together</h3>
       <span class="hint">A time slice shows both at once</span>
     </div>
+    <p style="margin:0 0 6px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Steps 1 to 4 all cut the volume <em>vertically</em>. A time slice cuts it <em>horizontally</em>: pick
+      one travel time and read the amplitude of every trace at that one time. The result is a map with a
+      seismic value at every bin, and no time axis at all.</p>
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      A time slice cuts the volume horizontally at one travel time. Where the reflector crosses that time it
-      leaves a band of amplitude, and the band runs along the direction in which travel time does not change.
-      Perpendicular to it is the direction in which travel time changes fastest. Those are the strike and the
-      dip direction, and both are set by the two numbers from steps 2 and 3.</p>
+      The diagram below shows why that map is useful. A horizontal cut through a dipping reflector meets it
+      along a straight line. On one side of that line the slice sits above the reflector, on the other side
+      below it, and along the line itself it is passing straight through the peak. So the reflector prints
+      itself onto the map as a band, and the band runs along strike.</p>
 
-    <div class="sec-row" id="row5">
+    <canvas id="c5cube" aria-label="Diagram of a horizontal time slice cutting a dipping reflector"></canvas>
+
+    <div class="sec-row" id="row5" style="margin-top:12px">
       <div class="panel-col">
-        <p class="sublabel"><b>1</b> Time slice through the volume
-          <span class="note">seismic amplitude, same grey scale as the sections</span></p>
+        <p class="sublabel"><b>1</b> The time slice itself
+          <span class="note">amplitude, not dip</span></p>
         <canvas id="c5map" aria-label="Time slice through the volume with the dip direction marked"></canvas>
       </div>
       <div class="panel-col">
@@ -233,11 +239,14 @@
     </div>
 
     <div class="legend">
-      <span><b>Left:</b> dark and light are seismic peaks and troughs, not dip. The crimson arrow points
-        downdip and the dashed teal line is strike. <b>Right:</b> the same two numbers plotted as a vector,
-        after converting both to milliseconds per metre. The grey dashed lines are the inline and crossline
-        components; the crimson arrow is their resultant, whose length is the dip magnitude and whose
-        direction is the dip azimuth.</span>
+      <span><b>Left, what the grey scale means:</b> exactly the same black-to-white scale as the wiggle
+        sections above. Black is a peak, white is a trough, mid grey is zero amplitude. It is a picture of
+        the seismic data at one travel time, not a picture of dip. The dark band is the reflector crossing
+        that time. The crimson arrow points downdip, straight across the band; the dashed teal line lies
+        along it and is strike. <b>Right:</b> the two numbers from steps 2 and 3 plotted as a vector, after
+        converting both to milliseconds per metre. The grey dashed lines are the components; the crimson
+        arrow is their resultant, whose length is the dip magnitude and whose direction is the dip
+        azimuth.</span>
     </div>
 
     <div class="controls" style="margin-top:14px">
@@ -859,11 +868,22 @@
   const EXC = 0.45;
 
   const pw = (el) => (el && el.parentElement ? el.parentElement.clientWidth : 900);
+
+  /* .panel-col is flex:none with no width, so without this it sizes to the
+     widest line of its caption and a three-panel row runs off the page. */
   function rowWidth(rowId, n) {
     const row = $(rowId);
     const total = row ? row.clientWidth : 800;
-    if (window.innerWidth <= 700) return Math.max(240, total);
-    return Math.max(190, Math.floor((total - 10 * (n - 1)) / n));
+    const w = window.innerWidth <= 700
+      ? Math.max(240, total)
+      : Math.max(190, Math.floor((total - 10 * (n - 1)) / n));
+    if (row) {
+      row.querySelectorAll(':scope > .panel-col').forEach((el) => {
+        el.style.width = w + 'px';
+        el.style.maxWidth = w + 'px';
+      });
+    }
+    return w;
   }
 
   function imageInto(ctx, rect, nx, ny, get, map) {
@@ -893,7 +913,7 @@
   };
 
   function colorbar(ctx, R, map, loLabel, hiLabel) {
-    const B = { x: R.x, y: R.y + R.h + 26, w: R.w, h: 9 };
+    const B = { x: R.x, y: R.y + R.h + 44, w: R.w, h: 9 };
     const n = Math.max(2, Math.round(B.w));
     for (let i = 0; i < n; i++) {
       const col = map(i / (n - 1));
@@ -937,8 +957,9 @@
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     const every = nTr > 15 ? 6 : (nTr > 8 ? 2 : 1);
     for (let i = 0; i < nTr; i++) {
-      if (i % every === 0 || i === nTr - 1) {
-        ctx.fillText(o.label ? o.label(i) : String(i + 1), X(i), R.y + R.h + 6);
+      if (o.labelAll || i % every === 0 || i === nTr - 1) {
+        const t = o.label ? o.label(i) : String(i + 1);
+        if (t) ctx.fillText(t, X(i), R.y + R.h + 6);
       }
     }
     ctx.fillStyle = CRIM; ctx.font = '600 10px "IBM Plex Mono", monospace';
@@ -1099,7 +1120,7 @@
     const nx = e.x1 - e.x0 + 1, ny = e.y1 - e.y0 + 1;
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 36 : 0) };
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 58 : 0) };
     drawBody(ctx, R);
     const X = (ix) => R.x + ((ix - e.x0 + 0.5) / nx) * R.w;
     const Y = (iy) => R.y + R.h - ((iy - e.y0 + 0.5) / ny) * R.h;
@@ -1117,19 +1138,22 @@
     const w = rowWidth('row4', 2);
     const h = clamp(Math.round(w * 0.86), 290, 390) + 36;
     const g = MAPF;
-    const rng = g.hi - g.lo;
-    const flat = rng < 2e-4;
+    const top = Math.max(g.hi, 1e-4);
+    // Scaled from zero, not from the smallest value present. Stretching a
+    // planar reflector's own estimation scatter across the full colour range
+    // produces a vivid pattern that is entirely noise.
+    const flat = (g.hi - g.lo) < 0.06 * top;
 
     mapFrame('c4mag', w, h,
       (ctx, R) => imageInto(ctx, R, g.gxn, g.gyn,
-        (c, r) => (flat ? 0.55 : (g.mag[r * g.gxn + c] - g.lo) / rng), SCANMAP),
+        (c, r) => g.mag[r * g.gxn + c] / top, SCANMAP),
       (ctx, R, X, Y) => {
         ctx.save(); ctx.strokeStyle = TEAL; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(X(CX), Y(CY), 5.5, 0, 6.2832); ctx.stroke(); ctx.restore();
       },
       (ctx, R) => colorbar(ctx, R, SCANMAP,
-        flat ? 'the same at every trace' : g.lo.toFixed(3) + ' ms/m',
-        flat ? '' : g.hi.toFixed(3) + ' ms/m'),
+        flat ? '0 \u2014 uniform, planar reflector' : '0 ms/m',
+        top.toFixed(3) + ' ms/m'),
       g);
 
     mapFrame('c4az', w, h,
@@ -1144,7 +1168,90 @@
 
   /* ------------------------------- step 5 ------------------------------- */
 
+  /* A cube with the reflector inside it and a horizontal cut through both, so
+     that the grey band on the map has somewhere to come from. */
+  function drawSliceCube() {
+    const w = pw($('c5cube')), h = 320;
+    const ctx = SEIS.fitCanvas($('c5cube'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const ex = { x: 200, y: 30 }, ey = { x: 100, y: -60 }, ez = { x: 0, y: 168 };
+    const O = { x: (w - (ex.x + ey.x)) / 2 + 6, y: 74 };
+    const P = (u, v, t) => ({
+      x: O.x + u * ex.x + v * ey.x,
+      y: O.y + u * ex.y + v * ey.y + t * ez.y,
+    });
+    const poly = (pts, fill, stroke, dash) => {
+      ctx.save();
+      if (dash) ctx.setLineDash(dash);
+      ctx.beginPath();
+      pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1.3; ctx.stroke(); }
+      ctx.restore();
+    };
+
+    const span = (NT - 1) * DT * 1000;
+    const tau = (u, v) => refMs(u * (NIL - 1), v * (NXL - 1), 0) / span;
+    const wSlice = clamp(S.slice / span, 0.03, 0.97);
+
+    // the box
+    poly([P(0, 0, 0), P(1, 0, 0), P(1, 1, 0), P(0, 1, 0)], 'rgba(22,25,28,.05)', 'rgba(22,25,28,.3)');
+    poly([P(0, 0, 0), P(1, 0, 0), P(1, 0, 1), P(0, 0, 1)], null, 'rgba(22,25,28,.3)');
+    poly([P(1, 0, 0), P(1, 1, 0), P(1, 1, 1), P(1, 0, 1)], null, 'rgba(22,25,28,.3)');
+
+    // the reflector, clipped to the box so it does not float outside it
+    const cor = [[0, 0], [1, 0], [1, 1], [0, 1]];
+    const inside = cor.every((c) => tau(c[0], c[1]) > 0.02 && tau(c[0], c[1]) < 0.98);
+    poly(cor.map((c) => P(c[0], c[1], clamp(tau(c[0], c[1]), 0.02, 0.98))),
+      'rgba(132,22,23,.20)', CRIM);
+
+    // the horizontal cut
+    poly([P(0, 0, wSlice), P(1, 0, wSlice), P(1, 1, wSlice), P(0, 1, wSlice)],
+      'rgba(11,114,133,.16)', TEAL, [5, 4]);
+
+    /* Where the two meet. Found by marching the top face, which works whether
+       the reflector is planar or domed. */
+    ctx.save();
+    ctx.strokeStyle = '#16191C'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    let started = false, any = false;
+    const N = 90;
+    for (let i = 0; i <= N; i++) {
+      const u = i / N;
+      let vHit = -1;
+      for (let j = 0; j < N; j++) {
+        const v0 = j / N, v1 = (j + 1) / N;
+        const a = tau(u, v0) - wSlice, b = tau(u, v1) - wSlice;
+        if ((a <= 0 && b >= 0) || (a >= 0 && b <= 0)) {
+          vHit = v0 + (v1 - v0) * (Math.abs(a) / (Math.abs(a) + Math.abs(b) || 1));
+          break;
+        }
+      }
+      if (vHit < 0) { started = false; continue; }
+      const p = P(u, vHit, wSlice);
+      started ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y);
+      started = true; any = true;
+    }
+    ctx.stroke(); ctx.restore();
+
+    SEIS.tag(ctx, P(0.04, 0, 0.06).x, P(0.04, 0, 0.06).y - 26,
+      'the horizontal cut \u2014 one travel time', TEAL);
+    if (inside) {
+      SEIS.tag(ctx, P(0.02, 0, tau(0.02, 0)).x, P(0.02, 0, tau(0.02, 0)).y + 16,
+        'the dipping reflector', CRIM);
+    }
+    if (any) {
+      SEIS.tag(ctx, P(0.5, 0.5, wSlice).x - 46, P(0.5, 0.5, wSlice).y - 30,
+        'where they meet \u2014 this is the band on the map', INK);
+    } else {
+      SEIS.tag(ctx, P(0.5, 0.5, wSlice).x - 60, P(0.5, 0.5, wSlice).y - 30,
+        'the cut misses the reflector at this time', SLATE);
+    }
+  }
+
   function drawStep5() {
+    drawSliceCube();
     const w = rowWidth('row5', 2);
     const h = clamp(Math.round(w * 0.86), 280, 380);
     const g = gradAt(CX, CY);
@@ -1252,8 +1359,12 @@
 
     const app = apparent(gxOf(truePx(CX)), gyOf(truePy(CY)), S.az);
     sectionPanel('c6sec', rotatedSection(S.az), NR, NT, w, h, {
-      dir: 'ALONG SECTION \u2192',
-      label: (i) => String(Math.round((i - (NR - 1) / 2) * RSTEP)),
+      dir: 'METRES ALONG THE SECTION \u2192',
+      label: (i) => {
+        const m = Math.round((i - (NR - 1) / 2) * RSTEP);
+        return m % 150 === 0 ? String(m) : '';
+      },
+      labelAll: true,
       extras: (ctx, R, X, Y) => reflectorLine(ctx, R, X, Y, NR,
         (i) => refMs(CX, CY, 0) + app * (i - (NR - 1) / 2) * RSTEP),
     });
@@ -1445,8 +1556,9 @@
     $('s4a').textContent = fmt(tpx) + ' , ' + fmt(tpy) + ' ms';
     $('s4b').textContent = fmt(truePx(NIL - 1)) + ' , ' + fmt(truePy(NXL - 1)) + ' ms';
     if (MAPF) {
-      $('s4c').textContent = (MAPF.hi - MAPF.lo) < 2e-4
-        ? 'the same at every trace: ' + MAPF.lo.toFixed(3) + ' ms/m'
+      const spread = MAPF.hi - MAPF.lo;
+      $('s4c').textContent = spread < 0.06 * Math.max(MAPF.hi, 1e-4)
+        ? 'the same at every trace, about ' + MAPF.hi.toFixed(3) + ' ms/m'
         : MAPF.lo.toFixed(3) + ' to ' + MAPF.hi.toFixed(3) + ' ms/m';
     }
     $('s4d').textContent = NIL + ' \u00d7 ' + NXL + ' \u00d7 ' + NT + ' = ' +
