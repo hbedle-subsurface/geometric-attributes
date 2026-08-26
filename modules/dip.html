@@ -432,7 +432,7 @@
 
   const DEF = {
     d1: 3,                              // step 1 dip, ms/trace
-    guess: 0, seed: 5, told: false,     // step 2
+    guess: 0, seed: 5,                   // step 2
     thMax: 8, dStep: 1,                 // search range and step, ms/trace
     half: 4, kHalf: 30,                 // traces either side, samples either side
     noise: 0, fault: false, split: false,
@@ -454,6 +454,11 @@
     return Math.abs(v) < 0.75 ? v + 2 : v;            // never nearly flat
   }
   let TRUE_MS = hiddenMs();
+
+  /* Whether the answer has been given away. Deliberately not part of S: it
+     describes where the student has got to, not how the page is configured,
+     and putting it in the link means a reload starts with the answer up. */
+  let TOLD = false;
 
   /* ------------------------------ the traces --------------------------- */
 
@@ -666,12 +671,22 @@
     }
 
     if (showTruth) {
+      // The real bed, which steps down at the fault. Drawing it straight across
+      // would have it floating off the reflectors on the downthrown side.
       const tp = msToP(TRUE_MS);
+      const ty = (ix) => Y(CT + tp * (ix - CX) + (S.fault && ix >= FAULT_IX - 0.5 ? THROW : 0));
       ctx.strokeStyle = TEAL; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.beginPath();
-      ctx.moveTo(X(-0.5), Y(CT + tp * (-0.5 - CX)));
-      ctx.lineTo(X(NX - 0.5), Y(CT + tp * (NX - 0.5 - CX)));
-      ctx.stroke(); ctx.setLineDash([]);
+      ctx.moveTo(X(-0.5), ty(-0.5));
+      ctx.lineTo(X(S.fault ? FAULT_IX - 0.5 : NX - 0.5), ty(S.fault ? FAULT_IX - 0.6 : NX - 0.5));
+      ctx.stroke();
+      if (S.fault) {
+        ctx.beginPath();
+        ctx.moveTo(X(FAULT_IX - 0.5), ty(FAULT_IX));
+        ctx.lineTo(X(NX - 0.5), ty(NX - 0.5));
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
     }
     ctx.restore();
 
@@ -684,7 +699,7 @@
     const w = panelWidth($('c2'));
     const h = clamp(Math.round(w * 0.46), 320, 440);
     tracePanel('c2', F2.f, NX, NT, F2.pk, w, h, (ctx, R, X, Y) => {
-      drawTilt(ctx, R, X, Y, S.guess, S.told);
+      drawTilt(ctx, R, X, Y, S.guess, TOLD);
     });
 
     drawScore('c2c', scoreFor(S.guess));
@@ -764,7 +779,7 @@
     const w = panelWidth($('c3'));
     const h = clamp(Math.round(w * 0.46), 320, 440);
     tracePanel('c3', F2.f, NX, NT, F2.pk, w, h, (ctx, R, X, Y) => {
-      drawTilt(ctx, R, X, Y, candMs(CAND), S.told);
+      drawTilt(ctx, R, X, Y, candMs(CAND), TOLD);
     });
     drawCurve();
   }
@@ -821,7 +836,7 @@
       const tx = clamp(X(candMs(BESTI)) + 7, R.x, R.x + R.w - 52);
       SEIS.tag(ctx, tx, Math.max(R.y + 8, Y(SCAN.curve[BESTI]) - 11), 'winner', CRIM);
     }
-    if (S.told && Math.abs(TRUE_MS) <= S.thMax) {
+    if (TOLD && Math.abs(TRUE_MS) <= S.thMax) {
       SEIS.dashedLine(ctx, X(TRUE_MS), R.y, X(TRUE_MS), R.y + R.h, TEAL, [5, 4], 1.8);
     }
 
@@ -850,7 +865,7 @@
     $('s2b').textContent = sc.toFixed(3);
     $('s2c').textContent = off < 0.13 ? 'you have it' : off < 0.6 ? 'very warm'
       : off < 1.5 ? 'warm' : off < 3 ? 'cold' : 'freezing';
-    $('s2d').textContent = S.told
+    $('s2d').textContent = TOLD
       ? (TRUE_MS > 0 ? '+' : '') + TRUE_MS.toFixed(2) + ' ms/trace   (' +
         msToDeg(TRUE_MS).toFixed(1) + '\u00b0)'
       : 'hidden \u2014 have a go first';
@@ -858,10 +873,10 @@
     const a = answerMs(), err = a - TRUE_MS;
     $('s3a').textContent = (a > 0 ? '+' : '') + a.toFixed(2) + ' ms/trace';
     $('s3b').textContent = SCAN.sem.toFixed(3);
-    $('s3c').textContent = S.told
+    $('s3c').textContent = TOLD
       ? (TRUE_MS > 0 ? '+' : '') + TRUE_MS.toFixed(2) + ' ms/trace'
       : 'still hidden';
-    $('s3d').textContent = S.told
+    $('s3d').textContent = TOLD
       ? (Math.abs(err) < 0.005 ? '0.00' : (err > 0 ? '+' : '') + err.toFixed(2)) + ' ms/trace'
       : '\u2014';
     $('s3e').textContent = nCand();
@@ -869,7 +884,7 @@
     const pinned = Math.abs(candMs(BESTI)) >= 0.999 * S.thMax;
     const crossesFault = S.fault && CX + halfTraces() >= FAULT_IX;
     const crossesSplit = S.split && CT + S.kHalf > SPLIT_T;
-    $('s3f').textContent = !S.told
+    $('s3f').textContent = !TOLD
       ? 'Run the search to compare it against the real answer'
       : pinned
         ? 'Stuck at the edge of the search range \u2014 widen it'
@@ -945,7 +960,7 @@
       if (i >= n) {
         stopAnim();
         CAND = BESTI; $('cand').value = CAND;
-        S.told = true;
+        TOLD = true;
         drawStep2(); drawStep3(); syncLabels(); updateStats(); saveState();
         return;
       }
@@ -974,13 +989,13 @@
   $('newBtn').addEventListener('click', () => {
     stopAnim();
     S.seed = (S.seed | 0) + 1;
-    S.told = false; S.guess = 0; $('guess').value = 0;
+    TOLD = false; S.guess = 0; $('guess').value = 0;
     TRUE_MS = hiddenMs();
     rebuildData();
   });
 
   $('tellBtn').addEventListener('click', () => {
-    S.told = true; drawStep2(); drawStep3(); updateStats(); saveState();
+    TOLD = true; drawStep2(); drawStep3(); updateStats(); saveState();
   });
 
   const searchSlide = (id, key) => $(id).addEventListener('input', () => {
@@ -1010,7 +1025,7 @@
   $('runBtn').addEventListener('click', () => { ANIM ? stopAnim() : runAnim(); });
   $('winBtn').addEventListener('click', () => {
     stopAnim(); CAND = BESTI; $('cand').value = CAND;
-    S.told = true;
+    TOLD = true;
     drawStep2(); drawStep3(); syncLabels(); updateStats(); saveState();
   });
 
@@ -1021,6 +1036,7 @@
   $('resetBtn').addEventListener('click', () => {
     stopAnim();
     S = Object.assign({}, DEF);
+    TOLD = false;
     TRUE_MS = hiddenMs();
     F1 = buildStep1(); F2 = buildMain();
     runScan(); CAND = BESTI;
