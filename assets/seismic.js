@@ -250,6 +250,27 @@ const SEIS = (function () {
    * anywhere a wavelet is expected. The rotated wavelet has longer tails than
    * the one it came from, so halfLength grows to match.
    */
+  /* Hilbert transform of a single trace, via the analytic signal: zero the
+     negative frequencies, double the positive ones, and the imaginary part of
+     the result is the quadrature. Needed because AASPI's similarity attributes
+     are all computed from the analytic trace rather than the amplitude. */
+  function hilbert(x) {
+    const n0 = x.length;
+    let n = 1;
+    while (n < 2 * n0) n *= 2;
+    const re = new Float64Array(n), im = new Float64Array(n);
+    for (let i = 0; i < n0; i++) re[i] = x[i];
+    fft(re, im, false);
+    for (let k = 1; k < n; k++) {
+      if (k === n / 2) continue;
+      if (k < n / 2) { re[k] *= 2; im[k] *= 2; } else { re[k] = 0; im[k] = 0; }
+    }
+    fft(re, im, true);
+    const out = new Float32Array(n0);
+    for (let i = 0; i < n0; i++) out[i] = im[i];
+    return out;
+  }
+
   function phaseRotate(wav, degrees) {
     const deg = ((degrees % 360) + 540) % 360 - 180;      // into -180..180
     if (Math.abs(deg) < 1e-9) return wav;
@@ -784,7 +805,7 @@ const SEIS = (function () {
   return {
     ricker, ormsby, makeWavelet, spectrum,
     traceValue, sampleTrace, traceFromSpikes, rc,
-    mulberry32, gaussRand, bandLimitedNoise, fft, fkSpectrum, phaseRotate,
+    mulberry32, gaussRand, bandLimitedNoise, fft, fkSpectrum, phaseRotate, hilbert,
     COLORMAPS, SEQMAPS, fitCanvas, drawVarDensity, drawWiggle,
     niceTicks, frame, axisBottom, axisLeft, dashedLine, tag, drawColorbar,
     UNITS, readState, writeState, copyLink, savePNG,
