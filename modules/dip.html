@@ -3,402 +3,214 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dip — the foundation | How Geometric Attributes Actually Work</title>
-<meta name="description" content="Interactive module on volumetric dip in 2D: build a structure, watch a discrete semblance dip search run candidate by candidate, and see what every other geometric attribute inherits from the answer.">
+<title>How Geometric Attributes Actually Work</title>
+<meta name="description" content="Interactive modules on seismic geometric attributes: dip, dip steering, coherence and energy ratio similarity, curvature, and aberrancy. Built for teaching by AASPI at the University of Oklahoma.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 
 <div class="wrap">
   <header class="masthead">
-    <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <a class="brand" href="index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
     <nav>
-      <a href="../index.html">All modules</a>
-      <a href="#why">Why dip first</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="#modules">Modules</a>
+      <a href="#about">About</a>
+      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a>
     </nav>
   </header>
 
-  <div class="mod-head">
-    <p class="eyebrow">Module 01 &nbsp;·&nbsp; Geometric attributes</p>
-    <h1>Dip: the direction everything else is measured along</h1>
-    <p class="sub">At every single sample in a seismic volume there is a local reflector orientation. Nothing
-      in your data announces it — it has to be estimated, by an algorithm, with parameters you chose or
-      inherited. Coherence, curvature, aberrancy and structure-oriented filtering are then all computed
-      relative to that estimate. This module builds a structure, runs the estimate in front of you one
-      candidate at a time, and then lets you break it.</p>
-  </div>
-
-  <!-- ============================ WHY DIP FIRST ============================ -->
-  <div class="teach" id="why" style="padding-top:6px">
-    <div class="tryit">
-      <h3>What dip is</h3>
-      <p style="margin-top:0;font-size:14.5px">Take any sample in a seismic section. Ask a simple question:
-        <b>if I step one trace to the right, how much later or earlier does this same reflector arrive?</b>
-        That number — a time shift per trace — is the dip. In 2D it is one number. In 3D it is two, an
-        inline component <span class="k">p</span> and a crossline component <span class="k">q</span>, which
-        together give a dip magnitude and a dip azimuth.</p>
-      <p style="font-size:14.5px">Notice what dip is <em>not</em>. It is not picked from a horizon, so it
-        does not need an interpretation and does not stop at the edge of one. It is computed at every sample,
-        including inside packages nobody has picked and in the middle of noise. That is why it is called
-        <b>volumetric dip</b>, and it is why a dip volume exists before any other geometric attribute does.</p>
-      <p style="font-size:14.5px;margin-bottom:0">Dip is also an attribute in its own right. Co-render dip
-        azimuth against dip magnitude on a time slice and the structure draws itself: flanks, noses, closures
-        and fault blocks separate by colour without a single pick.</p>
-    </div>
-    <div class="takeaway">
-      <h3>Why it has to come first</h3>
-      <ul>
-        <li><b>Coherence is measured along dip, not across it.</b> Steer the window wrong and you compare a
-          peak on one trace against a trough on the next. A perfectly continuous dipping reflector then reads
-          as a discontinuity, and your coherence volume images the bedding instead of the faults.</li>
-        <li><b>Curvature is the derivative of the dip field. Aberrancy is the derivative after that.</b>
-          Differentiation amplifies error. A dip field that is 1° noisy is a curvature volume that is
-          unusable, and the noise looks like structure rather than like noise.</li>
-        <li><b>Structure-oriented filtering smooths along dip.</b> If the dip estimate locks onto coherent
-          noise — migration smiles, ground roll, acquisition footprint — the filter will faithfully enhance
-          the noise and suppress the signal. This failure is quiet, and the output looks cleaner.</li>
-        <li><b>The confidence volume is free QC.</b> The winning semblance comes out of the search whether
-          you ask for it or not. It falls at faults and in poor data, which tells you both where the dip is
-          untrustworthy and, usefully, where the faults are.</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ============================== CONTROLS ============================== -->
-  <section class="controls">
-    <div class="ctl-col">
-      <h2>The structure</h2>
-      <div class="ctl">
-        <select id="preset">
-          <option value="custom">Custom</option>
-          <option value="flat">Flat layers</option>
-          <option value="dipping">Uniform dip</option>
-          <option value="fold">A fold</option>
-          <option value="foldfault" selected>Fold cut by a fault</option>
-          <option value="unconf">Angular unconformity</option>
-          <option value="noisy">Fold and fault, noisy</option>
-        </select>
-      </div>
-      <div class="ctl">
-        <label for="reg">Regional dip <span class="val" id="regV">0.0 ms/trace</span></label>
-        <input type="range" id="reg" min="-2.5" max="2.5" step="0.25" value="0">
-      </div>
-      <div class="ctl">
-        <label for="foldA">Fold amplitude <span class="val" id="foldAV">32 ms</span></label>
-        <input type="range" id="foldA" min="0" max="64" step="2" value="32">
-      </div>
-      <div class="ctl">
-        <label for="foldL">Fold wavelength <span class="val" id="foldLV">95 traces</span></label>
-        <input type="range" id="foldL" min="45" max="180" step="5" value="95">
-      </div>
-      <div class="ctl">
-        <label for="thr">Fault throw <span class="val" id="thrV">18 ms</span></label>
-        <input type="range" id="thr" min="0" max="48" step="2" value="18">
-      </div>
-      <label class="check"><input type="checkbox" id="unconf"> Angular unconformity at 0.17 s</label>
-      <div class="ctl">
-        <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
-        <input type="range" id="noise" min="0" max="60" step="2" value="0">
-      </div>
-      <div class="ctl">
-        <label for="freq">Peak frequency <span class="val" id="freqV">30 Hz</span></label>
-        <input type="range" id="freq" min="10" max="70" step="1" value="30">
+  <!-- ================================ HERO ================================ -->
+  <section class="hero">
+   <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">AASPI &nbsp;·&nbsp; University of Oklahoma</p>
+      <h1 class="title">Geometric attributes measure the <em>shape</em> of reflectors, not their strength.</h1>
+      <p class="lede">Coherence, curvature and aberrancy all answer questions about geometry: is this
+        reflector continuous, is it bent, is it flexed. Every one of them is computed from the same starting
+        point — an estimate of which way the reflector is going at every sample in the volume.</p>
+      <p class="lede">These modules open that up. Build a structure, watch the attribute being computed on it,
+        change the parameters that are usually left at their defaults, and see what happens to the answer.
+        Nothing to install, and nothing leaves your machine.</p>
+      <div class="hero-cta">
+        <a class="btn" href="modules/dip.html">Start with dip →</a>
+        <a class="btn ghost" href="#modules">See all modules</a>
       </div>
     </div>
+    <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
+      <div class="hero-cap"><span>dip estimated by semblance scan</span><b>every sample</b></div></div>
+   </div>
+  </section>
 
-    <div class="ctl-col">
-      <h2>The dip search</h2>
-      <div class="ctl">
-        <label for="thMax">Search range <span class="val" id="thMaxV">± 20°</span></label>
-        <input type="range" id="thMax" min="2" max="45" step="1" value="20">
-      </div>
-      <div class="ctl">
-        <label for="dTh">Search increment <span class="val" id="dThV">2°</span></label>
-        <input type="range" id="dTh" min="0.5" max="8" step="0.5" value="2">
-      </div>
-      <div class="ctl">
-        <label for="half">Window radius <span class="val" id="halfV">2 traces → 5 traces</span></label>
-        <input type="range" id="half" min="1" max="5" step="1" value="2">
-      </div>
-      <div class="ctl">
-        <label for="kHalf">Window half-height <span class="val" id="kHalfV">± 10 ms</span></label>
-        <input type="range" id="kHalf" min="2" max="14" step="1" value="5">
-      </div>
-      <p class="hint-line" style="margin:-4px 0 10px" id="searchNote">21 candidate dips per sample</p>
-      <label class="check"><input type="checkbox" id="refine" checked> Parabolic refinement of the winner</label>
+  <!-- ============================== THE PREMISE ============================ -->
+  <section class="primer">
+   <div class="primer-grid">
+    <div>
+      <h3>Attributes are computed, not measured</h3>
+      <p>Every geometric attribute is the output of an algorithm with parameters. Change the window, the
+        aperture or the dip search and the answer changes — sometimes a little, sometimes completely.</p>
+    </div>
+    <div>
+      <h3>They all stand on dip</h3>
+      <p>Coherence is measured along dip. Curvature is the derivative of the dip field. Aberrancy is the
+        derivative after that. Errors in dip do not stay in dip.</p>
+    </div>
+    <div>
+      <h3>Defaults are decisions</h3>
+      <p>Most attribute volumes are produced with whatever the software suggested. Those suggestions are
+        reasonable starting points, not answers, and they are rarely revisited.</p>
+    </div>
+   </div>
+  </section>
+
+  <!-- =============================== MODULES ============================== -->
+  <section id="modules" class="modules">
+    <div class="sec-head">
+      <h2>The modules</h2>
+      <p>In the order they build on each other. Each one isolates a single attribute, or a single decision
+        that goes into computing one.</p>
     </div>
 
-    <div class="ctl-col">
-      <h2>Survey &amp; conversion</h2>
-      <div class="ctl">
-        <label for="dx">Trace spacing <span class="val" id="dxV">25 m</span></label>
-        <input type="range" id="dx" min="6.25" max="50" step="6.25" value="25">
+    <div class="card-grid">
+
+      <a class="card" href="modules/dip.html">
+        <canvas class="thumb-canvas" data-thumb="dip"></canvas>
+        <div class="card-body">
+          <div class="card-no">01</div>
+          <h3>Dip — the foundation</h3>
+          <p>How dip is actually estimated: a brute-force search over candidate dips, scored by semblance.
+            Watch the search run, then break it.</p>
+          <div class="q">What is every other attribute standing on?</div>
+        </div>
+        <span class="flag next">Start here</span>
+      </a>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">02</div>
+          <h3>Inline and crossline dip</h3>
+          <p>One dip component becomes two. The search becomes a grid of candidate orientations, and the
+            pair <b>p</b> and <b>q</b> turns into the dip magnitude and dip azimuth you co-render.</p>
+          <div class="q">What does dip azimuth actually show me?</div>
+        </div>
+        <span class="flag">Planned</span>
       </div>
-      <div class="ctl">
-        <label for="vel">Conversion velocity <span class="val" id="velV">3000 m/s</span></label>
-        <input type="range" id="vel" min="1500" max="6000" step="100" value="3000">
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">03</div>
+          <h3>Dip steering</h3>
+          <p>The same coherence calculation, run along dip and then along horizontal windows, on the same
+            dipping data. One finds the fault; the other finds the bedding.</p>
+          <div class="q">Why does my coherence follow the structure?</div>
+        </div>
+        <span class="flag">Planned</span>
       </div>
-      <p class="hint-line" style="margin:-4px 0 10px" id="convNote">±20° is ±2.9 samples/trace here</p>
-      <label class="check"><input type="checkbox" id="bars" checked> Dip bars over the section</label>
-      <label class="check"><input type="checkbox" id="showTrue" checked> Mark the true dip</label>
-      <label class="check"><input type="checkbox" id="showErr"> Show the error panel</label>
-      <button class="btn ghost small" id="copyBtn" type="button">Copy link to this setup</button>
-      <button class="btn ghost small" id="pngBtn" type="button">Save the section as PNG</button>
-      <button class="btn ghost small" id="resetBtn" type="button">Reset</button>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">04</div>
+          <h3>Similarity &amp; the coherence family</h3>
+          <p>Cross-correlation, semblance, eigenstructure and energy ratio similarity computed side by side on
+            one dataset, so the differences are visible rather than described.</p>
+          <div class="q">Which coherence should I be running?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">05</div>
+          <h3>The analysis window</h3>
+          <p>Vertical height against lateral aperture, and what each does to a fault, a channel edge and a
+            stratigraphic boundary. The parameter with the largest effect and the least attention.</p>
+          <div class="q">Why did my fault get fat?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">06</div>
+          <h3>Curvature</h3>
+          <p>Most-positive and most-negative curvature, mean and Gaussian, shape index and curvedness — built
+            up from the dip field so you can see where each one comes from.</p>
+          <div class="q">What is k1 actually telling me?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">07</div>
+          <h3>Multispectral curvature</h3>
+          <p>Long- and short-wavelength curvature on the same structure. Different wavelengths reveal
+            different features, and the choice of operator length is an interpretation.</p>
+          <div class="q">Which wavelength shows my fractures?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">08</div>
+          <h3>Aberrancy</h3>
+          <p>The third derivative of structure. Aberrancy magnitude and azimuth pick out flexures and small
+            faults that curvature and coherence both step over.</p>
+          <div class="q">What is left that curvature missed?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
+      <div class="card planned">
+        <div class="thumb"></div>
+        <div class="card-body">
+          <div class="card-no">09</div>
+          <h3>Choosing an attribute</h3>
+          <p>One volume containing a fault, a flexure, a channel and an unconformity, with every attribute
+            from the previous modules run on it. Which finds what, and which cannot.</p>
+          <div class="q">Which attribute for which feature?</div>
+        </div>
+        <span class="flag">Planned</span>
+      </div>
+
     </div>
   </section>
 
-  <!-- ============================== SECTION =============================== -->
-  <section class="plot" style="margin-top:18px">
-    <div class="plot-head">
-      <h3>The section, and the point being analysed</h3>
-      <span class="hint">Click or drag anywhere on the section to move the analysis point</span>
-    </div>
-    <canvas id="secCanvas" aria-label="Synthetic seismic section with the analysis window marked"></canvas>
-    <div class="legend">
-      <span><i class="sw" style="background:#9AA0A6"></i>Amplitude, peak dark</span>
-      <span><i style="border-color:#841617"></i>Estimated dip</span>
-      <span><i style="border-color:#0B7285;border-top-style:dashed"></i>True dip of the model</span>
-      <span><i class="sw" style="background:none;border:1.5px dashed #841617"></i>The analysis window</span>
-    </div>
+  <!-- ============================== DISCLAIMER ============================= -->
+  <section class="disclaimer">
+    <h4>What this is, and what it is not</h4>
+    <p>These modules are <b>teaching models, built to make ideas visible</b>. The attribute algorithms are
+      implemented as the literature describes them, but on small synthetic datasets and in their plain
+      brute-force form, so the method can be read and watched rather than assumed. Each module lists what it
+      has left out and why.</p>
+    <p>This is not attribute software. For production work on real volumes, use
+      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> or your interpretation package. The numbers here
+      describe the model on the screen, not your survey.</p>
   </section>
 
-  <!-- ============================ THE SEARCH ============================== -->
-  <section class="plot" style="margin-top:18px">
-    <div class="plot-head">
-      <h3>Watching the search</h3>
-      <span class="hint">Every candidate dip is tried; the one with the highest semblance wins</span>
-    </div>
-
-    <div class="ctl" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-      <button class="btn small" id="runBtn" type="button">Run the search</button>
-      <div style="flex:1 1 260px;min-width:220px">
-        <label for="cand" style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px">
-          Candidate dip <span class="val" id="candV">—</span></label>
-        <input type="range" id="cand" min="0" max="20" step="1" value="10" style="width:100%">
-      </div>
-      <button class="btn ghost small" id="winBtn" type="button" style="margin-top:0">Jump to the winner</button>
-    </div>
-
-    <div class="sec-row" id="scanRow">
-      <div class="panel-col">
-        <p class="sublabel"><b>1</b> The window
-          <span class="note">the candidate drawn on the data</span></p>
-        <canvas id="zoomCanvas" aria-label="Zoom on the analysis window with the candidate dip drawn through it"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>2</b> Gathered along it
-          <span class="note">traces read at that shift</span></p>
-        <canvas id="gathCanvas" aria-label="The traces of the analysis window gathered along the candidate dip"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>3</b> Semblance vs candidate
-          <span class="note">the curve the search maximises</span></p>
-        <canvas id="scanCanvas" aria-label="Semblance as a function of candidate dip, with the winning dip marked"></canvas>
-      </div>
+  <!-- ================================ ABOUT =============================== -->
+  <section id="about" class="about">
+    <div class="about-copy">
+      <h2>About</h2>
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        Attribute Assisted Seismic Processing and Interpretation (AASPI) consortium.</p>
+      <p>Companion to <em>What Can You REALLY See in Seismic?</em>, which covers resolution — how thin a bed,
+        how small a fault, how narrow a feature. This set picks up where that one leaves off, and asks what
+        the attributes computed from that data are actually measuring.</p>
+      <p>Everything runs in the browser. No installation, no account, no data transmitted. Free to use or
+        adapt in your own courses with citation.</p>
     </div>
   </section>
-
-  <div class="stats">
-    <div class="stat"><span>Analysis point</span><b id="rPt">—</b></div>
-    <div class="stat"><span>Estimated dip</span><b id="rP">—</b></div>
-    <div class="stat"><span>Estimated dip in time</span><b id="rMs">—</b></div>
-    <div class="stat key"><span>Estimated dip in degrees</span><b id="rDeg">—</b></div>
-    <div class="stat"><span>Confidence — winning semblance</span><b id="rSem">—</b></div>
-    <div class="stat"><span>True dip of the model</span><b id="rTrue">—</b></div>
-    <div class="stat"><span>Error</span><b id="rErr">—</b></div>
-    <div class="stat"><span>Candidates tried per sample</span><b id="rN">—</b></div>
-    <div class="stat"><span>Window</span><b id="rWin">—</b></div>
-    <div class="stat wide"><span>Verdict at this point</span><b id="rVerdict">—</b></div>
-  </div>
-
-  <!-- ============================ DIP EVERYWHERE ========================== -->
-  <section class="plot" style="margin-top:18px">
-    <div class="plot-head">
-      <h3>Now run it at every sample</h3>
-      <span class="hint">The same search, repeated. These three volumes are what program <span class="k">dip3d</span> writes out.</span>
-    </div>
-    <div class="sec-row" id="fieldRow">
-      <div class="panel-col">
-        <p class="sublabel"><b>1</b> Dip
-          <span class="note">signed, in degrees</span></p>
-        <canvas id="dipCanvas" aria-label="Estimated dip field in degrees"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>2</b> Confidence
-          <span class="note">the winning semblance</span></p>
-        <canvas id="confCanvas" aria-label="Confidence of the dip estimate"></canvas>
-      </div>
-      <div class="panel-col" id="errCol" hidden>
-        <p class="sublabel"><b>3</b> Error
-          <span class="note">estimate minus truth</span></p>
-        <canvas id="errCanvas" aria-label="Difference between the estimated dip and the true dip of the model"></canvas>
-      </div>
-    </div>
-    <div class="legend">
-      <span>Only the middle panel exists on real data. The right-hand one is available here because the
-        structure is synthetic and its dip is known exactly.</span>
-    </div>
-  </section>
-
-  <!-- ========================== WHY IT MATTERS ============================ -->
-  <section class="plot" style="margin-top:18px">
-    <div class="plot-head">
-      <h3>What the next attribute inherits</h3>
-      <span class="hint">Semblance coherence, computed with the same window, steered and unsteered</span>
-    </div>
-    <div class="sec-row" id="cohRow">
-      <div class="panel-col">
-        <p class="sublabel"><b>1</b> Coherence along dip
-          <span class="note">window steered by the estimate above</span></p>
-        <canvas id="cohDipCanvas" aria-label="Coherence computed along the estimated dip"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>2</b> Coherence along a flat window
-          <span class="note">same window, never steered</span></p>
-        <canvas id="cohFlatCanvas" aria-label="Coherence computed with a horizontal window"></canvas>
-      </div>
-    </div>
-    <div class="legend">
-      <span>Dark is low coherence. On the left the fault is the only dark feature. On the right the fold
-        flanks go dark too, because a horizontal window straddles a dipping reflector — the attribute is
-        imaging your structure rather than your discontinuities.</span>
-    </div>
-  </section>
-
-  <!-- ============================== TEACHING ============================== -->
-  <div class="teach">
-    <div class="tryit">
-      <h3>Try this — and what to watch for</h3>
-      <ol>
-        <li><b>Starve the search.</b> <em>Why bother: the search range is the parameter most often left at its
-          default, and the default is a guess about your survey.</em> Put the analysis point on the steepest
-          part of a flank and drag the search range down to ±5°.
-          <span class="ans">The estimate pins at the edge of the fan and stops moving. The semblance curve is
-            still climbing when it runs out of candidates. This failure is silent: the dip volume looks
-            plausible, it is simply wrong wherever the structure was steeper than you allowed for, and the
-            error is systematic rather than random — the worst kind for a derivative attribute.</span></li>
-        <li><b>Coarsen the increment.</b> <em>Why bother: it is the cheapest way to halve your run time, and
-          it is not free.</em> Set the increment to 8°, then turn parabolic refinement off and on.
-          <span class="ans">With refinement off, the dip field goes visibly banded — the estimate can only
-            take the values you offered it. With refinement on, fitting a parabola through the winner and its
-            two neighbours recovers most of the precision back. This is why the AASPI search can afford a
-            coarse fan.</span></li>
-        <li><b>Put the window on the fault.</b> <em>Why bother: this is where dip estimates fail on every real
-          survey.</em> Drag the analysis point onto the fault, then widen the window radius to 5 traces.
-          <span class="ans">Semblance collapses and the winning dip becomes a compromise between two
-            unrelated reflectors. The confidence panel goes black in a stripe down the fault. Widen the
-            window and the stripe gets fatter — you have smeared the fault. This is the problem the Kuwahara
-            shifted-window scheme in <span class="k">dip3d</span> exists to solve: try several offset
-            windows and keep the most confident one, rather than the centred one.</span></li>
-        <li><b>Break the conversion.</b> <em>Why bother: dip in degrees is not measured, it is converted.</em>
-          Leave everything else alone and drag the conversion velocity from 3000 to 6000 m/s.
-          <span class="ans">The data did not change and the estimate in ms/trace did not change, but the
-            reported angle halves — and so does the search range in samples, so a range that was generous
-            becomes too narrow. A time-migrated volume converted with a single constant velocity carries this
-            error into curvature, reflector convergence and aberrancy. It does not affect dip-steered
-            computations such as coherence or structure-oriented filtering, which only need the time
-            shift.</span></li>
-        <li><b>Make the window too tall.</b> <em>Why bother: vertical window height is the quietest
-          resolution knob in the whole workflow.</em> Turn on the angular unconformity and drag the window
-          half-height to ±28 ms.
-          <span class="ans">Watch the error panel rather than the dip panel. The band of wrong dip along the
-            discordance thickens as the window grows, because the window is averaging two packages that have
-            nothing to do with each other over a taller and taller interval. The dip either side of the band
-            stays fine, which is exactly what makes this easy to miss. Rule of thumb: the full vertical
-            window should be about one dominant period — at 30 Hz that is 33 ms, so ±16 ms.</span></li>
-        <li><b>Turn up the noise, then look at the last row.</b> <em>Why bother: it separates a bad attribute
-          from a bad dip field.</em> Push noise to 40% and compare the two coherence panels.
-          <span class="ans">Both degrade, but the steered one degrades differently: where the dip estimate
-            went wrong, coherence goes dark along the bedding, and that dark fabric will be interpreted as
-            faults by anyone who did not compute the dip themselves. Noise in a dip volume does not stay in
-            the dip volume.</span></li>
-      </ol>
-    </div>
-
-    <div class="takeaway">
-      <h3>If you remember nothing else</h3>
-      <ul>
-        <li><b>Dip is an estimate, not a measurement.</b> It is the winner of a search you parameterised. Two
-          reasonable people running two reasonable parameter sets get two different dip volumes.</li>
-        <li><b>The search range must cover your steepest structure.</b> Everything steeper is clipped, quietly
-          and systematically.</li>
-        <li><b>Window height trades noise against resolution; window radius trades noise against faults.</b>
-          Bigger is smoother, smoother is smeared, and smeared is what your fault looks like afterwards.</li>
-        <li><b>Confidence is the volume nobody looks at.</b> It is the honest answer to "should I believe this
-          dip here", and it comes out of the run for free.</li>
-        <li><b>Time dip is what the data knows; degrees is what you asked for.</b> The conversion needs a
-          velocity, and a wrong one is invisible in every display.</li>
-        <li><b>Every downstream attribute inherits this.</b> Coherence steers by it, curvature differentiates
-          it, structure-oriented filtering smooths along it. Fix the dip before blaming the attribute.</li>
-      </ul>
-    </div>
-  </div>
-
-  <details class="notes" id="notes">
-    <summary>Method, assumptions, and where to read more</summary>
-    <p>The structure is built as a set of reflection coefficients whose arrival time is displaced by a shift
-      function: a linear regional term, a sinusoidal fold, an optional vertical step at trace 111 standing in
-      for a fault, and an optional undeformed package above 0.17 s that truncates the fold and makes an
-      angular unconformity. Each trace is the convolution of that reflectivity with a Ricker wavelet. Because the shift function is analytic, its
-      derivative — the true dip at every sample — is known exactly, which is what the error panel compares
-      against. Nothing on a real survey provides this.</p>
-    <p>Dip is estimated by the discrete semblance search of Marfurt et al. (1998), the same algorithm offered
-      as the second choice in AASPI program <span class="k">dip3d</span>. A fan of candidate time dips is
-      generated across the search range; for each, the traces of the analysis window are read at a shift
-      proportional to their distance from the centre, with linear interpolation, and semblance is computed
-      over the window. The candidate with the highest semblance wins, then a parabola through it and its two
-      neighbours refines the estimate off the candidate grid.</p>
-    <p>Where this departs from <span class="k">dip3d</span>, and why. It is 2D, so there is one dip component
-      rather than the inline and crossline pair, and no dip azimuth — that is the next module. Semblance is
-      computed on the real trace rather than the analytic trace, so it is slightly less stable near zero
-      crossings. Candidates are spaced evenly in time dip rather than on the polar angle grid dip3d has used
-      since 2016. There is no Kuwahara search over shifted windows, no short-window AGC, no Tukey taper on
-      the vertical window, and no L1-norm option — each of those is a real improvement that would hide the
-      plain algorithm underneath. And dip here is computed on a decimated grid and interpolated for display,
-      because a full-density scan at every slider movement would stutter; the decimation is stated in the
-      readout and is a display choice, not part of the method.</p>
-    <p>The last row computes semblance coherence, not the energy-ratio similarity that program
-      <span class="k">similarity3d</span> produces. Semblance is used because it is already there — it is
-      the same quantity the dip scan maximises — and because the point being made is about steering, which
-      is common to every member of the coherence family.</p>
-    <ul>
-      <li>Marfurt, K. J., R. L. Kirlin, S. L. Farmer, and M. S. Bahorich, 1998, 3-D seismic attributes using
-        a semblance-based coherency algorithm: <em>Geophysics</em>, 63, 1150–1165. The discrete dip search
-        and the semblance measure this module implements.</li>
-      <li>Marfurt, K. J., 2006, Robust estimates of 3D reflector dip and azimuth: <em>Geophysics</em>, 71,
-        P29–P40. The Kuwahara shifted-window scheme that keeps dip estimates off faults.</li>
-      <li>Luo, Y., Y. E. Wang, N. M. Albinhassan, and M. N. Alfaraj, 2006, Computation of dips and azimuths
-        with weighted structural tensor approach: <em>Geophysics</em>, 71, V119–V121. The other family of dip
-        estimators, and the first choice in dip3d.</li>
-      <li>Kuwahara, M., K. Hachimura, S. Eiho, and M. Kinoshita, 1976, Digital processing of biomedical
-        images: Plenum Press, 187–203.</li>
-      <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
-        Reservoir Characterization</em>: SEG.</li>
-      <li>AASPI program documentation for <span class="k">dip3d</span>, University of Oklahoma —
-        <a href="https://www.ou.edu/mcee/aaspi">ou.edu/mcee/aaspi</a>.</li>
-    </ul>
-  </details>
-
-  <section class="nextup">
-    <p class="eyebrow">Next up</p>
-    <h3><a href="dip3d.html">02 · Inline and crossline dip</a></h3>
-    <p>One dip component becomes two. The search stops being a fan and becomes a grid of candidate
-      orientations, the winner is refined with a paraboloid rather than a parabola, and the pair
-      <span class="k">p</span> and <span class="k">q</span> turns into the dip magnitude and dip azimuth you
-      actually co-render. The failures you just met all get one dimension worse.</p>
-    <a class="btn" href="dip3d.html">Open module 02 →</a>
-    <a class="btn ghost" href="../index.html">All modules</a>
-  </section>
-
-  <div class="pager">
-    <a class="btn ghost" href="../index.html">← All modules</a>
-    <a class="btn" href="dip3d.html">Next: inline and crossline dip →</a>
-  </div>
 
   <footer>
     <div class="foot-grid">
@@ -409,827 +221,92 @@
   </footer>
 </div>
 
-<script src="../assets/seismic.js"></script>
-<script src="../assets/attributes.js"></script>
+<script src="assets/seismic.js"></script>
+<script src="assets/attributes.js"></script>
 <script>
 (function () {
   'use strict';
 
-  /* The commonest way this page breaks is a path problem: the module sits in
-     modules/ and reaches up to ../assets/. If either library did not load,
-     every canvas stays blank and nothing says why, so say why. */
-  if (typeof SEIS === 'undefined' || typeof ATTR === 'undefined') {
-    const missing = [];
-    if (typeof SEIS === 'undefined') missing.push('assets/seismic.js');
-    if (typeof ATTR === 'undefined') missing.push('assets/attributes.js');
-    const el = document.createElement('div');
-    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
-      'font:13px/1.6 ui-monospace,Menlo,monospace');
-    el.textContent = 'This module could not load ' + missing.join(' and ') +
-      '. It expects them one directory up, at ../assets/, and file names are ' +
-      'case-sensitive on GitHub Pages.';
-    const w = document.querySelector('.wrap');
-    (w || document.body).insertBefore(el, w ? w.firstChild : null);
-    return;
-  }
-
-  const $ = (id) => document.getElementById(id);
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-
-  /* Shareable links need a real URL. Opened straight off disk there is no URL
-     to write to, and history.replaceState throws, so the feature stands down
-     rather than taking the page with it. */
-  const CAN_LINK = location.protocol !== 'file:';
-  const saveState = () => {
-    if (!CAN_LINK) return;
-    try { SEIS.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
-  };
-
-  /* Two helpers this module needs arrived with a later assets/attributes.js.
-     Defining them here when they are absent means the module can be dropped
-     into an older checkout on its own and still work. */
-  const degToDip = ATTR.degToDip || function (deg, dtSec, dxM, vMs) {
-    return (2 * Math.sin(deg * Math.PI / 180) * dxM) / (vMs * dtSec);
-  };
-
-  const cohField = ATTR.cohField || function (field, nx, nt, opts) {
-    const o = opts || {};
-    const half = o.half === undefined ? 2 : o.half;
-    const kHalf = o.kHalf === undefined ? 5 : o.kHalf;
-    const dcx = o.decX || 2, dct = o.decT || 2;
-    const grid = o.grid || null;
-    const J = 2 * half + 1, K = 2 * kHalf + 1;
-    const buf = new Float64Array(J * K);
-    const gx = Math.ceil(nx / dcx), gt = Math.ceil(nt / dct);
-    const c = new Float32Array(gx * gt);
-    for (let a = 0; a < gx; a++) {
-      const ix = Math.min(nx - 1, a * dcx);
-      for (let b = 0; b < gt; b++) {
-        const it = Math.min(nt - 1, b * dct);
-        const p = grid ? ATTR.sampleGrid(grid, grid.p, ix, it) : 0;
-        ATTR.gatherAlongDip(field, nx, nt, ix, it, p, half, kHalf, buf);
-        c[a * gt + b] = ATTR.semblance(buf, J, K);
-      }
-    }
-    return { c, gx, gt, decX: dcx, decT: dct };
-  };
-
-  /* =====================================================================
-     MODEL GEOMETRY
-
-     One inline. Time increases downward. The structure is a shift function
-     applied to a fixed reflectivity sequence, so the true dip is the
-     analytic derivative of that shift and is known everywhere.
-     ===================================================================== */
-
-  const NX = 176;              // traces
-  const NT = 240;              // samples
-  const DT = 0.002;            // s
-  const XF = 111;              // the fault sits between this trace and the next
-  const TU = 86;               // unconformity, in un-shifted samples (0.172 s)
-  const RSPACE = 26;           // reflector spacing, samples
-
-  const DEF = {
-    preset: 'foldfault',
-    reg: 0, foldA: 32, foldL: 95, thr: 18, unconf: false, noise: 0, f: 30,
-    thMax: 20, dTh: 2, half: 2, kHalf: 5, refine: true,
-    dx: 25, vel: 3000,
-    bars: true, showTrue: true, showErr: false,
-    px: 0.30, pt: 0.46,
-  };
-  let S = SEIS.readState(DEF);
-
-  const PRESETS = {
-    flat:      { reg: 0,   foldA: 0,  thr: 0,  unconf: false, noise: 0 },
-    dipping:   { reg: 1.5, foldA: 0,  thr: 0,  unconf: false, noise: 0 },
-    fold:      { reg: 0,   foldA: 32, thr: 0,  unconf: false, noise: 0, foldL: 95 },
-    foldfault: { reg: 0,   foldA: 32, thr: 18, unconf: false, noise: 0, foldL: 95 },
-    unconf:    { reg: 1,   foldA: 44, thr: 0,  unconf: true,  noise: 0, foldL: 80 },
-    noisy:     { reg: 0,   foldA: 32, thr: 18, unconf: false, noise: 34, foldL: 95 },
-  };
-
-  // ms/trace -> samples/trace, and back
-  const msToP = (ms) => (ms / 1000) / DT;
-  const regP = () => msToP(S.reg);
-
-  /* Shift, in samples, applied to a reflector whose un-shifted time index is
-     t0, at trace ix. The fault is a step; everything else is smooth. */
-  function shiftAt(ix, t0) {
-    const upper = S.unconf && t0 < TU;
-    let s = regP() * (ix - NX / 2);
-    if (!upper) s += msToP(S.foldA) * Math.sin(2 * Math.PI * ix / S.foldL);
-    if (ix > XF) s += msToP(S.thr);
-    return s;
-  }
-
-  /* The derivative of that shift with respect to trace: the true dip, in
-     samples per trace. Undefined exactly at the fault, where the shift is
-     discontinuous — the estimate there is a compromise, which is the point. */
-  function trueP(ix, it) {
-    let t0 = it;
-    for (let n = 0; n < 3; n++) t0 = it - shiftAt(ix, t0);
-    const upper = S.unconf && t0 < TU;
-    if (upper) return regP();
-    return regP() +
-      msToP(S.foldA) * (2 * Math.PI / S.foldL) * Math.cos(2 * Math.PI * ix / S.foldL);
-  }
-
-  /* ------------------------------ the data ----------------------------- */
-
-  let FIELD = new Float32Array(NX * NT);
-  let PEAK = 1;
-
-  function buildField() {
-    const wav = SEIS.makeWavelet({ type: 'ricker', f: S.f });
-    const rnd = SEIS.mulberry32(7);
+  // hero: a folded, faulted section with dip bars laid over it
+  function drawHero() {
+    const c = document.getElementById('heroCanvas');
+    if (!c || !c.parentElement) return;
+    const w = c.parentElement.clientWidth, h = Math.max(220, Math.round(w * 0.62));
+    const ctx = SEIS.fitCanvas(c, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const NX = 160, NT = 220, DT = 0.002;
+    const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
+    const rnd = SEIS.mulberry32(4);
     const refl = [];
-    for (let t = -240; t < NT + 240; t += RSPACE) {
-      refl.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.055 + rnd() * 0.075) });
+    for (let t = -500; t < NT + 500; t += 34) {
+      refl.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.06 + rnd() * 0.07) });
     }
-    const f = new Float32Array(NX * NT);
+    const shift = (ix) => 14 * Math.sin(2 * Math.PI * ix / 95) + (ix > 0.62 * NX ? 9 : 0);
+    const fld = new Float32Array(NX * NT);
     for (let ix = 0; ix < NX; ix++) {
-      const sp = refl.map((R) => ({ t: (R.it + shiftAt(ix, R.it)) * DT, r: R.r }));
-      f.set(SEIS.traceFromSpikes(sp, 0, DT, NT, wav), ix * NT);
+      const sh = shift(ix);
+      fld.set(SEIS.traceFromSpikes(refl.map((R) => ({ t: (R.it + sh) * DT, r: R.r })),
+        0, DT, NT, wav), ix * NT);
     }
     let pk = 1e-6;
-    for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
-    if (S.noise > 0) {
-      const nz = SEIS.bandLimitedNoise(NX, NT, DT, wav, 21, 2);
-      const amp = (S.noise / 100) * pk;
-      for (let i = 0; i < f.length; i++) f[i] += amp * nz[i];
-      pk = 1e-6;
-      for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
-    }
-    FIELD = f; PEAK = pk;
-  }
-
-  /* --------------------------- search parameters ------------------------ */
-
-  // The GUI asks for a search range in degrees, exactly as dip3d does. Turning
-  // that into the sample shifts the algorithm applies needs the trace spacing
-  // and the conversion velocity — which is why changing the velocity changes
-  // the search, not just the label on the answer.
-  const pMax = () => Math.max(0.4, degToDip(S.thMax, DT, S.dx, S.vel));
-  const nCand = () => clamp(2 * Math.round(S.thMax / S.dTh) + 1, 3, 81);
-  const candP = (i) => -pMax() + (2 * pMax() * i) / (nCand() - 1);
-  const pToDeg = (p) => ATTR.dipToDegrees(p, DT, S.dx, S.vel);
-
-  function scanOpts() {
-    return { half: S.half, kHalf: S.kHalf, pMax: pMax(), nP: nCand() };
-  }
-
-  // Which candidate the search is currently showing. Deliberately not part of
-  // S: it is a position in an animation, not a setting worth putting in a link.
-  let CAND = 0;
-
-  const probeIX = () => Math.round(clamp(S.px, 0, 1) * (NX - 1));
-  const probeIT = () => Math.round(clamp(S.pt, 0, 1) * (NT - 1));
-
-  /* -------------------------- the heavy volumes ------------------------- */
-
-  let SCAN = null;             // the scan at the analysis point
-  let BESTI = 0;               // winning candidate index
-  let GRID = null;             // decimated dip + confidence
-  let COH = null, COHF = null; // coherence, steered and flat
-
-  // Keep the whole-section scan inside a fixed operation budget by decimating
-  // more when the parameters get expensive. Stated in the readout.
-  function decimation() {
-    const J = 2 * S.half + 1, K = 2 * S.kHalf + 1, nP = nCand();
-    for (let d = 2; d <= 9; d++) {
-      const gx = Math.ceil(NX / d), gt = Math.ceil(NT / (d + 1));
-      if (gx * gt * nP * J * K < 1.2e7) return { decX: d, decT: d + 1 };
-    }
-    return { decX: 9, decT: 10 };
-  }
-
-  function runScan() {
-    SCAN = ATTR.dipScan(FIELD, NX, NT, probeIX(), probeIT(), scanOpts());
-    let b = 0;
-    for (let i = 1; i < SCAN.curve.length; i++) if (SCAN.curve[i] > SCAN.curve[b]) b = i;
-    BESTI = b;
-  }
-
-  function runFields() {
-    const dec = decimation();
-    GRID = ATTR.dipField(FIELD, NX, NT, Object.assign(scanOpts(), dec));
-    COH = cohField(FIELD, NX, NT,
-      { half: S.half, kHalf: S.kHalf, decX: 2, decT: 2, grid: GRID });
-    COHF = cohField(FIELD, NX, NT,
-      { half: S.half, kHalf: S.kHalf, decX: 2, decT: 2, grid: null });
-  }
-
-  // The estimate reported at the analysis point, honouring the refinement switch
-  function estP() {
-    if (!SCAN) return 0;
-    return S.refine ? SCAN.p : candP(BESTI);
-  }
-
-  /* =====================================================================
-     DRAWING
-     ===================================================================== */
-
-  const INK = '#16191C', CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670';
-  const M = { l: 50, r: 14, t: 8, b: 32 };
-
-  function panelWidths(rowId, n) {
-    const row = $(rowId);
-    const total = row ? row.clientWidth : 900;
-    if (window.innerWidth <= 700) return new Array(n).fill(Math.max(240, total));
-    const gap = 10;
-    const w = Math.floor((total - gap * (n - 1)) / n);
-    return new Array(n).fill(Math.max(200, w));
-  }
-
-  /* --------------------------- the main section ------------------------- */
-
-  function drawSection() {
-    const c = $('secCanvas');
-    const w = c.parentElement.clientWidth;
-    const h = clamp(Math.round(w * 0.46), 300, 460);
-    const ctx = SEIS.fitCanvas(c, w, h);
-    ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
-
-    SEIS.drawVarDensity(ctx, FIELD, NX, NT, R,
-      { cmap: SEIS.COLORMAPS.gray, clip: PEAK * 0.85 });
-
-    const X = (ix) => R.x + (ix / (NX - 1)) * R.w;
-    const Y = (it) => R.y + (it / (NT - 1)) * R.h;
-
-    // dip bars, read from the volume that has already been computed
-    if (S.bars && GRID) {
-      ctx.save();
-      ctx.lineWidth = 1.8; ctx.lineCap = 'round';
-      const stepX = 11, stepT = 18, arm = 4.6;
-      for (let ix = 8; ix < NX - 8; ix += stepX) {
-        for (let it = 14; it < NT - 14; it += stepT) {
-          const p = ATTR.sampleGrid(GRID, GRID.p, ix, it);
-          const s = ATTR.sampleGrid(GRID, GRID.sem, ix, it);
-          ctx.strokeStyle = 'rgba(132,22,23,' + clamp(0.30 + 0.75 * s, 0.25, 0.98).toFixed(2) + ')';
-          ctx.beginPath();
-          ctx.moveTo(X(ix - arm), Y(it - p * arm));
-          ctx.lineTo(X(ix + arm), Y(it + p * arm));
-          ctx.stroke();
-        }
-      }
-      ctx.restore();
-    }
-
-    // the analysis window at the probe, sheared by the estimated dip
-    const ix0 = probeIX(), it0 = probeIT(), p = estP();
+    for (let i = 0; i < fld.length; i++) pk = Math.max(pk, Math.abs(fld[i]));
+    SEIS.drawVarDensity(ctx, fld, NX, NT, { x: 0, y: 0, w: w, h: h },
+      { cmap: SEIS.COLORMAPS.gray, clip: pk * 0.8 });
+    // dip bars, from the same scan the modules use
     ctx.save();
-    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-    ctx.strokeStyle = CRIM; ctx.lineWidth = 1.6; ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    ctx.moveTo(X(ix0 - S.half), Y(it0 - p * S.half - S.kHalf));
-    ctx.lineTo(X(ix0 + S.half), Y(it0 + p * S.half - S.kHalf));
-    ctx.lineTo(X(ix0 + S.half), Y(it0 + p * S.half + S.kHalf));
-    ctx.lineTo(X(ix0 - S.half), Y(it0 - p * S.half + S.kHalf));
-    ctx.closePath(); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = CRIM;
-    ctx.beginPath(); ctx.arc(X(ix0), Y(it0), 3.2, 0, 6.2832); ctx.fill();
-    ctx.restore();
-
-    // true dip at the probe, for comparison
-    if (S.showTrue) {
-      const tp = trueP(ix0, it0), a = 15;
-      ctx.save();
-      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-      ctx.strokeStyle = TEAL; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
-      ctx.beginPath();
-      ctx.moveTo(X(ix0 - a), Y(it0 - tp * a));
-      ctx.lineTo(X(ix0 + a), Y(it0 + tp * a));
-      ctx.stroke(); ctx.restore();
-    }
-
-    SEIS.frame(ctx, R);
-    SEIS.axisBottom(ctx, R, 0, NX - 1, 'trace', (v) => String(Math.round(v)));
-    SEIS.axisLeft(ctx, R, 0, (NT - 1) * DT, 'time (s)', (v) => v.toFixed(2));
-  }
-
-  /* ------------------------ zoom on the window -------------------------- */
-
-  function drawZoom() {
-    const c = $('zoomCanvas');
-    const w = panelWidths('scanRow', 3)[0];
-    const h = 232;
-    const ctx = SEIS.fitCanvas(c, w, h);
-    ctx.clearRect(0, 0, w, h);
-    const R = { x: 34, y: 6, w: w - 44, h: h - 34 };
-
-    const ix0 = probeIX(), it0 = probeIT();
-    const padX = S.half + 3, padT = S.kHalf + 8;
-    const x0 = clamp(ix0 - padX, 0, NX - 1), x1 = clamp(ix0 + padX, 0, NX - 1);
-    const t0 = clamp(it0 - padT, 0, NT - 1), t1 = clamp(it0 + padT, 0, NT - 1);
-    const nx = x1 - x0 + 1, nt = t1 - t0 + 1;
-    const sub = new Float32Array(nx * nt);
-    for (let a = 0; a < nx; a++) {
-      for (let b = 0; b < nt; b++) sub[a * nt + b] = FIELD[(x0 + a) * NT + (t0 + b)];
-    }
-    SEIS.drawVarDensity(ctx, sub, nx, nt, R,
-      { cmap: SEIS.COLORMAPS.gray, clip: PEAK * 0.8 });
-
-    const X = (ix) => R.x + ((ix - x0) / (nx - 1)) * R.w;
-    const Y = (it) => R.y + ((it - t0) / (nt - 1)) * R.h;
-
-    const p = candP(CAND);
-
-    // the window this candidate reads from
-    ctx.save();
-    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-    ctx.fillStyle = 'rgba(132,22,23,.10)';
-    ctx.strokeStyle = CRIM; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    ctx.moveTo(X(ix0 - S.half), Y(it0 - p * S.half - S.kHalf));
-    ctx.lineTo(X(ix0 + S.half), Y(it0 + p * S.half - S.kHalf));
-    ctx.lineTo(X(ix0 + S.half), Y(it0 + p * S.half + S.kHalf));
-    ctx.lineTo(X(ix0 - S.half), Y(it0 - p * S.half + S.kHalf));
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // the candidate itself
-    ctx.strokeStyle = CRIM; ctx.lineWidth = 2.2;
-    ctx.beginPath();
-    ctx.moveTo(X(ix0 - S.half), Y(it0 - p * S.half));
-    ctx.lineTo(X(ix0 + S.half), Y(it0 + p * S.half));
-    ctx.stroke();
-
-    // one dot per trace, at the sample the gather will read
-    ctx.fillStyle = '#fff'; ctx.strokeStyle = CRIM; ctx.lineWidth = 1.2;
-    for (let j = -S.half; j <= S.half; j++) {
-      ctx.beginPath(); ctx.arc(X(ix0 + j), Y(it0 + p * j), 2.6, 0, 6.2832);
-      ctx.fill(); ctx.stroke();
-    }
-    ctx.restore();
-
-    if (S.showTrue) {
-      const tp = trueP(ix0, it0);
-      ctx.save();
-      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-      ctx.strokeStyle = TEAL; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
-      ctx.beginPath();
-      ctx.moveTo(X(ix0 - S.half - 2), Y(it0 - tp * (S.half + 2)));
-      ctx.lineTo(X(ix0 + S.half + 2), Y(it0 + tp * (S.half + 2)));
-      ctx.stroke(); ctx.restore();
-    }
-
-    SEIS.frame(ctx, R);
-    ctx.save();
-    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillText(nx + ' traces \u00d7 ' + nt + ' samples', R.x + R.w / 2, R.y + R.h + 8);
-    ctx.restore();
-  }
-
-  /* ------------------------- the gathered window ------------------------ */
-
-  function drawGather() {
-    const c = $('gathCanvas');
-    const w = panelWidths('scanRow', 3)[1];
-    const h = 232;
-    const ctx = SEIS.fitCanvas(c, w, h);
-    ctx.clearRect(0, 0, w, h);
-    const R = { x: 18, y: 6, w: w - 30, h: h - 34 };
-
-    const J = 2 * S.half + 1, K = 2 * S.kHalf + 1;
-    const buf = new Float64Array(J * K);
-    ATTR.gatherAlongDip(FIELD, NX, NT, probeIX(), probeIT(),
-      candP(CAND), S.half, S.kHalf, buf);
-    const g = new Float32Array(J * K);
-    for (let i = 0; i < g.length; i++) g[i] = buf[i];
-
-    SEIS.drawWiggle(ctx, g, J, K, R,
-      { clip: PEAK * 0.9, excursion: 1.15, lineWidth: 1.1 });
-
-    // the centre sample: what semblance is really asking about is whether the
-    // traces agree here, and either side of here
-    ctx.save();
-    SEIS.dashedLine(ctx, R.x, R.y + R.h / 2, R.x + R.w, R.y + R.h / 2,
-      'rgba(132,22,23,.55)', [4, 3], 1.2);
-    ctx.restore();
-
-    SEIS.frame(ctx, R);
-    ctx.save();
-    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    const s = ATTR.semblance(buf, J, K);
-    ctx.fillText(J + ' traces  \u00b7  semblance ' + s.toFixed(3), R.x + R.w / 2, R.y + R.h + 8);
-    ctx.restore();
-  }
-
-  /* --------------------------- the scan curve --------------------------- */
-
-  function drawScan() {
-    const c = $('scanCanvas');
-    const w = panelWidths('scanRow', 3)[2];
-    const h = 232;
-    const ctx = SEIS.fitCanvas(c, w, h);
-    ctx.clearRect(0, 0, w, h);
-    const R = { x: 40, y: 8, w: w - 52, h: h - 44 };
-    if (!SCAN) return;
-
-    const n = SCAN.curve.length;
-    let hi = 0;
-    for (let i = 0; i < n; i++) hi = Math.max(hi, SCAN.curve[i]);
-    const top = Math.max(0.12, Math.min(1, hi * 1.15));
-    const degMax = pToDeg(pMax());
-    const X = (deg) => R.x + ((deg + degMax) / (2 * degMax)) * R.w;
-    const Y = (s) => R.y + R.h - (s / top) * R.h;
-
-    SEIS.axisLeft(ctx, R, 0, top, 'semblance', (v) => v.toFixed(2), { flip: true, grid: true, ticks: 4 });
-
-    // candidates, drawn as the discrete things they are
-    ctx.save();
-    ctx.strokeStyle = 'rgba(132,22,23,.30)'; ctx.lineWidth = 1;
-    for (let i = 0; i < n; i++) {
-      const x = X(pToDeg(candP(i)));
-      ctx.beginPath(); ctx.moveTo(x, R.y + R.h); ctx.lineTo(x, Y(SCAN.curve[i])); ctx.stroke();
-    }
-    ctx.strokeStyle = CRIM; ctx.lineWidth = 1.8; ctx.beginPath();
-    for (let i = 0; i < n; i++) {
-      const x = X(pToDeg(candP(i))), y = Y(SCAN.curve[i]);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-    ctx.fillStyle = CRIM;
-    for (let i = 0; i < n; i++) {
-      ctx.beginPath(); ctx.arc(X(pToDeg(candP(i))), Y(SCAN.curve[i]), 2, 0, 6.2832); ctx.fill();
-    }
-    ctx.restore();
-
-    // where the search currently is
-    const cx = X(pToDeg(candP(CAND)));
-    ctx.save();
-    ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.moveTo(cx, R.y); ctx.lineTo(cx, R.y + R.h); ctx.stroke();
-    ctx.fillStyle = INK;
-    ctx.beginPath(); ctx.arc(cx, Y(SCAN.curve[CAND]), 3.4, 0, 6.2832); ctx.fill();
-    ctx.restore();
-
-    // the truth, and the refined answer
-    if (S.showTrue) {
-      const td = pToDeg(trueP(probeIX(), probeIT()));
-      if (Math.abs(td) <= degMax) {
-        SEIS.dashedLine(ctx, X(td), R.y, X(td), R.y + R.h, TEAL, [5, 4], 1.8);
+    ctx.strokeStyle = 'rgba(196,60,45,.95)'; ctx.lineWidth = 2;
+    for (let ix = 10; ix < NX - 10; ix += 13) {
+      for (let it = 18; it < NT - 18; it += 24) {
+        const r = ATTR.dipScan(fld, NX, NT, ix, it, { half: 2, kHalf: 5, pMax: 4, nP: 25 });
+        const x = (ix / NX) * w, y = (it / NT) * h;
+        const ex = 5.5 * (w / NX), ey = r.p * 5.5 * (h / NT);
+        ctx.beginPath(); ctx.moveTo(x - ex, y - ey); ctx.lineTo(x + ex, y + ey); ctx.stroke();
       }
     }
-    if (S.refine) {
-      const rx = X(pToDeg(SCAN.p));
-      ctx.save();
-      ctx.fillStyle = CRIM;
-      ctx.beginPath();
-      ctx.moveTo(rx, R.y + 2); ctx.lineTo(rx - 5, R.y - 6); ctx.lineTo(rx + 5, R.y - 6);
-      ctx.closePath(); ctx.fill(); ctx.restore();
-    }
-
-    SEIS.frame(ctx, R);
-    SEIS.axisBottom(ctx, R, -degMax, degMax, 'candidate dip (degrees)',
-      (v) => (Math.abs(v) < 0.05 ? '0' : v.toFixed(0)));
+    ctx.restore();
   }
 
-  /* --------------------------- attribute panels ------------------------- */
-
-  function drawGridPanel(canvasId, g, arr, w, opts) {
-    const c = $(canvasId);
-    const h = clamp(Math.round(w * 0.62), 190, 300) + 34;
-    const ctx = SEIS.fitCanvas(c, w, h);
+  function thumbDip(canvas) {
+    const w = canvas.parentElement.clientWidth, h = 118;
+    const ctx = SEIS.fitCanvas(canvas, w, h);
     ctx.clearRect(0, 0, w, h);
-    const barH = 9;
-    const R = { x: 40, y: 6, w: w - 52, h: h - 6 - 30 - barH - 20 };
-
+    const NX = 140, NT = 160, DT = 0.002;
+    const shift = (ix) => 13 * Math.sin(2 * Math.PI * ix / 80) + (ix > 0.6 * NX ? 8 : 0);
+    const trueP = (ix) => 13 * (2 * Math.PI / 80) * Math.cos(2 * Math.PI * ix / 80);
     const off = document.createElement('canvas');
-    off.width = g.gx; off.height = g.gt;
+    off.width = NX; off.height = NT;
     const octx = off.getContext('2d');
-    const img = octx.createImageData(g.gx, g.gt);
-    for (let a = 0; a < g.gx; a++) {
-      for (let b = 0; b < g.gt; b++) {
-        const col = opts.map(opts.norm(arr[a * g.gt + b]));
-        const q = (b * g.gx + a) * 4;
-        img.data[q] = col[0]; img.data[q + 1] = col[1];
-        img.data[q + 2] = col[2]; img.data[q + 3] = 255;
+    const img = octx.createImageData(NX, NT);
+    for (let it = 0; it < NT; it++) {
+      for (let ix = 0; ix < NX; ix++) {
+        const c = ATTR.MAPS.dip(trueP(ix) / 1.4);
+        const q = it * NX + ix;
+        img.data[q * 4] = c[0]; img.data[q * 4 + 1] = c[1];
+        img.data[q * 4 + 2] = c[2]; img.data[q * 4 + 3] = 255;
       }
     }
     octx.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(off, 0, 0, w, h);
     ctx.save();
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(off, R.x, R.y, R.w, R.h);
-    ctx.restore();
-
-    const xSpan = (g.gx - 1) * g.decX, tSpan = (g.gt - 1) * g.decT;
-    if (opts.probe) {
-      const px = R.x + clamp(probeIX() / xSpan, 0, 1) * R.w;
-      const py = R.y + clamp(probeIT() / tSpan, 0, 1) * R.h;
-      ctx.save();
-      ctx.strokeStyle = CRIM; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.arc(px, py, 4.5, 0, 6.2832); ctx.stroke();
-      ctx.restore();
-    }
-
-    SEIS.frame(ctx, R);
-    SEIS.axisLeft(ctx, R, 0, tSpan * DT, null, (v) => v.toFixed(2), { ticks: 4 });
-    SEIS.axisBottom(ctx, R, 0, xSpan, null, (v) => String(Math.round(v)), { ticks: 4 });
-
-    // colour bar
-    const B = { x: R.x, y: R.y + R.h + 26, w: R.w, h: barH };
-    const nn = Math.max(2, Math.round(B.w));
-    for (let i = 0; i < nn; i++) {
-      const u = i / (nn - 1);
-      const col = opts.map(opts.signed ? -1 + 2 * u : u);
-      ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
-      ctx.fillRect(B.x + i * (B.w / nn), B.y, B.w / nn + 1, B.h);
-    }
-    ctx.save();
-    ctx.strokeStyle = 'rgba(22,25,28,.4)'; ctx.lineWidth = 1;
-    ctx.strokeRect(B.x + 0.5, B.y + 0.5, B.w, B.h);
-    ctx.font = '9.5px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
-    ctx.textBaseline = 'top';
-    ctx.textAlign = 'left'; ctx.fillText(opts.lo, B.x, B.y + B.h + 3);
-    ctx.textAlign = 'right'; ctx.fillText(opts.hi, B.x + B.w, B.y + B.h + 3);
-    ctx.restore();
+    ctx.strokeStyle = 'rgba(22,25,28,.55)'; ctx.lineWidth = 1.4;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(0.6 * w, 0); ctx.lineTo(0.6 * w, h);
+    ctx.stroke(); ctx.restore();
   }
 
-  function drawFields() {
-    if (!GRID) return;
-    const n = S.showErr ? 3 : 2;
-    const w = panelWidths('fieldRow', n)[0];
-    const dLim = Math.max(2, pToDeg(pMax()));
-
-    drawGridPanel('dipCanvas', GRID, GRID.p, w, {
-      map: ATTR.MAPS.dip, signed: true, probe: true,
-      norm: (p) => pToDeg(p) / dLim,
-      lo: '\u2212' + dLim.toFixed(0) + '\u00b0', hi: '+' + dLim.toFixed(0) + '\u00b0',
+  function drawThumbs() {
+    document.querySelectorAll('.thumb-canvas').forEach((c) => {
+      if (c.dataset.thumb === 'dip') thumbDip(c);
     });
-
-    drawGridPanel('confCanvas', GRID, GRID.sem, w, {
-      map: ATTR.MAPS.coherence, signed: false, probe: true,
-      norm: (s) => s,
-      lo: '0 \u2014 no confidence', hi: '1',
-    });
-
-    if (S.showErr) {
-      const e = new Float32Array(GRID.gx * GRID.gt);
-      for (let a = 0; a < GRID.gx; a++) {
-        const ix = Math.min(NX - 1, a * GRID.decX);
-        for (let b = 0; b < GRID.gt; b++) {
-          const it = Math.min(NT - 1, b * GRID.decT);
-          e[a * GRID.gt + b] = pToDeg(GRID.p[a * GRID.gt + b]) - pToDeg(trueP(ix, it));
-        }
-      }
-      drawGridPanel('errCanvas', GRID, e, w, {
-        map: ATTR.MAPS.dip, signed: true, probe: true,
-        norm: (v) => v / 4,
-        lo: '\u22124\u00b0', hi: '+4\u00b0',
-      });
-    }
   }
 
-  function drawCoherence() {
-    if (!COH || !COHF) return;
-    const w = panelWidths('cohRow', 2)[0];
-    const o = {
-      map: ATTR.MAPS.coherence, signed: false, probe: false,
-      norm: (s) => s, lo: '0 \u2014 incoherent', hi: '1 \u2014 identical',
-    };
-    drawGridPanel('cohDipCanvas', COH, COH.c, w, o);
-    drawGridPanel('cohFlatCanvas', COHF, COHF.c, w, o);
-  }
-
-  /* =====================================================================
-     READOUTS
-     ===================================================================== */
-
-  function updateStats() {
-    if (!SCAN) return;
-    const ix = probeIX(), it = probeIT();
-    const p = estP(), tp = trueP(ix, it);
-    const deg = pToDeg(p), tdeg = pToDeg(tp);
-    const err = deg - tdeg;
-
-    $('rPt').textContent = 'trace ' + ix + '  \u00b7  ' + (it * DT).toFixed(3) + ' s';
-    $('rP').textContent = p.toFixed(3) + ' samples/trace';
-    $('rMs').textContent = ATTR.dipToMsPerTrace(p, DT).toFixed(2) + ' ms/trace';
-    $('rDeg').textContent = deg.toFixed(2) + '\u00b0';
-    $('rSem').textContent = SCAN.sem.toFixed(3);
-    $('rTrue').textContent = tdeg.toFixed(2) + '\u00b0';
-    $('rErr').textContent = (Math.abs(err) < 0.005 ? '0.00'
-      : (err > 0 ? '+' : '') + err.toFixed(2)) + '\u00b0';
-    $('rN').textContent = nCand() + '  (\u00b1' + S.thMax + '\u00b0 at ' + S.dTh + '\u00b0)';
-    $('rWin').textContent = (2 * S.half + 1) + ' traces \u00d7 \u00b1' +
-      (S.kHalf * DT * 1000).toFixed(0) + ' ms';
-
-    const pinned = Math.abs(candP(BESTI)) >= 0.999 * pMax();
-    const onFault = S.thr > 0 && Math.abs(ix - XF) <= S.half;
-    let v;
-    if (pinned) {
-      v = 'Search range hit \u2014 the true dip is steeper than \u00b1' + S.thMax + '\u00b0';
-    } else if (onFault) {
-      v = 'Window straddles the fault \u2014 the winner is a compromise';
-    } else if (SCAN.sem < 0.45) {
-      v = 'Low confidence \u2014 treat this dip as unreliable';
-    } else if (Math.abs(err) > 1.5) {
-      v = 'Off by ' + Math.abs(err).toFixed(1) + '\u00b0 \u2014 enough to matter for curvature';
-    } else {
-      v = 'Good estimate \u2014 within ' + Math.abs(err).toFixed(1) + '\u00b0 of the truth';
-    }
-    $('rVerdict').textContent = v;
-
-    const dec = GRID ? GRID.decX + '\u00d7' + GRID.decT : '\u2014';
-    $('searchNote').textContent = nCand() + ' candidate dips per sample \u00b7 volume computed 1 in ' +
-      dec + ' and interpolated';
-    $('convNote').textContent = '\u00b1' + S.thMax + '\u00b0 is \u00b1' + pMax().toFixed(2) +
-      ' samples/trace, or \u00b1' + (pMax() * DT * 1000).toFixed(1) + ' ms/trace, here';
-  }
-
-  function syncLabels() {
-    $('regV').textContent = S.reg.toFixed(2) + ' ms/trace';
-    $('foldAV').textContent = S.foldA + ' ms';
-    $('foldLV').textContent = S.foldL + ' traces';
-    $('thrV').textContent = S.thr === 0 ? 'no fault' : S.thr + ' ms';
-    $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
-    $('freqV').textContent = S.f + ' Hz';
-    $('thMaxV').textContent = '\u00b1 ' + S.thMax + '\u00b0';
-    $('dThV').textContent = S.dTh + '\u00b0';
-    $('halfV').textContent = S.half + ' \u2192 ' + (2 * S.half + 1) + ' traces';
-    $('kHalfV').textContent = '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms';
-    $('dxV').textContent = S.dx + ' m';
-    $('velV').textContent = S.vel + ' m/s';
-    $('candV').textContent = pToDeg(candP(CAND)).toFixed(1) + '\u00b0' +
-      (CAND === BESTI ? '  \u2190 winner' : '');
-    $('errCol').hidden = !S.showErr;
-  }
-
-  function pushToInputs() {
-    ['reg', 'foldA', 'foldL', 'thr', 'noise', 'freq', 'thMax', 'dTh',
-      'half', 'kHalf', 'dx', 'vel'].forEach((id) => {
-      const key = id === 'freq' ? 'f' : id;
-      if ($(id)) $(id).value = S[key];
-    });
-    $('unconf').checked = S.unconf;
-    $('refine').checked = S.refine;
-    $('bars').checked = S.bars;
-    $('showTrue').checked = S.showTrue;
-    $('showErr').checked = S.showErr;
-    $('preset').value = S.preset;
-    $('errCol').hidden = !S.showErr;
-    $('cand').max = nCand() - 1;
-    $('cand').value = CAND;
-  }
-
-  /* =====================================================================
-     PLUMBING
-     ===================================================================== */
-
-
-  function drawAll() {
-    drawSection(); drawZoom(); drawGather(); drawScan();
-    drawFields(); drawCoherence(); syncLabels(); updateStats();
-  }
-
-  function drawLight() {
-    drawZoom(); drawGather(); drawScan(); syncLabels(); updateStats();
-  }
-
-  let heavyTimer = null;
-  function scheduleHeavy() {
-    clearTimeout(heavyTimer);
-    heavyTimer = setTimeout(() => {
-      runFields();
-      drawSection(); drawFields(); drawCoherence(); updateStats();
-    }, 90);
-  }
-
-  // rebuildData: the section itself changed. Otherwise only the search changed.
-  function refresh(rebuildData) {
-    if (rebuildData) buildField();
-    const nC = nCand();
-    $('cand').max = nC - 1;
-    CAND = clamp(CAND, 0, nC - 1);
-    runScan();
-    if (!ANIM) CAND = BESTI;
-    $('cand').value = CAND;
-    drawSection(); drawZoom(); drawGather(); drawScan();
-    syncLabels(); updateStats();
-    scheduleHeavy();
-    saveState();
-  }
-
-  /* ---------------------------- interaction ----------------------------- */
-
-  function attachProbe(canvas) {
-    let down = false;
-    const go = (ev) => {
-      const r = canvas.getBoundingClientRect();
-      const wPlot = r.width - M.l - M.r;
-      const hPlot = r.height - M.t - M.b;
-      S.px = clamp((ev.clientX - r.left - M.l) / wPlot, 0, 1);
-      S.pt = clamp((ev.clientY - r.top - M.t) / hPlot, 0, 1);
-      stopAnim();
-      runScan(); CAND = BESTI; $('cand').value = CAND;
-      drawSection(); drawZoom(); drawGather(); drawScan(); syncLabels(); updateStats();
-    };
-    canvas.addEventListener('pointerdown', (e) => {
-      down = true; canvas.setPointerCapture(e.pointerId); e.preventDefault(); go(e);
-    });
-    canvas.addEventListener('pointermove', (e) => { if (down) go(e); });
-    canvas.addEventListener('pointerup', () => { down = false; saveState(); });
-    canvas.addEventListener('pointercancel', () => { down = false; });
-  }
-
-  let ANIM = null;
-  function stopAnim() {
-    if (ANIM) { cancelAnimationFrame(ANIM.raf); ANIM = null; $('runBtn').textContent = 'Run the search'; }
-  }
-  function runAnim() {
-    stopAnim();
-    const n = nCand();
-    const perStep = clamp(1400 / n, 28, 130);
-    ANIM = { i: 0, t0: performance.now(), raf: 0 };
-    $('runBtn').textContent = 'Stop';
-    const tick = (now) => {
-      if (!ANIM) return;
-      const i = Math.floor((now - ANIM.t0) / perStep);
-      if (i >= n) {
-        stopAnim();
-        CAND = BESTI; $('cand').value = CAND; drawLight();
-        return;
-      }
-      if (i !== ANIM.i) {
-        ANIM.i = i; CAND = i; $('cand').value = i; drawLight();
-      }
-      ANIM.raf = requestAnimationFrame(tick);
-    };
-    ANIM.raf = requestAnimationFrame(tick);
-  }
-
-  const slide = (id, key, rebuild) => $(id).addEventListener('input', () => {
-    S[key] = parseFloat($(id).value);
-    S.preset = 'custom'; $('preset').value = 'custom';
-    stopAnim(); refresh(rebuild);
-  });
-  slide('reg', 'reg', true); slide('foldA', 'foldA', true);
-  slide('foldL', 'foldL', true); slide('thr', 'thr', true);
-  slide('noise', 'noise', true); slide('freq', 'f', true);
-
-  const slideSearch = (id, key) => $(id).addEventListener('input', () => {
-    S[key] = parseFloat($(id).value); stopAnim(); refresh(false);
-  });
-  slideSearch('thMax', 'thMax'); slideSearch('dTh', 'dTh');
-  slideSearch('half', 'half'); slideSearch('kHalf', 'kHalf');
-  slideSearch('dx', 'dx'); slideSearch('vel', 'vel');
-
-  $('unconf').addEventListener('change', () => {
-    S.unconf = $('unconf').checked; S.preset = 'custom'; $('preset').value = 'custom';
-    stopAnim(); refresh(true);
-  });
-  $('refine').addEventListener('change', () => { S.refine = $('refine').checked; refresh(false); });
-  $('bars').addEventListener('change', () => { S.bars = $('bars').checked; drawSection(); });
-  $('showTrue').addEventListener('change', () => {
-    S.showTrue = $('showTrue').checked; drawSection(); drawZoom(); drawScan();
-  });
-  $('showErr').addEventListener('change', () => {
-    S.showErr = $('showErr').checked; $('errCol').hidden = !S.showErr; drawFields();
-  });
-
-  $('cand').addEventListener('input', () => {
-    stopAnim(); CAND = parseInt($('cand').value, 10); drawLight();
-  });
-  $('runBtn').addEventListener('click', () => { ANIM ? stopAnim() : runAnim(); });
-  $('winBtn').addEventListener('click', () => {
-    stopAnim(); CAND = BESTI; $('cand').value = CAND; drawLight();
-  });
-
-  $('preset').addEventListener('change', () => {
-    const p = PRESETS[$('preset').value];
-    S.preset = $('preset').value;
-    if (p) Object.assign(S, p);
-    stopAnim(); pushToInputs(); refresh(true);
-  });
-
-  $('resetBtn').addEventListener('click', () => {
-    S = Object.assign({}, DEF); CAND = 0;
-    Object.assign(S, PRESETS.foldfault);
-    stopAnim(); pushToInputs(); refresh(true);
-  });
-  $('copyBtn').addEventListener('click', (e) => {
-    if (!CAN_LINK) { e.currentTarget.textContent = 'Needs a web address, not a local file'; return; }
-    try { SEIS.copyLink(e.currentTarget); } catch (err) { /* clipboard blocked */ }
-  });
-  $('pngBtn').addEventListener('click', () => SEIS.savePNG($('secCanvas'), 'dip-2d-section'));
-
-  attachProbe($('secCanvas'));
-
+  function all() { drawHero(); drawThumbs(); }
   let rt;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
-
-  buildField();
-  runScan();
-  CAND = BESTI;
-  runFields();
-  pushToInputs();
-  drawAll();
-  document.fonts && document.fonts.ready.then(drawAll);
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(all, 150); });
+  all();
+  document.fonts && document.fonts.ready.then(all);
 })();
 </script>
 </body>
