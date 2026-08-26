@@ -3,214 +3,373 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How Geometric Attributes Actually Work</title>
-<meta name="description" content="Interactive modules on seismic geometric attributes: dip, dip steering, coherence and energy ratio similarity, curvature, and aberrancy. Built for teaching by AASPI at the University of Oklahoma.">
+<title>Dip — the foundation | How Geometric Attributes Actually Work</title>
+<meta name="description" content="A first look at seismic dip in 2D: what dip is, why every other geometric attribute needs it, and how a computer finds it by tilting a line until the traces along it match.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
 
 <div class="wrap">
   <header class="masthead">
-    <a class="brand" href="index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
     <nav>
-      <a href="#modules">Modules</a>
-      <a href="#about">About</a>
-      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a>
+      <a href="../index.html">All modules</a>
+      <a href="#why">Why it matters</a>
+      <a href="#notes">Method &amp; references</a>
     </nav>
   </header>
 
-  <!-- ================================ HERO ================================ -->
-  <section class="hero">
-   <div class="hero-grid">
-    <div class="hero-copy">
-      <p class="eyebrow">AASPI &nbsp;·&nbsp; University of Oklahoma</p>
-      <h1 class="title">Geometric attributes measure the <em>shape</em> of reflectors, not their strength.</h1>
-      <p class="lede">Coherence, curvature and aberrancy all answer questions about geometry: is this
-        reflector continuous, is it bent, is it flexed. Every one of them is computed from the same starting
-        point — an estimate of which way the reflector is going at every sample in the volume.</p>
-      <p class="lede">These modules open that up. Build a structure, watch the attribute being computed on it,
-        change the parameters that are usually left at their defaults, and see what happens to the answer.
-        Nothing to install, and nothing leaves your machine.</p>
-      <div class="hero-cta">
-        <a class="btn" href="modules/dip.html">Start with dip →</a>
-        <a class="btn ghost" href="#modules">See all modules</a>
-      </div>
+  <div class="mod-head">
+    <p class="eyebrow">Module 01 &nbsp;·&nbsp; Geometric attributes</p>
+    <h1>Dip: the direction everything else is measured along</h1>
+    <p class="sub">Almost no rock layer anywhere is perfectly flat and horizontal. Beds tilt, fold, thin and
+      break, and a seismic reflector inherits all of it. So before you can measure anything <em>about</em> a
+      reflector, something has to work out which way it is heading. Three steps: what dip is, finding it
+      yourself, then watching the computer find it.</p>
+  </div>
+
+  <!-- ============================== STEP ONE ============================== -->
+  <section class="plot" style="margin-top:6px">
+    <div class="plot-head">
+      <h3>Step 1 &nbsp;·&nbsp; What dip is</h3>
+      <span class="hint">Nine traces, one reflector</span>
     </div>
-    <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
-      <div class="hero-cap"><span>dip estimated by semblance scan</span><b>every sample</b></div></div>
-   </div>
-  </section>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Each wiggle below is one seismic trace. They sit side by side, and time runs downward. There is a
+      single reflector in them, plus a little random noise so it looks like something you might actually be
+      handed. Drag the slider and watch the reflector walk across the traces.</p>
 
-  <!-- ============================== THE PREMISE ============================ -->
-  <section class="primer">
-   <div class="primer-grid">
-    <div>
-      <h3>Attributes are computed, not measured</h3>
-      <p>Every geometric attribute is the output of an algorithm with parameters. Change the window, the
-        aperture or the dip search and the answer changes — sometimes a little, sometimes completely.</p>
+    <canvas id="c1" aria-label="Nine seismic traces with a single dipping reflector"></canvas>
+
+    <div class="ctl" style="margin-top:14px;max-width:520px">
+      <label for="d1">Dip <span class="val" id="d1V">3.0 ms per trace</span></label>
+      <input type="range" id="d1" min="-8" max="8" step="0.5" value="3">
     </div>
-    <div>
-      <h3>They all stand on dip</h3>
-      <p>Coherence is measured along dip. Curvature is the derivative of the dip field. Aberrancy is the
-        derivative after that. Errors in dip do not stay in dip.</p>
+    <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">How much later the reflector arrives on
+      each trace to the right. Negative means it arrives earlier, so the reflector climbs instead of falling.
+      At zero it is flat — and a reflector that is exactly flat is the rarest thing in this subject.</p>
+
+    <div class="stats">
+      <div class="stat key"><span>Dip</span><b id="s1a">—</b></div>
+      <div class="stat"><span>Total shift across all nine traces</span><b id="s1b">—</b></div>
+      <div class="stat"><span>The same dip as an angle in the ground</span><b id="s1c">—</b></div>
+      <div class="stat wide"><span>Read it out loud</span><b id="s1d">—</b></div>
     </div>
-    <div>
-      <h3>Defaults are decisions</h3>
-      <p>Most attribute volumes are produced with whatever the software suggested. Those suggestions are
-        reasonable starting points, not answers, and they are rarely revisited.</p>
-    </div>
-   </div>
-  </section>
-
-  <!-- =============================== MODULES ============================== -->
-  <section id="modules" class="modules">
-    <div class="sec-head">
-      <h2>The modules</h2>
-      <p>In the order they build on each other. Each one isolates a single attribute, or a single decision
-        that goes into computing one.</p>
-    </div>
-
-    <div class="card-grid">
-
-      <a class="card" href="modules/dip.html">
-        <canvas class="thumb-canvas" data-thumb="dip"></canvas>
-        <div class="card-body">
-          <div class="card-no">01</div>
-          <h3>Dip — the foundation</h3>
-          <p>How dip is actually estimated: a brute-force search over candidate dips, scored by semblance.
-            Watch the search run, then break it.</p>
-          <div class="q">What is every other attribute standing on?</div>
-        </div>
-        <span class="flag next">Start here</span>
-      </a>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">02</div>
-          <h3>Inline and crossline dip</h3>
-          <p>One dip component becomes two. The search becomes a grid of candidate orientations, and the
-            pair <b>p</b> and <b>q</b> turns into the dip magnitude and dip azimuth you co-render.</p>
-          <div class="q">What does dip azimuth actually show me?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">03</div>
-          <h3>Dip steering</h3>
-          <p>The same coherence calculation, run along dip and then along horizontal windows, on the same
-            dipping data. One finds the fault; the other finds the bedding.</p>
-          <div class="q">Why does my coherence follow the structure?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">04</div>
-          <h3>Similarity &amp; the coherence family</h3>
-          <p>Cross-correlation, semblance, eigenstructure and energy ratio similarity computed side by side on
-            one dataset, so the differences are visible rather than described.</p>
-          <div class="q">Which coherence should I be running?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">05</div>
-          <h3>The analysis window</h3>
-          <p>Vertical height against lateral aperture, and what each does to a fault, a channel edge and a
-            stratigraphic boundary. The parameter with the largest effect and the least attention.</p>
-          <div class="q">Why did my fault get fat?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">06</div>
-          <h3>Curvature</h3>
-          <p>Most-positive and most-negative curvature, mean and Gaussian, shape index and curvedness — built
-            up from the dip field so you can see where each one comes from.</p>
-          <div class="q">What is k1 actually telling me?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">07</div>
-          <h3>Multispectral curvature</h3>
-          <p>Long- and short-wavelength curvature on the same structure. Different wavelengths reveal
-            different features, and the choice of operator length is an interpretation.</p>
-          <div class="q">Which wavelength shows my fractures?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">08</div>
-          <h3>Aberrancy</h3>
-          <p>The third derivative of structure. Aberrancy magnitude and azimuth pick out flexures and small
-            faults that curvature and coherence both step over.</p>
-          <div class="q">What is left that curvature missed?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
-      <div class="card planned">
-        <div class="thumb"></div>
-        <div class="card-body">
-          <div class="card-no">09</div>
-          <h3>Choosing an attribute</h3>
-          <p>One volume containing a fault, a flexure, a channel and an unconformity, with every attribute
-            from the previous modules run on it. Which finds what, and which cannot.</p>
-          <div class="q">Which attribute for which feature?</div>
-        </div>
-        <span class="flag">Planned</span>
-      </div>
-
+    <div class="legend">
+      <span>The angle needs a trace spacing and a velocity before it can be worked out — 25 m and 3000 m/s
+        here. The seismic itself only ever knows the time shift.</span>
     </div>
   </section>
 
-  <!-- ============================== DISCLAIMER ============================= -->
-  <section class="disclaimer">
-    <h4>What this is, and what it is not</h4>
-    <p>These modules are <b>teaching models, built to make ideas visible</b>. The attribute algorithms are
-      implemented as the literature describes them, but on small synthetic datasets and in their plain
-      brute-force form, so the method can be read and watched rather than assumed. Each module lists what it
-      has left out and why.</p>
-    <p>This is not attribute software. For production work on real volumes, use
-      <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> or your interpretation package. The numbers here
-      describe the model on the screen, not your survey.</p>
-  </section>
+  <!-- ========================= WHY THIS COMES FIRST ======================== -->
+  <div class="teach" id="why">
+    <div class="tryit">
+      <h3>Why this one number comes before everything else</h3>
+      <p style="margin-top:0;font-size:14.5px">Every geometric attribute is measured <b>along</b> the
+        reflector, not straight across the screen. That is only possible if something already knows which way
+        the reflector is going — and since almost nothing is flat, that direction is different at every
+        single sample in the volume.</p>
+      <p style="font-size:14.5px;margin-bottom:0">So the first thing computed in any attribute workflow is a
+        <b>dip volume</b>: the bed dip at every sample, estimated without a picked horizon. Everything below
+        is then built on top of it.</p>
+    </div>
+    <div class="takeaway">
+      <h3>What is standing on it</h3>
+      <ul>
+        <li><b>Coherence</b> compares neighbouring traces along the bed. Compare them horizontally instead
+          and a perfectly good dipping reflector looks broken — you end up imaging the bedding rather than
+          the faults.</li>
+        <li><b>Curvature</b> is the rate at which the dip changes from place to place. It is computed
+          directly <em>from</em> the dip field, so it can never be better than the dip was.</li>
+        <li><b>Aberrancy</b> goes one derivative further still, which means it inherits the dip errors and
+          then amplifies them.</li>
+        <li><b>Structure-oriented filtering</b> smooths along the bed. Give it the wrong direction and it
+          will smooth straight across your reflectors, cheerfully and invisibly.</li>
+      </ul>
+    </div>
+  </div>
 
-  <!-- ================================ ABOUT =============================== -->
-  <section id="about" class="about">
-    <div class="about-copy">
-      <h2>About</h2>
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
-        Attribute Assisted Seismic Processing and Interpretation (AASPI) consortium.</p>
-      <p>Companion to <em>What Can You REALLY See in Seismic?</em>, which covers resolution — how thin a bed,
-        how small a fault, how narrow a feature. This set picks up where that one leaves off, and asks what
-        the attributes computed from that data are actually measuring.</p>
-      <p>Everything runs in the browser. No installation, no account, no data transmitted. Free to use or
-        adapt in your own courses with citation.</p>
+  <!-- ============================== STEP TWO ============================== -->
+  <section class="plot" style="margin-top:20px">
+    <div class="plot-head">
+      <h3>Step 2 &nbsp;·&nbsp; Find the dip yourself</h3>
+      <span class="hint">Tilt the line until it lies along the bed</span>
+    </div>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Twenty-five traces now, and the dip is hidden. The crimson line is your guess at which way the bed is
+      going. Tilt it until it lies along a reflector rather than cutting across it — that is the same
+      judgement you make by eye on a real section, just made explicit.</p>
+
+    <canvas id="c2" aria-label="Twenty-five traces with a tiltable line representing the guessed dip"></canvas>
+
+    <div class="ctl" style="margin-top:14px;max-width:520px">
+      <label for="guess">Tilt of your line <span class="val" id="guessV">0.00 ms per trace</span></label>
+      <input type="range" id="guess" min="-8" max="8" step="0.25" value="0">
+    </div>
+    <p class="hint-line" style="margin:-8px 0 16px;max-width:84ch">The dashed box is the patch of data being
+      judged. Notice it tilts with the line — that is the whole point. The window follows the bed.</p>
+
+    <p class="sublabel"><b>1</b> How well the traces match along your line
+      <span class="note">1.0 would mean all of them are identical</span></p>
+    <canvas id="c2c" aria-label="Match score for the current tilt"></canvas>
+
+    <p class="sublabel" style="margin-top:16px"><b>2</b> The same traces, redrawn along your line
+      <span class="note">this is what the score is actually measuring</span></p>
+    <canvas id="c2b" aria-label="The traces from inside the window, laid side by side along the guessed dip"></canvas>
+    <p class="hint-line" style="margin:8px 0 14px;max-width:84ch">Reading each trace along the tilted line
+      and laying them side by side is how the computer checks its guess. Get the tilt right and they stack
+      into one shape. Get it wrong and they stagger.</p>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn small" id="newBtn" type="button">New hidden dip</button>
+      <button class="btn ghost small" id="tellBtn" type="button">Tell me the answer</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Your tilt</span><b id="s2a">—</b></div>
+      <div class="stat key"><span>Match score</span><b id="s2b">—</b></div>
+      <div class="stat"><span>How close you are</span><b id="s2c">—</b></div>
+      <div class="stat wide"><span>The real answer</span><b id="s2d">—</b></div>
+    </div>
+    <div class="legend">
+      <span>The best score you can reach is almost never 1.0, and on real seismic it is nowhere near. Traces
+        differ for all sorts of reasons that have nothing to do with dip — noise, thinning beds, changing
+        rock. You are not looking for a perfect match. You are looking for the best one available.</span>
     </div>
   </section>
+
+  <!-- ============================= STEP THREE ============================= -->
+  <section class="plot" style="margin-top:20px">
+    <div class="plot-head">
+      <h3>Step 3 &nbsp;·&nbsp; Let the computer do it</h3>
+      <span class="hint">Same data, same job, every tilt tried in turn</span>
+    </div>
+    <p style="margin:0 0 16px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      The computer cannot see the line lying along the bed, but it can do the other half of what you just
+      did: read the traces along a tilted line, check whether they stack up, and score it. So it tries every
+      tilt across a range, one after another, and keeps the best. That is the entire algorithm — it is
+      correcting for the dip of the bed by finding the tilt that lines the traces up.</p>
+
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <button class="btn small" id="runBtn" type="button">Run the search</button>
+      <div style="flex:1 1 240px;min-width:200px">
+        <label for="cand" style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px">
+          Currently trying <span class="val" id="candV">—</span></label>
+        <input type="range" id="cand" min="0" max="16" step="1" value="0" style="width:100%">
+      </div>
+      <button class="btn ghost small" id="winBtn" type="button" style="margin-top:0">Show the winner</button>
+    </div>
+
+    <canvas id="c3" aria-label="The traces with the line at the tilt currently being tried"></canvas>
+
+    <p class="sublabel" style="margin-top:16px"><b>1</b> The score for every tilt it has tried
+      <span class="note">the tallest bar wins</span></p>
+    <canvas id="c3b" aria-label="Match score plotted against every candidate tilt"></canvas>
+
+    <div class="stats" style="margin:16px 0 20px">
+      <div class="stat key"><span>The computer's answer</span><b id="s3a">—</b></div>
+      <div class="stat"><span>Score at the winner</span><b id="s3b">—</b></div>
+      <div class="stat"><span>The real answer</span><b id="s3c">—</b></div>
+      <div class="stat"><span>How far off it is</span><b id="s3d">—</b></div>
+      <div class="stat"><span>Tilts tried</span><b id="s3e">—</b></div>
+      <div class="stat wide"><span>Verdict</span><b id="s3f">—</b></div>
+    </div>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      Now break it</h2>
+    <p style="margin:0 0 4px;font-size:15px;color:var(--ink-soft);max-width:84ch">These are the settings real
+      attribute software asks you for, and they are usually left at whatever the program suggested. The
+      sliders deliberately run past sensible values in both directions — sensible settings teach you less
+      than broken ones. The two switches on the right put something in the data worth breaking.</p>
+
+    <div class="controls">
+      <div class="ctl-col">
+        <h2>Where it looks</h2>
+        <div class="ctl">
+          <label for="thMax">Search range <span class="val" id="thMaxV">± 8 ms/trace</span></label>
+          <input type="range" id="thMax" min="1" max="10" step="0.5" value="8">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">How far either side of flat it is allowed to tilt the
+          line. If the real dip lies outside this, it can never find it — and it will not tell you.</p>
+        <div class="ctl">
+          <label for="dStep">Step size <span class="val" id="dStepV">1.00 ms/trace</span></label>
+          <input type="range" id="dStep" min="0.25" max="4" step="0.25" value="1">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">How finely it works through that range. Bigger steps
+          mean fewer tilts to try and a faster run, but a coarser answer.</p>
+        <label class="check"><input type="checkbox" id="refine" checked> Fine-tune the winner</label>
+        <p class="hint-line" style="margin:-4px 0 0">After picking the best tilt, fit a curve through it and
+          its two neighbours so the answer can land between two tries instead of on one.</p>
+      </div>
+
+      <div class="ctl-col">
+        <h2>How much data it judges on</h2>
+        <div class="ctl">
+          <label for="half">Traces used <span class="val" id="halfV">9 traces</span></label>
+          <input type="range" id="half" min="1" max="10" step="1" value="4">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">How many traces it compares at once. Three is barely
+          any evidence; twenty-one reaches 250 m either side of the point it is meant to be describing.</p>
+        <div class="ctl">
+          <label for="kHalf">Window height <span class="val" id="kHalfV">± 60 ms</span></label>
+          <input type="range" id="kHalf" min="5" max="50" step="1" value="30">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">How much of each trace it compares. A useful rule is
+          roughly one wavelength — about ±17 ms at 30 Hz. Push it to ±100 ms and the window spans three
+          reflectors that may have nothing to do with each other.</p>
+      </div>
+
+      <div class="ctl-col">
+        <h2>The data, and the display</h2>
+        <label class="check"><input type="checkbox" id="fault"> Put a fault four traces away</label>
+        <p class="hint-line" style="margin:-4px 0 12px">Harmless while the window stays narrow. Widen it past
+          nine traces and the window straddles the fault.</p>
+        <label class="check"><input type="checkbox" id="split"> Make the bed dip change with depth</label>
+        <p class="hint-line" style="margin:-4px 0 12px">The beds below about 290 ms dip the other way.
+          Harmless until the window gets tall enough to reach down to them.</p>
+        <div class="ctl">
+          <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
+          <input type="range" id="noise" min="0" max="60" step="2" value="0">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 12px">Real traces are never identical. Add some and watch
+          both the score and the accuracy fall away.</p>
+        <div class="ctl">
+          <label>Show the traces as</label>
+          <div class="seg" role="group" aria-label="Display style">
+            <button type="button" id="dWig" aria-pressed="true">Wiggle</button>
+            <button type="button" id="dCol" aria-pressed="false">Color</button>
+          </div>
+        </div>
+        <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== TEACHING ============================== -->
+  <div class="teach">
+    <div class="tryit">
+      <h3>Try this — and what to watch for</h3>
+      <ol>
+        <li><b>Look in the wrong place.</b> Press "tell me the answer" so you can see the target, then drag
+          the search range down until the real dip falls outside it.
+          <span class="ans">The answer sticks at the edge of the range and stops moving. The bars are still
+            climbing when the search runs out of tilts to try. Nothing warns you — the number that comes out
+            looks just as respectable as a correct one. This is the commonest way a dip volume goes
+            wrong.</span></li>
+        <li><b>Take bigger steps.</b> Set the step size to 2 ms/trace, then turn "fine-tune the winner" off
+          and on a few times.
+          <span class="ans">With it off, the answer can only ever be one of the nine tilts that were tried,
+            so it lands in chunks and is typically about four times further from the truth. With it on,
+            fitting a curve through the winner and its two neighbours puts the answer back between the tries
+            almost for free. That is how real software affords a coarse search. Push the step to 4 ms and the
+            trick starts to fail, because a parabola needs the peak to still be sampled — with only five
+            tilts across the whole range there is no peak left to fit.</span></li>
+        <li><b>Reach across a fault.</b> Switch the fault on and leave everything else alone — nine traces
+          still lands clear of it. Now drag "traces used" up to 21.
+          <span class="ans">The score falls off a cliff — from about 0.98 to about 0.51 — the moment the
+            tilted box reaches across the break, and the winning tilt becomes a compromise between two beds
+            that are not the same bed. Notice the fault is one trace wide but the damage extends four traces
+            either side of it, because that is how far the window reaches. This is why coherence computed on
+            a smeared dip field gives fat, soft faults. Real software fights it by trying several windows
+            offset around the point and keeping the most confident one, rather than always centring the
+            window on the sample.</span></li>
+        <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then drag the window
+          height from ±30 ms up to ±100 ms and watch the box grow down into the lower beds.
+          <span class="ans">Nothing happens until about ±80 ms, then the score drops from 0.98 to around
+            0.70 and the answer slides toward the average of two things that have nothing to do with each
+            other. Switch the depth change off and repeat: the same window heights now cost you nothing at
+            all. The seismic did not get harder — your instruction about how much of it to trust at once got
+            worse. That is why window height is really a question about how far you can assume the geology
+            stays the same, which is why it is usually quoted as a fraction of a wavelength.</span></li>
+        <li><b>Use fewer traces, and watch the score go the wrong way.</b> Set noise to about 30%, then drag
+          "traces used" from 9 down to 3. Read the score and the error together.
+          <span class="ans">The score goes <em>up</em> — from around 0.68 to around 0.85 — while the answer
+            gets roughly four times worse. Three traces have less to disagree about, so they match more
+            easily and prove much less. This is the most useful thing on this page: <b>a high score is not
+            evidence of a good answer</b>, and any confidence volume has to be read next to the window that
+            produced it.</span></li>
+        <li><b>Add noise until it fails.</b> Push noise up in steps — 20%, 40%, 60% — pressing "new hidden
+          dip" a few times at each level.
+          <span class="ans">The answer degrades gently at first: barely wrong at 20%, a few tenths of a
+            millisecond out at 40%. Then past 50% the bars stop having one clean peak and the winner
+            occasionally lands on the wrong bump entirely. Watch the <em>score</em> though — it starts
+            falling long before the answer does, from 0.99 to below 0.6. That gap is why attribute software
+            writes a confidence volume alongside the dip: it warns you well before the number beside it goes
+            obviously wrong.</span></li>
+      </ol>
+    </div>
+
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>Nothing is flat.</b> Dip is not a special case for structured areas; it is the normal
+          condition of every reflector in every survey.</li>
+        <li><b>Dip is a time shift per trace.</b> Turning it into an angle needs a trace spacing and a
+          velocity, and those come from you, not from the seismic.</li>
+        <li><b>It is found by trying, not by measuring.</b> Tilt a line every way you are allowed to, score
+          how well the traces line up along it, keep the best. That is the whole algorithm.</li>
+        <li><b>A low score is a warning; a high score is not a guarantee.</b> Fewer traces and shorter
+          windows both raise the score while making the answer worse, because there is less evidence in the
+          window to disagree.</li>
+        <li><b>The window has to be small enough that the geology inside it is one thing.</b> Too wide and it
+          crosses a fault; too tall and it crosses into beds going the other way.</li>
+        <li><b>Everything downstream inherits this.</b> Coherence steers by it, curvature is computed from
+          it, aberrancy differentiates it again. Fix the dip before blaming the attribute.</li>
+      </ul>
+    </div>
+  </div>
+
+  <details class="notes" id="notes">
+    <summary>Method, assumptions, and where to read more</summary>
+    <p>Twenty-five traces sampled every 2 ms, built by convolving a set of reflection coefficients with a
+      30 Hz Ricker wavelet and shifting each trace according to the dip. The hidden dip comes from a seeded
+      random number, so "new hidden dip" gives a genuinely different case each time while a shared link
+      always reproduces the same one. The optional fault is a vertical step in arrival time applied to every
+      trace to the right of trace 17; the optional depth change reverses the dip of every bed below about 290 ms.</p>
+    <p>The score is <b>semblance</b>: the energy of the summed traces divided by the summed energy of the
+      individual traces, over the analysis window. It is 1 when every trace in the window is identical and
+      falls toward 1/N when they are unrelated. Marfurt et al. (1998) introduced it as a coherence measure,
+      and here it is also the thing the dip search maximises — which is not a coincidence. Coherence and dip
+      are the same calculation asked two different questions.</p>
+    <p>The search is the discrete dip scan of Marfurt et al. (1998), offered today as one of the two
+      algorithms in AASPI program <span class="k">dip3d</span>. Candidate tilts are spaced evenly across the
+      range, each trace is read along the tilted line with linear interpolation between samples, and the
+      winner is refined by fitting a parabola through it and its two neighbours.</p>
+    <p>Simplified deliberately, with each simplification getting its own module later: this is 2D, so there
+      is a single dip component rather than the inline and crossline pair, and no dip azimuth. The search
+      range is quoted in milliseconds per trace, whereas real software asks in degrees and needs a conversion
+      velocity to get there. Semblance is computed on the plain trace rather than the analytic trace. Dip is
+      estimated at one point rather than at every sample in a volume. And there is no Kuwahara search over
+      shifted windows, which is what keeps a real dip estimate from smearing across a fault.</p>
+    <ul>
+      <li>Marfurt, K. J., R. L. Kirlin, S. L. Farmer, and M. S. Bahorich, 1998, 3-D seismic attributes using
+        a semblance-based coherency algorithm: <em>Geophysics</em>, 63, 1150–1165.</li>
+      <li>Marfurt, K. J., 2006, Robust estimates of 3D reflector dip and azimuth: <em>Geophysics</em>, 71,
+        P29–P40.</li>
+      <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+        Reservoir Characterization</em>: SEG.</li>
+      <li>AASPI program documentation for <span class="k">dip3d</span>, University of Oklahoma —
+        <a href="https://www.ou.edu/mcee/labs/aaspi">ou.edu/mcee/labs/aaspi</a>.</li>
+    </ul>
+  </details>
+
+  <section class="nextup">
+    <p class="eyebrow">Next up</p>
+    <h3><a href="dip3d.html">02 · Inline and crossline dip</a></h3>
+    <p>A line of traces becomes a patch of traces in a survey, and one dip becomes two: how much later the
+      reflector arrives one trace along the inline, and one line along the crossline. Those two numbers are
+      what dip magnitude and dip azimuth are made of.</p>
+    <a class="btn" href="dip3d.html">Open module 02 →</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+  </section>
+
+  <div class="pager">
+    <a class="btn ghost" href="../index.html">← All modules</a>
+    <a class="btn" href="dip3d.html">Next: inline and crossline dip →</a>
+  </div>
 
   <footer>
     <div class="foot-grid">
@@ -221,92 +380,661 @@
   </footer>
 </div>
 
-<script src="assets/seismic.js"></script>
-<script src="assets/attributes.js"></script>
+<script src="../assets/seismic.js"></script>
+<script src="../assets/attributes.js"></script>
 <script>
 (function () {
   'use strict';
 
-  // hero: a folded, faulted section with dip bars laid over it
-  function drawHero() {
-    const c = document.getElementById('heroCanvas');
-    if (!c || !c.parentElement) return;
-    const w = c.parentElement.clientWidth, h = Math.max(220, Math.round(w * 0.62));
-    const ctx = SEIS.fitCanvas(c, w, h);
-    ctx.clearRect(0, 0, w, h);
-    const NX = 160, NT = 220, DT = 0.002;
-    const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
-    const rnd = SEIS.mulberry32(4);
-    const refl = [];
-    for (let t = -500; t < NT + 500; t += 34) {
-      refl.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.06 + rnd() * 0.07) });
-    }
-    const shift = (ix) => 14 * Math.sin(2 * Math.PI * ix / 95) + (ix > 0.62 * NX ? 9 : 0);
-    const fld = new Float32Array(NX * NT);
-    for (let ix = 0; ix < NX; ix++) {
-      const sh = shift(ix);
-      fld.set(SEIS.traceFromSpikes(refl.map((R) => ({ t: (R.it + sh) * DT, r: R.r })),
-        0, DT, NT, wav), ix * NT);
-    }
+  /* The commonest way this page breaks is a path problem: the module sits in
+     modules/ and reaches up to ../assets/. If a library did not load, every
+     canvas stays blank and nothing says why, so say why. */
+  if (typeof SEIS === 'undefined' || typeof ATTR === 'undefined') {
+    const missing = [];
+    if (typeof SEIS === 'undefined') missing.push('assets/seismic.js');
+    if (typeof ATTR === 'undefined') missing.push('assets/attributes.js');
+    const el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load ' + missing.join(' and ') +
+      '. It expects them one directory up, at ../assets/, and file names are ' +
+      'case-sensitive on GitHub Pages.';
+    const w = document.querySelector('.wrap');
+    (w || document.body).insertBefore(el, w ? w.firstChild : null);
+    return;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  /* =====================================================================
+     THE MODEL
+
+     Everything the student touches is in milliseconds per trace, because
+     that is a quantity they can read off the time axis and check. The
+     conversion to samples per trace, which is what the algorithm works in,
+     happens in one place and nowhere else.
+     ===================================================================== */
+
+  const DT = 0.002;                     // 2 ms
+  const DXM = 25, VEL = 3000;           // trace spacing and conversion velocity
+
+  const N1X = 9, N1T = 160, C1X = 4;    // step 1: nine traces
+  const NX = 25, NT = 220;              // steps 2 and 3
+  const CX = 12, CT = 110;              // the point being analysed: trace 13, 220 ms
+  const FAULT_IX = 17;                  // traces from here rightward are downthrown
+  const THROW = 11;                     // samples, about 22 ms
+  const SPLIT_T = 145;                  // beds below here can dip the other way
+
+  const msToP = (ms) => (ms / 1000) / DT;
+  const pToMs = (p) => p * DT * 1000;
+  const msToDeg = (ms) => ATTR.dipToDegrees(msToP(ms), DT, DXM, VEL);
+
+  const DEF = {
+    d1: 3,                              // step 1 dip, ms/trace
+    guess: 0, seed: 5, told: false,     // step 2
+    thMax: 8, dStep: 1,                 // search range and step, ms/trace
+    half: 4, kHalf: 30,                 // traces either side, samples either side
+    noise: 0, fault: false, split: false,
+    refine: true, disp: 'wiggle',
+  };
+  let S = SEIS.readState(DEF);
+
+  const CAN_LINK = location.protocol !== 'file:';
+  const saveState = () => {
+    if (!CAN_LINK) return;
+    try { SEIS.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  };
+
+  // The hidden dip comes from the seed, so a shared link reproduces the puzzle
+  function hiddenMs() {
+    const r = SEIS.mulberry32(S.seed | 0);
+    r(); r();
+    const v = Math.round((r() * 10 - 5) * 4) / 4;     // -5 .. +5, quarter ms
+    return Math.abs(v) < 0.75 ? v + 2 : v;            // never nearly flat
+  }
+  let TRUE_MS = hiddenMs();
+
+  /* ------------------------------ the traces --------------------------- */
+
+  const WAVELET = SEIS.makeWavelet({ type: 'ricker', f: 30 });
+
+  function addNoise(f, pct, seed, nx, nt) {
+    if (!pct) return f;
     let pk = 1e-6;
-    for (let i = 0; i < fld.length; i++) pk = Math.max(pk, Math.abs(fld[i]));
-    SEIS.drawVarDensity(ctx, fld, NX, NT, { x: 0, y: 0, w: w, h: h },
-      { cmap: SEIS.COLORMAPS.gray, clip: pk * 0.8 });
-    // dip bars, from the same scan the modules use
-    ctx.save();
-    ctx.strokeStyle = 'rgba(196,60,45,.95)'; ctx.lineWidth = 2;
-    for (let ix = 10; ix < NX - 10; ix += 13) {
-      for (let it = 18; it < NT - 18; it += 24) {
-        const r = ATTR.dipScan(fld, NX, NT, ix, it, { half: 2, kHalf: 5, pMax: 4, nP: 25 });
-        const x = (ix / NX) * w, y = (it / NT) * h;
-        const ex = 5.5 * (w / NX), ey = r.p * 5.5 * (h / NT);
-        ctx.beginPath(); ctx.moveTo(x - ex, y - ey); ctx.lineTo(x + ex, y + ey); ctx.stroke();
-      }
-    }
-    ctx.restore();
+    for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
+    const nz = SEIS.bandLimitedNoise(nx, nt, DT, WAVELET, seed, 1);
+    const amp = (pct / 100) * pk;
+    for (let i = 0; i < f.length; i++) f[i] += amp * nz[i];
+    return f;
   }
 
-  function thumbDip(canvas) {
-    const w = canvas.parentElement.clientWidth, h = 118;
-    const ctx = SEIS.fitCanvas(canvas, w, h);
+  function peakOf(f) {
+    let pk = 1e-6;
+    for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
+    return pk;
+  }
+
+  // step 1: nine traces, one reflector, a little noise so it looks real
+  function buildStep1() {
+    const f = new Float32Array(N1X * N1T);
+    const p = msToP(S.d1);
+    for (let ix = 0; ix < N1X; ix++) {
+      const sh = p * (ix - C1X);
+      f.set(SEIS.traceFromSpikes([{ t: (80 + sh) * DT, r: 0.1 }], 0, DT, N1T, WAVELET), ix * N1T);
+    }
+    addNoise(f, 9, 31, N1X, N1T);
+    return { f, pk: peakOf(f) };
+  }
+
+  /* Steps 2 and 3. Beds every 36 samples, with two optional complications:
+     a fault to the right of the analysis point, and a reversal of dip below
+     SPLIT_T. Both are harmless until the analysis window grows enough to
+     reach them, which is exactly the lesson. */
+  function buildMain() {
+    const beds = [-22, 20, 50, 80, 110, 150, 190, 230];
+    const amps = [0.08, 0.09, -0.08, 0.095, -0.075, 0.09, -0.085, 0.075];
+    const f = new Float32Array(NX * NT);
+    for (let ix = 0; ix < NX; ix++) {
+      const spikes = [];
+      for (let b = 0; b < beds.length; b++) {
+        const t0 = beds[b];
+        const dip = (S.split && t0 > SPLIT_T) ? -TRUE_MS : TRUE_MS;
+        let sh = msToP(dip) * (ix - CX);
+        if (S.fault && ix >= FAULT_IX) sh += THROW;
+        spikes.push({ t: (t0 + sh) * DT, r: amps[b] });
+      }
+      f.set(SEIS.traceFromSpikes(spikes, 0, DT, NT, WAVELET), ix * NT);
+    }
+    addNoise(f, S.noise, 9 + (S.seed | 0), NX, NT);
+    return { f, pk: peakOf(f) };
+  }
+
+  let F1 = buildStep1();
+  let F2 = buildMain();
+
+  /* --------------------------- search settings ------------------------- */
+
+  const halfTraces = () => clamp(Math.round(S.half), 1, 10);
+  const nCand = () => clamp(2 * Math.round(S.thMax / S.dStep) + 1, 3, 121);
+  const candMs = (i) => -S.thMax + (2 * S.thMax * i) / (nCand() - 1);
+
+  let CAND = 0, SCAN = null, BESTI = 0;
+
+  function runScan() {
+    SCAN = ATTR.dipScan(F2.f, NX, NT, CX, CT,
+      { half: halfTraces(), kHalf: S.kHalf, pMax: msToP(S.thMax), nP: nCand() });
+    let b = 0;
+    for (let i = 1; i < SCAN.curve.length; i++) if (SCAN.curve[i] > SCAN.curve[b]) b = i;
+    BESTI = b;
+  }
+
+  const answerMs = () => (S.refine ? pToMs(SCAN.p) : candMs(BESTI));
+
+  function gatherAt(ms) {
+    const hf = halfTraces();
+    const J = 2 * hf + 1, K = 2 * S.kHalf + 1;
+    const buf = new Float64Array(J * K);
+    ATTR.gatherAlongDip(F2.f, NX, NT, CX, CT, msToP(ms), hf, S.kHalf, buf);
+    return { buf, J, K };
+  }
+  const scoreFor = (ms) => {
+    const g = gatherAt(ms);
+    return ATTR.semblance(g.buf, g.J, g.K);
+  };
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  const CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670';
+  const M = { l: 50, r: 14, t: 10, b: 34 };
+  const EXC = 0.45;      // wiggle excursion, in trace spacings. Under 0.5 so a
+                         // full-amplitude peak cannot reach its neighbour.
+
+  const panelWidth = (el) => (el.parentElement ? el.parentElement.clientWidth : 900);
+
+  /* One panel of traces, wiggle or colour, trace numbers along the bottom
+     and milliseconds up the side. */
+  function tracePanel(canvasId, field, nx, nt, peak, w, h, extras) {
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const NX = 140, NT = 160, DT = 0.002;
-    const shift = (ix) => 13 * Math.sin(2 * Math.PI * ix / 80) + (ix > 0.6 * NX ? 8 : 0);
-    const trueP = (ix) => 13 * (2 * Math.PI / 80) * Math.cos(2 * Math.PI * ix / 80);
-    const off = document.createElement('canvas');
-    off.width = NX; off.height = NT;
-    const octx = off.getContext('2d');
-    const img = octx.createImageData(NX, NT);
-    for (let it = 0; it < NT; it++) {
-      for (let ix = 0; ix < NX; ix++) {
-        const c = ATTR.MAPS.dip(trueP(ix) / 1.4);
-        const q = it * NX + ix;
-        img.data[q * 4] = c[0]; img.data[q * 4 + 1] = c[1];
-        img.data[q * 4 + 2] = c[2]; img.data[q * 4 + 3] = 255;
-      }
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+
+    if (S.disp === 'color') {
+      SEIS.drawVarDensity(ctx, field, nx, nt, R,
+        { cmap: SEIS.COLORMAPS.gray, clip: peak * 0.9 });
+    } else {
+      ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+      SEIS.drawWiggle(ctx, field, nx, nt, R,
+        { clip: peak, excursion: EXC, lineWidth: 1 });
     }
-    octx.putImageData(img, 0, 0);
-    ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(off, 0, 0, w, h);
+
+    const X = (ix) => R.x + ((ix + 0.5) / nx) * R.w;
+    const Y = (it) => R.y + (it / (nt - 1)) * R.h;
+    if (extras) extras(ctx, R, X, Y);
+
+    SEIS.frame(ctx, R);
+    SEIS.axisLeft(ctx, R, 0, (nt - 1) * DT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 5 });
     ctx.save();
-    ctx.strokeStyle = 'rgba(22,25,28,.55)'; ctx.lineWidth = 1.4;
-    ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    ctx.moveTo(0.6 * w, 0); ctx.lineTo(0.6 * w, h);
-    ctx.stroke(); ctx.restore();
+    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const every = nx > 15 ? 4 : 1;
+    for (let ix = 0; ix < nx; ix++) {
+      if (ix % every === 0 || ix === nx - 1) ctx.fillText(String(ix + 1), X(ix), R.y + R.h + 6);
+    }
+    ctx.fillText('trace', R.x + R.w / 2, R.y + R.h + 20);
+    ctx.restore();
+    return R;
   }
 
-  function drawThumbs() {
-    document.querySelectorAll('.thumb-canvas').forEach((c) => {
-      if (c.dataset.thumb === 'dip') thumbDip(c);
+  /* -------------------------------- step 1 ----------------------------- */
+
+  function drawStep1() {
+    const w = panelWidth($('c1'));
+    const h = clamp(Math.round(w * 0.34), 260, 340);
+    tracePanel('c1', F1.f, N1X, N1T, F1.pk, w, h, (ctx, R, X, Y) => {
+      const p = msToP(S.d1);
+      ctx.save();
+      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+      ctx.strokeStyle = CRIM; ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let ix = 0; ix < N1X; ix++) {
+        const y = Y(80 + p * (ix - C1X));
+        ix === 0 ? ctx.moveTo(X(ix), y) : ctx.lineTo(X(ix), y);
+      }
+      ctx.stroke();
+      ctx.fillStyle = CRIM;
+      for (let ix = 0; ix < N1X; ix++) {
+        ctx.beginPath(); ctx.arc(X(ix), Y(80 + p * (ix - C1X)), 3, 0, 6.2832); ctx.fill();
+      }
+      if (Math.abs(S.d1) > 0.01) {
+        const ia = 4, ib = 5;
+        const ya = Y(80 + p * (ia - C1X)), yb = Y(80 + p * (ib - C1X));
+        ctx.setLineDash([3, 3]); ctx.strokeStyle = TEAL; ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(X(ia), ya); ctx.lineTo(X(ib), ya); ctx.lineTo(X(ib), yb);
+        ctx.stroke(); ctx.setLineDash([]);
+        ctx.restore();
+        SEIS.tag(ctx, X(ib) + 8, (ya + yb) / 2, (S.d1 > 0 ? '+' : '') + S.d1.toFixed(1) + ' ms', TEAL);
+        SEIS.tag(ctx, (X(ia) + X(ib)) / 2 - 26, ya - 13, 'one trace', TEAL);
+        return;
+      }
+      ctx.restore();
+      SEIS.tag(ctx, X(4) - 64, Y(80) - 14, 'flat \u2014 and that is rare', TEAL);
     });
   }
 
-  function all() { drawHero(); drawThumbs(); }
+  /* ------------------- the tilted line, steps 2 and 3 ------------------- */
+
+  function drawTilt(ctx, R, X, Y, ms, showTruth) {
+    const p = msToP(ms);
+    const hf = halfTraces();
+    const yAt = (ix) => Y(CT + p * (ix - CX));
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+
+    // the window the score is computed over, tilted with the line
+    ctx.fillStyle = 'rgba(132,22,23,.07)';
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+    const kk = S.kHalf;
+    ctx.beginPath();
+    ctx.moveTo(X(CX - hf - 0.4), Y(CT + p * (-hf - 0.4) - kk));
+    ctx.lineTo(X(CX + hf + 0.4), Y(CT + p * (hf + 0.4) - kk));
+    ctx.lineTo(X(CX + hf + 0.4), Y(CT + p * (hf + 0.4) + kk));
+    ctx.lineTo(X(CX - hf - 0.4), Y(CT + p * (-hf - 0.4) + kk));
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // the guess, faint right across the panel and solid inside the window
+    ctx.strokeStyle = 'rgba(132,22,23,.32)'; ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(X(-0.5), yAt(-0.5)); ctx.lineTo(X(NX - 0.5), yAt(NX - 0.5));
+    ctx.stroke();
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.moveTo(X(CX - hf), yAt(CX - hf)); ctx.lineTo(X(CX + hf), yAt(CX + hf));
+    ctx.stroke();
+
+    // where the line crosses each trace: the samples that get compared
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 1.2;
+    for (let j = -hf; j <= hf; j++) {
+      ctx.beginPath(); ctx.arc(X(CX + j), yAt(CX + j), 2.8, 0, 6.2832);
+      ctx.fill(); ctx.stroke();
+    }
+
+    if (showTruth) {
+      const tp = msToP(TRUE_MS);
+      ctx.strokeStyle = TEAL; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(X(-0.5), Y(CT + tp * (-0.5 - CX)));
+      ctx.lineTo(X(NX - 0.5), Y(CT + tp * (NX - 0.5 - CX)));
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.restore();
+
+    if (showTruth) SEIS.tag(ctx, R.x + 6, R.y + 12, 'the real bed dip', TEAL);
+  }
+
+  /* -------------------------------- step 2 ----------------------------- */
+
+  function drawStep2() {
+    const w = panelWidth($('c2'));
+    const h = clamp(Math.round(w * 0.46), 320, 440);
+    tracePanel('c2', F2.f, NX, NT, F2.pk, w, h, (ctx, R, X, Y) => {
+      drawTilt(ctx, R, X, Y, S.guess, S.told);
+    });
+
+    drawScore('c2c', scoreFor(S.guess));
+    drawGathered('c2b', S.guess);
+  }
+
+  /* The windowed traces read along the line and laid side by side. This is
+     the thing semblance is actually looking at. */
+  function drawGathered(canvasId, ms) {
+    const g = gatherAt(ms);
+    const w = panelWidth($(canvasId));
+    const h = 170;
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: 8, w: w - M.l - M.r, h: h - 8 - 26 };
+
+    const arr = new Float32Array(g.J * g.K);
+    for (let i = 0; i < arr.length; i++) arr[i] = g.buf[i];
+
+    ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+    if (S.disp === 'color') {
+      SEIS.drawVarDensity(ctx, arr, g.J, g.K, R, { cmap: SEIS.COLORMAPS.gray, clip: F2.pk * 0.9 });
+    } else {
+      SEIS.drawWiggle(ctx, arr, g.J, g.K, R, { clip: F2.pk, excursion: EXC, lineWidth: 1 });
+    }
+    SEIS.dashedLine(ctx, R.x, R.y + R.h / 2, R.x + R.w, R.y + R.h / 2,
+      'rgba(132,22,23,.5)', [4, 3], 1.2);
+    SEIS.frame(ctx, R);
+
+    ctx.save();
+    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(g.J + ' traces from inside the window, read along the line',
+      R.x + R.w / 2, R.y + R.h + 7);
+    ctx.restore();
+  }
+
+  /* A plain horizontal score bar: one number, no axes to decode. */
+  function drawScore(canvasId, s) {
+    const w = panelWidth($(canvasId)), h = 58;
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 2, y: 6, w: w - 4, h: 24 };
+
+    ctx.save();
+    ctx.fillStyle = '#F1F2EE'; ctx.fillRect(R.x, R.y, R.w, R.h);
+    const fw = clamp(s, 0, 1) * R.w;
+    const n = Math.max(2, Math.round(fw));
+    for (let i = 0; i < n; i++) {
+      const col = ATTR.MAPS.scan((i / n) * clamp(s, 0, 1));
+      ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      ctx.fillRect(R.x + i * (fw / n), R.y, fw / n + 1, R.h);
+    }
+    ctx.strokeStyle = 'rgba(22,25,28,.4)'; ctx.lineWidth = 1;
+    ctx.strokeRect(R.x + 0.5, R.y + 0.5, R.w, R.h);
+
+    ctx.font = '500 15px "IBM Plex Mono", monospace';
+    ctx.textBaseline = 'middle';
+    if (fw > 66) {
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'right';
+      ctx.fillText(s.toFixed(3), R.x + fw - 9, R.y + R.h / 2 + 0.5);
+    } else {
+      ctx.fillStyle = '#16191C'; ctx.textAlign = 'left';
+      ctx.fillText(s.toFixed(3), R.x + fw + 9, R.y + R.h / 2 + 0.5);
+    }
+
+    ctx.font = '10.5px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left'; ctx.fillText('0 \u2014 nothing matches', R.x, R.y + R.h + 5);
+    ctx.textAlign = 'right'; ctx.fillText('1 \u2014 a perfect stack', R.x + R.w, R.y + R.h + 5);
+    ctx.restore();
+  }
+
+  /* -------------------------------- step 3 ----------------------------- */
+
+  function drawStep3() {
+    const w = panelWidth($('c3'));
+    const h = clamp(Math.round(w * 0.46), 320, 440);
+    tracePanel('c3', F2.f, NX, NT, F2.pk, w, h, (ctx, R, X, Y) => {
+      drawTilt(ctx, R, X, Y, candMs(CAND), S.told);
+    });
+    drawCurve();
+  }
+
+  function drawCurve() {
+    const w = panelWidth($('c3b'));
+    const h = 250;
+    const ctx = SEIS.fitCanvas($('c3b'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 50, y: 14, w: w - 62, h: h - 14 - 44 };
+    if (!SCAN) return;
+
+    const n = SCAN.curve.length;
+    let hi = 0;
+    for (let i = 0; i < n; i++) hi = Math.max(hi, SCAN.curve[i]);
+    const top = clamp(hi * 1.18, 0.1, 1);
+    const X = (ms) => R.x + ((ms + S.thMax) / (2 * S.thMax)) * R.w;
+    const Y = (s) => R.y + R.h - (clamp(s, 0, top) / top) * R.h;
+
+    SEIS.axisLeft(ctx, R, 0, top, 'score', (v) => v.toFixed(2),
+      { flip: true, grid: true, ticks: 4 });
+
+    /* Only the tilts already tried are drawn. Anything ahead of the search
+       is a tick on the axis, not a bar — otherwise the shape of the answer
+       is on screen before the search gets there, which gives the game away. */
+    const bw = clamp((R.w / n) * 0.66, 2, 26);
+    ctx.save();
+    for (let i = 0; i < n; i++) {
+      const x = X(candMs(i));
+      if (i > CAND) {
+        ctx.strokeStyle = 'rgba(22,25,28,.22)'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, R.y + R.h); ctx.lineTo(x, R.y + R.h - 4);
+        ctx.stroke();
+        continue;
+      }
+      const y = Y(SCAN.curve[i]);
+      const col = ATTR.MAPS.scan(SCAN.curve[i] / Math.max(top, 1e-6));
+      ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      ctx.fillRect(x - bw / 2, y, bw, R.y + R.h - y);
+      ctx.strokeStyle = 'rgba(22,25,28,.35)'; ctx.lineWidth = 1;
+      ctx.strokeRect(x - bw / 2 + 0.5, y + 0.5, bw, R.y + R.h - y);
+    }
+    ctx.restore();
+
+    // where the search has got to
+    ctx.save();
+    ctx.strokeStyle = '#16191C'; ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(X(candMs(CAND)), R.y); ctx.lineTo(X(candMs(CAND)), R.y + R.h);
+    ctx.stroke(); ctx.restore();
+
+    if (CAND >= BESTI) {
+      const tx = clamp(X(candMs(BESTI)) + 7, R.x, R.x + R.w - 52);
+      SEIS.tag(ctx, tx, Math.max(R.y + 8, Y(SCAN.curve[BESTI]) - 11), 'winner', CRIM);
+    }
+    if (S.told && Math.abs(TRUE_MS) <= S.thMax) {
+      SEIS.dashedLine(ctx, X(TRUE_MS), R.y, X(TRUE_MS), R.y + R.h, TEAL, [5, 4], 1.8);
+    }
+
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, -S.thMax, S.thMax, 'tilt of the line (ms per trace)',
+      (v) => (Math.abs(v) < 0.05 ? '0' : v.toFixed(1)));
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function updateStats() {
+    const d = S.d1;
+    $('s1a').textContent = (d > 0 ? '+' : '') + d.toFixed(1) + ' ms per trace';
+    $('s1b').textContent = (d > 0 ? '+' : '') + (d * (N1X - 1)).toFixed(1) + ' ms';
+    $('s1c').textContent = msToDeg(d).toFixed(1) + '\u00b0';
+    $('s1d').textContent = Math.abs(d) < 0.01
+      ? 'The reflector is flat.'
+      : 'The reflector arrives ' + Math.abs(d).toFixed(1) + ' ms ' +
+        (d > 0 ? 'later' : 'earlier') + ' on each trace to the right.';
+
+    const sc = scoreFor(S.guess);
+    const off = Math.abs(S.guess - TRUE_MS);
+    $('s2a').textContent = (S.guess > 0 ? '+' : '') + S.guess.toFixed(2) + ' ms/trace';
+    $('s2b').textContent = sc.toFixed(3);
+    $('s2c').textContent = off < 0.13 ? 'you have it' : off < 0.6 ? 'very warm'
+      : off < 1.5 ? 'warm' : off < 3 ? 'cold' : 'freezing';
+    $('s2d').textContent = S.told
+      ? (TRUE_MS > 0 ? '+' : '') + TRUE_MS.toFixed(2) + ' ms/trace   (' +
+        msToDeg(TRUE_MS).toFixed(1) + '\u00b0)'
+      : 'hidden \u2014 have a go first';
+
+    const a = answerMs(), err = a - TRUE_MS;
+    $('s3a').textContent = (a > 0 ? '+' : '') + a.toFixed(2) + ' ms/trace';
+    $('s3b').textContent = SCAN.sem.toFixed(3);
+    $('s3c').textContent = S.told
+      ? (TRUE_MS > 0 ? '+' : '') + TRUE_MS.toFixed(2) + ' ms/trace'
+      : 'still hidden';
+    $('s3d').textContent = S.told
+      ? (Math.abs(err) < 0.005 ? '0.00' : (err > 0 ? '+' : '') + err.toFixed(2)) + ' ms/trace'
+      : '\u2014';
+    $('s3e').textContent = nCand();
+
+    const pinned = Math.abs(candMs(BESTI)) >= 0.999 * S.thMax;
+    const crossesFault = S.fault && CX + halfTraces() >= FAULT_IX;
+    const crossesSplit = S.split && CT + S.kHalf > SPLIT_T;
+    $('s3f').textContent = !S.told
+      ? 'Run the search to compare it against the real answer'
+      : pinned
+        ? 'Stuck at the edge of the search range \u2014 widen it'
+        : crossesFault
+          ? 'The window is reaching across the fault \u2014 this answer is a compromise'
+          : crossesSplit
+            ? 'The window is reaching into beds that dip the other way'
+            : SCAN.sem < 0.45
+              ? 'Low score \u2014 the traces never really matched, so do not trust this'
+              : Math.abs(err) > 0.5
+                ? 'Off by ' + Math.abs(err).toFixed(2) + ' ms/trace'
+                : 'Found it \u2014 within ' + Math.abs(err).toFixed(2) + ' ms/trace of the truth';
+  }
+
+  function syncLabels() {
+    $('d1V').textContent = S.d1.toFixed(1) + ' ms per trace';
+    $('guessV').textContent = (S.guess > 0 ? '+' : '') + S.guess.toFixed(2) + ' ms per trace';
+    $('thMaxV').textContent = '\u00b1 ' + S.thMax + ' ms/trace';
+    $('dStepV').textContent = S.dStep.toFixed(2) + ' ms/trace';
+    $('halfV').textContent = (2 * halfTraces() + 1) + ' traces';
+    $('kHalfV').textContent = '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms';
+    $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
+    $('candV').textContent = (candMs(CAND) > 0 ? '+' : '') + candMs(CAND).toFixed(2) +
+      ' ms/trace' + (CAND === BESTI ? '  \u2190 best so far' : '');
+    $('dWig').setAttribute('aria-pressed', S.disp === 'wiggle');
+    $('dCol').setAttribute('aria-pressed', S.disp === 'color');
+  }
+
+  function pushToInputs() {
+    $('d1').value = S.d1; $('guess').value = S.guess;
+    $('thMax').value = S.thMax; $('dStep').value = S.dStep;
+    $('half').value = S.half; $('kHalf').value = S.kHalf;
+    $('noise').value = S.noise;
+    $('refine').checked = S.refine;
+    $('fault').checked = S.fault; $('split').checked = S.split;
+    $('cand').max = nCand() - 1; $('cand').value = CAND;
+  }
+
+  /* =====================================================================
+     PLUMBING
+     ===================================================================== */
+
+  function drawAll() { drawStep1(); drawStep2(); drawStep3(); syncLabels(); updateStats(); }
+
+  function refreshSearch(keepCand) {
+    $('cand').max = nCand() - 1;
+    runScan();
+    if (!keepCand) CAND = BESTI;
+    CAND = clamp(CAND, 0, nCand() - 1);
+    $('cand').value = CAND;
+    drawStep2(); drawStep3(); syncLabels(); updateStats();
+    saveState();
+  }
+
+  function rebuildData() { F2 = buildMain(); refreshSearch(false); }
+
+  let ANIM = null;
+  function stopAnim() {
+    if (!ANIM) return;
+    cancelAnimationFrame(ANIM.raf); ANIM = null;
+    $('runBtn').textContent = 'Run the search';
+  }
+  function runAnim() {
+    stopAnim();
+    const n = nCand();
+    const per = clamp(2600 / n, 45, 240);
+    CAND = 0; $('cand').value = 0;
+    ANIM = { i: -1, t0: performance.now(), raf: 0 };
+    $('runBtn').textContent = 'Stop';
+    const tick = (now) => {
+      if (!ANIM) return;
+      const i = Math.floor((now - ANIM.t0) / per);
+      if (i >= n) {
+        stopAnim();
+        CAND = BESTI; $('cand').value = CAND;
+        S.told = true;
+        drawStep2(); drawStep3(); syncLabels(); updateStats(); saveState();
+        return;
+      }
+      if (i !== ANIM.i) {
+        ANIM.i = i; CAND = i; $('cand').value = i;
+        drawStep3(); syncLabels(); updateStats();
+      }
+      ANIM.raf = requestAnimationFrame(tick);
+    };
+    ANIM.raf = requestAnimationFrame(tick);
+  }
+
+  /* ------------------------------ handlers ------------------------------ */
+
+  $('d1').addEventListener('input', () => {
+    S.d1 = parseFloat($('d1').value);
+    F1 = buildStep1();
+    drawStep1(); syncLabels(); updateStats(); saveState();
+  });
+
+  $('guess').addEventListener('input', () => {
+    S.guess = parseFloat($('guess').value);
+    drawStep2(); syncLabels(); updateStats(); saveState();
+  });
+
+  $('newBtn').addEventListener('click', () => {
+    stopAnim();
+    S.seed = (S.seed | 0) + 1;
+    S.told = false; S.guess = 0; $('guess').value = 0;
+    TRUE_MS = hiddenMs();
+    rebuildData();
+  });
+
+  $('tellBtn').addEventListener('click', () => {
+    S.told = true; drawStep2(); drawStep3(); updateStats(); saveState();
+  });
+
+  const searchSlide = (id, key) => $(id).addEventListener('input', () => {
+    S[key] = parseFloat($(id).value);
+    stopAnim(); refreshSearch(false);
+  });
+  searchSlide('thMax', 'thMax'); searchSlide('dStep', 'dStep');
+  searchSlide('half', 'half'); searchSlide('kHalf', 'kHalf');
+
+  $('noise').addEventListener('input', () => {
+    S.noise = parseFloat($('noise').value); stopAnim(); rebuildData();
+  });
+  $('fault').addEventListener('change', () => {
+    S.fault = $('fault').checked; stopAnim(); rebuildData();
+  });
+  $('split').addEventListener('change', () => {
+    S.split = $('split').checked; stopAnim(); rebuildData();
+  });
+  $('refine').addEventListener('change', () => {
+    S.refine = $('refine').checked; updateStats(); saveState();
+  });
+
+  $('cand').addEventListener('input', () => {
+    stopAnim(); CAND = parseInt($('cand').value, 10);
+    drawStep3(); syncLabels(); updateStats();
+  });
+  $('runBtn').addEventListener('click', () => { ANIM ? stopAnim() : runAnim(); });
+  $('winBtn').addEventListener('click', () => {
+    stopAnim(); CAND = BESTI; $('cand').value = CAND;
+    S.told = true;
+    drawStep2(); drawStep3(); syncLabels(); updateStats(); saveState();
+  });
+
+  const setDisp = (v) => { S.disp = v; drawAll(); saveState(); };
+  $('dWig').addEventListener('click', () => setDisp('wiggle'));
+  $('dCol').addEventListener('click', () => setDisp('color'));
+
+  $('resetBtn').addEventListener('click', () => {
+    stopAnim();
+    S = Object.assign({}, DEF);
+    TRUE_MS = hiddenMs();
+    F1 = buildStep1(); F2 = buildMain();
+    runScan(); CAND = BESTI;
+    pushToInputs(); drawAll(); saveState();
+  });
+
   let rt;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(all, 150); });
-  all();
-  document.fonts && document.fonts.ready.then(all);
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
+
+  runScan();
+  CAND = BESTI;
+  pushToInputs();
+  drawAll();
+  document.fonts && document.fonts.ready.then(drawAll);
 })();
 </script>
 </body>
