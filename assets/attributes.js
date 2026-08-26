@@ -305,6 +305,184 @@ const ATTR = (function () {
     return Math.abs(s) >= 1 ? 90 : Math.asin(s) * 180 / Math.PI;
   }
 
+  /* =====================================================================
+     THE COHERENCE FAMILY
+
+     Every attribute below except the Sobel filter is computed from one
+     covariance matrix built from the analytic trace, following AASPI program
+     similarity3d (Geometric Attributes: Program similarity3d, 13 June 2022).
+     Equation numbers in the comments refer to that document.
+     ===================================================================== */
+
+  /**
+   * Covariance matrix of an analysis window, equations 1a and 1b.
+   *
+   * d and dH are J traces by K samples, trace-major, already gathered along
+   * dip. C is J-by-J: C[m][n] sums the product of trace m and trace n over the
+   * window, using the amplitude and its Hilbert transform. The quadrature
+   * terms do not change the vertical resolution but stabilise the estimate
+   * near amplitude zero crossings.
+   *
+   * w is an optional per-sample taper (equation 1b); omit for no taper.
+   */
+  function covarianceAnalytic(d, dH, J, K, w) {
+    const C = new Float64Array(J * J);
+    for (let m = 0; m < J; m++) {
+      for (let n = m; n < J; n++) {
+        let sum = 0;
+        for (let k = 0; k < K; k++) {
+          const wk = w ? w[k] : 1;
+          sum += wk * (d[m * K + k] * d[n * K + k] + dH[m * K + k] * dH[n * K + k]);
+        }
+        C[m * J + n] = sum; C[n * J + m] = sum;
+      }
+    }
+    return C;
+  }
+
+  // total energy of the window, equation 7. Equals the trace of C.
+  function totalEnergy(C, J) {
+    let e = 0;
+    for (let m = 0; m < J; m++) e += C[m * J + m];
+    return e;
+  }
+
+  /**
+   * Eigenvalues and eigenvectors of a small real symmetric matrix, by cyclic
+   * Jacobi rotation. Returns values sorted largest first (equation 4b) with
+   * unit-length vectors (equation 4a); vectors[j] is the jth eigenvector.
+   */
+  function jacobiEigen(Cin, J) {
+    const A = Float64Array.from(Cin);
+    const V = new Float64Array(J * J);
+    for (let i = 0; i < J; i++) V[i * J + i] = 1;
+    for (let sweep = 0; sweep < 60; sweep++) {
+      let off = 0;
+      for (let p = 0; p < J; p++) for (let q = p + 1; q < J; q++) off += A[p * J + q] * A[p * J + q];
+      if (off < 1e-22) break;
+      for (let p = 0; p < J; p++) {
+        for (let q = p + 1; q < J; q++) {
+          const apq = A[p * J + q];
+          if (Math.abs(apq) < 1e-24) continue;
+          const theta = (A[q * J + q] - A[p * J + p]) / (2 * apq);
+          const t = Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+          const c = 1 / Math.sqrt(t * t + 1), sn = t * c;
+          for (let k = 0; k < J; k++) {
+            const akp = A[k * J + p], akq = A[k * J + q];
+            A[k * J + p] = c * akp - sn * akq;
+            A[k * J + q] = sn * akp + c * akq;
+          }
+          for (let k = 0; k < J; k++) {
+            const apk = A[p * J + k], aqk = A[q * J + k];
+            A[p * J + k] = c * apk - sn * aqk;
+            A[q * J + k] = sn * apk + c * aqk;
+          }
+          for (let k = 0; k < J; k++) {
+            const vkp = V[k * J + p], vkq = V[k * J + q];
+            V[k * J + p] = c * vkp - sn * vkq;
+            V[k * J + q] = sn * vkp + c * vkq;
+          }
+        }
+      }
+    }
+    const idx = [];
+    for (let i = 0; i < J; i++) idx.push(i);
+    idx.sort((a, b) => A[b * J + b] - A[a * J + a]);
+    const values = new Float64Array(J);
+    const vectors = [];
+    idx.forEach((src, j) => {
+      values[j] = Math.max(0, A[src * J + src]);
+      const v = new Float64Array(J);
+      for (let k = 0; k < J; k++) v[k] = V[k * J + src];
+      vectors.push(v);
+    });
+    return { values, vectors };
+  }
+
+  /**
+   * Outer-product similarity, equation 12: c = (r' C r) / Etot.
+   *
+   * The test vector r selects which member of the family you get. With r set
+   * to the first eigenvector this is eigenstructure coherence; with r set to
+   * J equal components of J^-1/2 it is a semblance estimate of coherence
+   * (equation 13); AASPI also allows r to be the sample vector through the
+   * analysis point.
+   */
+  function outerProduct(C, J, r, Etot) {
+    let num = 0;
+    for (let m = 0; m < J; m++) {
+      for (let n = 0; n < J; n++) num += r[m] * C[m * J + n] * r[n];
+    }
+    return Etot > 1e-20 ? num / Etot : 0;
+  }
+
+  const constantTestVector = (J) => {
+    const r = new Float64Array(J), v = 1 / Math.sqrt(J);
+    for (let i = 0; i < J; i++) r[i] = v;
+    return r;
+  };
+
+  // eigenstructure coherence, equation 9 (Gersztenkorn and Marfurt, 1999)
+  function eigenCoherence(values) {
+    let sum = 0;
+    for (let i = 0; i < values.length; i++) sum += values[i];
+    return sum > 1e-20 ? values[0] / sum : 0;
+  }
+
+  /**
+   * Energy-ratio coherence, equation 10: the energy of the Karhunen-Loeve
+   * filtered data over the total energy in the window.
+   *
+   * Because the eigenvectors are orthonormal, the energy retained by keeping
+   * the first L principal components (equations 5, 6 and 8) is the sum of the
+   * first L eigenvalues, so this reduces to a ratio of eigenvalue sums. With
+   * L=1 and an untapered window it is numerically identical to equation 9;
+   * the extra generality AASPI refers to is L>1 and the tapered, balanced
+   * windows used for data-adaptive analysis.
+   */
+  function energyRatio(values, L) {
+    const nKeep = Math.max(1, Math.min(L || 1, values.length));
+    let coh = 0, tot = 0;
+    for (let i = 0; i < values.length; i++) {
+      tot += values[i];
+      if (i < nKeep) coh += values[i];
+    }
+    return tot > 1e-20 ? coh / tot : 0;
+  }
+
+  /**
+   * Sobel-filter similarity, equation 15, reduced to a single lateral
+   * direction. AASPI computes inline and crossline derivatives; on a 2D line
+   * only the inline term exists.
+   *
+   * As published, this returns a value near 0 where the traces are identical
+   * and near 1 across an edge, so it is an edge response rather than a
+   * similarity. See the module notes on the sign convention.
+   */
+  function sobelEdge(d, dH, J, K) {
+    // central-difference derivative across traces, the smallest Sobel stencil
+    const deriv = (arr, k) => {
+      let g = 0;
+      for (let j = 1; j < J - 1; j++) g += (arr[(j + 1) * K + k] - arr[(j - 1) * K + k]) / 2;
+      return g;
+    };
+    const derivAbs = (arr, k) => {
+      let g = 0;
+      for (let j = 1; j < J - 1; j++) {
+        g += (Math.abs(arr[(j + 1) * K + k]) + Math.abs(arr[(j - 1) * K + k])) / 2;
+      }
+      return g;
+    };
+    let num = 0, den = 0;
+    for (let k = 0; k < K; k++) {
+      const a = deriv(d, k), b = deriv(dH, k);
+      num += a * a + b * b;
+      const p = derivAbs(d, k), q = derivAbs(dH, k);
+      den += p * p + q * q;
+    }
+    return den > 1e-20 ? Math.sqrt(num) / Math.sqrt(den) : 0;
+  }
+
   /* ---------------------------------------------------------------------
      COHERENCE, THE CHEAP WAY
 
@@ -404,6 +582,8 @@ const ATTR = (function () {
   return {
     semblance, gatherAlongDip, dipScan, dipField, sampleGrid, cohField,
     gatherAlongDip3D, dipScan3D,
+    covarianceAnalytic, totalEnergy, jacobiEigen, outerProduct, constantTestVector,
+    eigenCoherence, energyRatio, sobelEdge,
     perTraceToPerMetre, dipMagAzim, apparentDip, gradientToDegrees,
     dipToMsPerTrace, dipToDegrees, degToDip, MAPS, ramp, cyclicRamp,
   };
