@@ -190,6 +190,122 @@ const ATTR = (function () {
   }
 
   /* ---------------------------------------------------------------------
+     THE SAME SCAN, IN THREE DIMENSIONS
+
+     A 3D volume is stored trace-major: vol[(iy * nil + ix) * nt + it]. A
+     candidate orientation is now a pair, px samples per inline trace and py
+     samples per crossline trace, and the window is a square patch of traces
+     rather than a line of them. Everything else is unchanged from the 2D
+     case, which is the point worth making to a student.
+     --------------------------------------------------------------------- */
+
+  function gatherAlongDip3D(vol, nil, nxl, nt, ix, iy, it, px, py, half, kHalf, out) {
+    const K = 2 * kHalf + 1;
+    let n = 0;
+    for (let jy = -half; jy <= half; jy++) {
+      const yy = Math.min(nxl - 1, Math.max(0, iy + jy));
+      for (let jx = -half; jx <= half; jx++) {
+        const xx = Math.min(nil - 1, Math.max(0, ix + jx));
+        const shift = px * jx + py * jy;         // samples, usually fractional
+        const base = (yy * nil + xx) * nt;
+        for (let k = -kHalf; k <= kHalf; k++) {
+          const pos = it + k + shift;
+          const i0 = Math.floor(pos), f = pos - i0;
+          let v = 0;
+          if (i0 >= 0 && i0 < nt - 1) v = vol[base + i0] * (1 - f) + vol[base + i0 + 1] * f;
+          else if (i0 >= 0 && i0 < nt) v = vol[base + i0];
+          out[n * K + (k + kHalf)] = v;
+        }
+        n++;
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Scan a square grid of candidate orientations and keep the best.
+   *
+   * Returns { px, py, sem, grid, nP, pMax } with grid[a * nP + b] holding the
+   * semblance at inline candidate a and crossline candidate b, so the whole
+   * search surface can be drawn rather than just its winner.
+   *
+   * The refinement fits a parabola along each axis through the winning cell.
+   * A true 2D peak wants a paraboloid with a cross term; the separable form
+   * used here is what most implementations do and is accurate while the peak
+   * is not strongly skewed.
+   */
+  function dipScan3D(vol, nil, nxl, nt, ix, iy, it, opts) {
+    const o = opts || {};
+    const half = o.half === undefined ? 2 : o.half;
+    const kHalf = o.kHalf === undefined ? 8 : o.kHalf;
+    const pMax = o.pMax === undefined ? 4 : o.pMax;
+    const nP = o.nP === undefined ? 17 : o.nP;
+
+    const JT = (2 * half + 1) * (2 * half + 1), K = 2 * kHalf + 1;
+    const buf = new Float64Array(JT * K);
+    const grid = new Float32Array(nP * nP);
+    const cand = (i) => -pMax + (2 * pMax * i) / (nP - 1);
+    let best = -1, ba = 0, bb = 0;
+
+    for (let a = 0; a < nP; a++) {
+      for (let b = 0; b < nP; b++) {
+        gatherAlongDip3D(vol, nil, nxl, nt, ix, iy, it, cand(a), cand(b), half, kHalf, buf);
+        const s = semblance(buf, JT, K);
+        grid[a * nP + b] = s;
+        if (s > best) { best = s; ba = a; bb = b; }
+      }
+    }
+
+    const step = (2 * pMax) / (nP - 1);
+    const refine = (lo, mid, hi, at) => {
+      const den = lo - 2 * mid + hi;
+      if (Math.abs(den) < 1e-12) return at;
+      return at - 0.5 * step * (hi - lo) / den;
+    };
+    let px = cand(ba), py = cand(bb);
+    if (ba > 0 && ba < nP - 1) {
+      px = refine(grid[(ba - 1) * nP + bb], grid[ba * nP + bb], grid[(ba + 1) * nP + bb], px);
+    }
+    if (bb > 0 && bb < nP - 1) {
+      py = refine(grid[ba * nP + bb - 1], grid[ba * nP + bb], grid[ba * nP + bb + 1], py);
+    }
+    return { px, py, sem: best, grid, nP, pMax, ia: ba, ib: bb };
+  }
+
+  /* ---------------------------------------------------------------------
+     FROM TWO COMPONENTS TO AN ORIENTATION
+
+     Inline and crossline dip are quoted per trace and per line. Before they
+     can be combined they have to be put on a common footing, which means
+     dividing by the bin spacing in each direction. Skipping that step is
+     invisible whenever the bins are square, and wrong whenever they are not.
+     --------------------------------------------------------------------- */
+
+  // ms per trace -> ms per metre, given the bin spacing in that direction
+  const perTraceToPerMetre = (msPerTrace, binM) => msPerTrace / binM;
+
+  // magnitude and azimuth of the time-dip gradient. Azimuth is degrees
+  // clockwise from the inline axis, pointing downdip.
+  function dipMagAzim(gx, gy) {
+    const mag = Math.sqrt(gx * gx + gy * gy);
+    let az = Math.atan2(gy, gx) * 180 / Math.PI;
+    if (az < 0) az += 360;
+    return { mag, az };
+  }
+
+  // apparent time dip in a vertical section cut at a given azimuth, per metre
+  const apparentDip = (gx, gy, azDeg) => {
+    const a = azDeg * Math.PI / 180;
+    return gx * Math.cos(a) + gy * Math.sin(a);
+  };
+
+  // gradient magnitude in ms/m -> geological dip in degrees, two-way time
+  function gradientToDegrees(magMsPerM, vMs) {
+    const s = (vMs * (magMsPerM / 1000)) / 2;
+    return Math.abs(s) >= 1 ? 90 : Math.asin(s) * 180 / Math.PI;
+  }
+
+  /* ---------------------------------------------------------------------
      COHERENCE, THE CHEAP WAY
 
      Semblance over a window, computed either along a supplied dip field or
@@ -244,6 +360,21 @@ const ATTR = (function () {
     };
   }
 
+  /* Azimuth runs 0 to 360 and then starts again, so a ramp with different
+     colours at its two ends draws a discontinuity that is not in the data.
+     This one returns to where it started. */
+  function cyclicRamp(stops) {
+    return function (u) {
+      const v = u - Math.floor(u);
+      const q = v * (stops.length - 1);
+      const i = Math.min(stops.length - 2, Math.floor(q)), f = q - i;
+      const a = stops[i], b = stops[i + 1];
+      return [Math.round(a[0] + (b[0] - a[0]) * f),
+              Math.round(a[1] + (b[1] - a[1]) * f),
+              Math.round(a[2] + (b[2] - a[2]) * f)];
+    };
+  }
+
   const MAPS = {
     // signed dip: brown for one direction, teal for the other, pale at flat.
     // Avoids red/green, and the two ends are told apart by lightness as well
@@ -256,6 +387,11 @@ const ATTR = (function () {
     coherence: ramp([
       [8, 10, 12], [58, 62, 68], [122, 128, 134], [190, 194, 198], [252, 252, 250],
     ], false),
+    // dip azimuth: cyclic, so 359 degrees and 1 degree look nearly the same
+    azimuth: cyclicRamp([
+      [196, 60, 45], [214, 150, 60], [150, 172, 84], [46, 132, 150],
+      [96, 96, 164], [172, 74, 124], [196, 60, 45],
+    ]),
     // semblance during a scan, warm so it reads against the crimson accent
     scan: ramp([
       [252, 250, 246], [253, 231, 160], [247, 190, 90], [233, 131, 60],
@@ -267,6 +403,8 @@ const ATTR = (function () {
 
   return {
     semblance, gatherAlongDip, dipScan, dipField, sampleGrid, cohField,
-    dipToMsPerTrace, dipToDegrees, degToDip, MAPS, ramp,
+    gatherAlongDip3D, dipScan3D,
+    perTraceToPerMetre, dipMagAzim, apparentDip, gradientToDegrees,
+    dipToMsPerTrace, dipToDegrees, degToDip, MAPS, ramp, cyclicRamp,
   };
 })();
