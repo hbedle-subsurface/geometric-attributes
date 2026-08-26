@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dip — the foundation | How Geometric Attributes Actually Work</title>
-<meta name="description" content="A first look at seismic dip in 2D: what dip is, why every other geometric attribute needs it, and how a computer finds it by tilting a line until the traces along it match.">
+<meta name="description" content="An introduction to seismic dip in 2D: what dip is, why other geometric attributes depend on it, and how a dip scan estimates it.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -25,10 +25,10 @@
   <div class="mod-head">
     <p class="eyebrow">Module 01 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Dip: the direction everything else is measured along</h1>
-    <p class="sub">Almost no rock layer anywhere is perfectly flat and horizontal. Beds tilt, fold, thin and
-      break, and a seismic reflector inherits all of it. So before you can measure anything <em>about</em> a
-      reflector, something has to work out which way it is heading. Three steps: what dip is, finding it
-      yourself, then watching the computer find it.</p>
+    <p class="sub">Rock layers are almost never flat. Beds tilt, fold, thin and break, and reflectors
+      follow them. Any measurement made along a reflector therefore has to begin by establishing which way
+      that reflector runs. This module covers it in three steps: what dip is, how you would estimate it by
+      hand, and how the standard algorithm estimates it.</p>
   </div>
 
   <!-- ============================== STEP ONE ============================== -->
@@ -38,9 +38,9 @@
       <span class="hint">Nine traces, one reflector</span>
     </div>
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Each wiggle below is one seismic trace. They sit side by side, and time runs downward. There is a
-      single reflector in them, plus a little random noise so it looks like something you might actually be
-      handed. Drag the slider and watch the reflector walk across the traces.</p>
+      Each wiggle is one seismic trace. Traces are plotted side by side, and time increases downward. These
+      nine contain a single reflector, with a small amount of random noise added. Move the slider to change
+      how steeply the reflector crosses them.</p>
 
     <canvas id="c1" aria-label="Nine seismic traces with a single dipping reflector"></canvas>
 
@@ -48,9 +48,9 @@
       <label for="d1">Dip <span class="val" id="d1V">3.0 ms per trace</span></label>
       <input type="range" id="d1" min="-8" max="8" step="0.5" value="3">
     </div>
-    <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">How much later the reflector arrives on
-      each trace to the right. Negative means it arrives earlier, so the reflector climbs instead of falling.
-      At zero it is flat — and a reflector that is exactly flat is the rarest thing in this subject.</p>
+    <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">The time difference between one trace and
+      the next. Negative values mean the reflector arrives earlier as you move right, so it climbs rather
+      than falls. Zero gives a flat reflector, which is uncommon in real data.</p>
 
     <div class="stats">
       <div class="stat key"><span>Dip</span><b id="s1a">—</b></div>
@@ -59,35 +59,34 @@
       <div class="stat wide"><span>Read it out loud</span><b id="s1d">—</b></div>
     </div>
     <div class="legend">
-      <span>The angle needs a trace spacing and a velocity before it can be worked out — 25 m and 3000 m/s
-        here. The seismic itself only ever knows the time shift.</span>
+      <span>Converting the time shift into an angle requires a trace spacing and a velocity, here 25 m and
+        3000 m/s. The seismic data itself contains only the time shift.</span>
     </div>
   </section>
 
   <!-- ========================= WHY THIS COMES FIRST ======================== -->
   <div class="teach" id="why">
     <div class="tryit">
-      <h3>Why this one number comes before everything else</h3>
-      <p style="margin-top:0;font-size:14.5px">Every geometric attribute is measured <b>along</b> the
-        reflector, not straight across the screen. That is only possible if something already knows which way
-        the reflector is going — and since almost nothing is flat, that direction is different at every
-        single sample in the volume.</p>
-      <p style="font-size:14.5px;margin-bottom:0">So the first thing computed in any attribute workflow is a
-        <b>dip volume</b>: the bed dip at every sample, estimated without a picked horizon. Everything below
-        is then built on top of it.</p>
+      <h3>Why dip is computed first</h3>
+      <p style="margin-top:0;font-size:14.5px">Geometric attributes are measured <b>along</b> the reflector
+        rather than horizontally across the display. That requires knowing the reflector orientation in
+        advance, and because bedding is rarely flat, the orientation differs from sample to sample.</p>
+      <p style="font-size:14.5px;margin-bottom:0">A <b>dip volume</b> is therefore computed first: an
+        estimate of bed dip at every sample, made without picking a horizon. The attributes listed opposite
+        are then computed relative to it.</p>
     </div>
     <div class="takeaway">
-      <h3>What is standing on it</h3>
+      <h3>What depends on it</h3>
       <ul>
-        <li><b>Coherence</b> compares neighbouring traces along the bed. Compare them horizontally instead
-          and a perfectly good dipping reflector looks broken — you end up imaging the bedding rather than
-          the faults.</li>
-        <li><b>Curvature</b> is the rate at which the dip changes from place to place. It is computed
-          directly <em>from</em> the dip field, so it can never be better than the dip was.</li>
-        <li><b>Aberrancy</b> goes one derivative further still, which means it inherits the dip errors and
-          then amplifies them.</li>
-        <li><b>Structure-oriented filtering</b> smooths along the bed. Give it the wrong direction and it
-          will smooth straight across your reflectors, cheerfully and invisibly.</li>
+        <li><b>Coherence</b> compares neighbouring traces along the bed. Compared horizontally instead, a
+          continuous dipping reflector reads as a discontinuity, and the output images bedding rather than
+          faults.</li>
+        <li><b>Curvature</b> describes how quickly dip changes laterally. It is computed from the dip field,
+          so its quality is limited by the quality of the dip estimate.</li>
+        <li><b>Aberrancy</b> takes a further derivative, so any error in the dip field is amplified
+          again.</li>
+        <li><b>Structure-oriented filtering</b> smooths along bedding. Given the wrong orientation it smooths
+          across reflectors instead, and the result still looks clean.</li>
       </ul>
     </div>
   </div>
@@ -99,9 +98,9 @@
       <span class="hint">Tilt the line until it lies along the bed</span>
     </div>
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Twenty-five traces now, and the dip is hidden. The crimson line is your guess at which way the bed is
-      going. Tilt it until it lies along a reflector rather than cutting across it — that is the same
-      judgement you make by eye on a real section, just made explicit.</p>
+      Twenty-five traces, and this time the dip is not shown. The crimson line is your estimate of the bed
+      orientation. Adjust its tilt until it follows a reflector instead of cutting across one. This is the
+      same judgement an interpreter makes by eye on a section.</p>
 
     <canvas id="c2" aria-label="Twenty-five traces with a tiltable line representing the guessed dip"></canvas>
 
@@ -109,19 +108,19 @@
       <label for="guess">Tilt of your line <span class="val" id="guessV">0.00 ms per trace</span></label>
       <input type="range" id="guess" min="-8" max="8" step="0.25" value="0">
     </div>
-    <p class="hint-line" style="margin:-8px 0 16px;max-width:84ch">The dashed box is the patch of data being
-      judged. Notice it tilts with the line — that is the whole point. The window follows the bed.</p>
+    <p class="hint-line" style="margin:-8px 0 16px;max-width:84ch">The dashed box outlines the data being
+      scored. It tilts with the line, so the window follows the bedding rather than the time axis.</p>
 
     <p class="sublabel"><b>1</b> How well the traces match along your line
-      <span class="note">1.0 would mean all of them are identical</span></p>
+      <span class="note">1.0 would mean every trace is identical</span></p>
     <canvas id="c2c" aria-label="Match score for the current tilt"></canvas>
 
     <p class="sublabel" style="margin-top:16px"><b>2</b> The same traces, redrawn along your line
-      <span class="note">this is what the score is actually measuring</span></p>
+      <span class="note">what the score is measuring</span></p>
     <canvas id="c2b" aria-label="The traces from inside the window, laid side by side along the guessed dip"></canvas>
-    <p class="hint-line" style="margin:8px 0 14px;max-width:84ch">Reading each trace along the tilted line
-      and laying them side by side is how the computer checks its guess. Get the tilt right and they stack
-      into one shape. Get it wrong and they stagger.</p>
+    <p class="hint-line" style="margin:8px 0 14px;max-width:84ch">Each trace is sampled along the tilted
+      line and the results are plotted side by side. At the correct tilt they coincide. At the wrong tilt
+      they are offset from one another.</p>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
       <button class="btn small" id="newBtn" type="button">New hidden dip</button>
@@ -135,9 +134,9 @@
       <div class="stat wide"><span>The real answer</span><b id="s2d">—</b></div>
     </div>
     <div class="legend">
-      <span>The best score you can reach is almost never 1.0, and on real seismic it is nowhere near. Traces
-        differ for all sorts of reasons that have nothing to do with dip — noise, thinning beds, changing
-        rock. You are not looking for a perfect match. You are looking for the best one available.</span>
+      <span>The highest score you can reach is rarely 1.0, and on field data it is much lower. Traces differ
+        for reasons unrelated to dip, including noise, bed thinning and lateral changes in lithology. The aim
+        is the best available match, not a perfect one.</span>
     </div>
   </section>
 
@@ -148,10 +147,10 @@
       <span class="hint">Same data, same job, every tilt tried in turn</span>
     </div>
     <p style="margin:0 0 16px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      The computer cannot see the line lying along the bed, but it can do the other half of what you just
-      did: read the traces along a tilted line, check whether they stack up, and score it. So it tries every
-      tilt across a range, one after another, and keeps the best. That is the entire algorithm — it is
-      correcting for the dip of the bed by finding the tilt that lines the traces up.</p>
+      The algorithm cannot judge by eye whether the line follows a bed, but it can do the rest of what you
+      just did: sample the traces along a tilted line, measure how well they agree, and record the result. It
+      repeats this for every tilt in a range and keeps the highest-scoring one. The estimate it returns is
+      the tilt that best aligns the traces, which is what correcting for bed dip amounts to in practice.</p>
 
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
       <button class="btn small" id="runBtn" type="button">Run the search</button>
@@ -180,10 +179,10 @@
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       Now break it</h2>
-    <p style="margin:0 0 4px;font-size:15px;color:var(--ink-soft);max-width:84ch">These are the settings real
-      attribute software asks you for, and they are usually left at whatever the program suggested. The
-      sliders deliberately run past sensible values in both directions — sensible settings teach you less
-      than broken ones. The two switches on the right put something in the data worth breaking.</p>
+    <p style="margin:0 0 4px;font-size:15px;color:var(--ink-soft);max-width:84ch">These are the parameters
+      attribute software asks for, and in practice they are often left at their default values. The sliders
+      extend well past the usual range in both directions so the failure modes become visible. The two
+      switches add features to the data for those failures to act on.</p>
 
     <div class="controls">
       <div class="ctl-col">
@@ -192,17 +191,18 @@
           <label for="thMax">Search range <span class="val" id="thMaxV">± 8 ms/trace</span></label>
           <input type="range" id="thMax" min="1" max="10" step="0.5" value="8">
         </div>
-        <p class="hint-line" style="margin:-8px 0 14px">How far either side of flat it is allowed to tilt the
-          line. If the real dip lies outside this, it can never find it — and it will not tell you.</p>
+        <p class="hint-line" style="margin:-8px 0 14px">The largest tilt allowed in either
+          direction. Dips steeper than this cannot be found, and nothing in the output records that the
+          limit was reached.</p>
         <div class="ctl">
           <label for="dStep">Step size <span class="val" id="dStepV">1.00 ms/trace</span></label>
           <input type="range" id="dStep" min="0.25" max="4" step="0.25" value="1">
         </div>
-        <p class="hint-line" style="margin:-8px 0 14px">How finely it works through that range. Bigger steps
-          mean fewer tilts to try and a faster run, but a coarser answer.</p>
+        <p class="hint-line" style="margin:-8px 0 14px">The spacing between successive tilts. Larger
+          steps mean fewer trials and a faster run, at the cost of precision.</p>
         <label class="check"><input type="checkbox" id="refine" checked> Fine-tune the winner</label>
-        <p class="hint-line" style="margin:-4px 0 0">After picking the best tilt, fit a curve through it and
-          its two neighbours so the answer can land between two tries instead of on one.</p>
+        <p class="hint-line" style="margin:-4px 0 0">Fits a parabola through the winning tilt and its
+          two neighbours, so the estimate can fall between the values actually tested.</p>
       </div>
 
       <div class="ctl-col">
@@ -211,31 +211,32 @@
           <label for="half">Traces used <span class="val" id="halfV">9 traces</span></label>
           <input type="range" id="half" min="1" max="10" step="1" value="4">
         </div>
-        <p class="hint-line" style="margin:-8px 0 14px">How many traces it compares at once. Three is barely
-          any evidence; twenty-one reaches 250 m either side of the point it is meant to be describing.</p>
+        <p class="hint-line" style="margin:-8px 0 14px">The number of traces compared at once. Three
+          gives very little evidence to work from; twenty-one spans 250 m either side of the point being
+          described.</p>
         <div class="ctl">
           <label for="kHalf">Window height <span class="val" id="kHalfV">± 60 ms</span></label>
           <input type="range" id="kHalf" min="5" max="50" step="1" value="30">
         </div>
-        <p class="hint-line" style="margin:-8px 0 0">How much of each trace it compares. A useful rule is
-          roughly one wavelength — about ±17 ms at 30 Hz. Push it to ±100 ms and the window spans three
-          reflectors that may have nothing to do with each other.</p>
+        <p class="hint-line" style="margin:-8px 0 0">The length of trace compared. A common guideline
+          is about one wavelength, roughly ±17 ms at 30 Hz. At ±100 ms the window spans three separate
+          reflectors.</p>
       </div>
 
       <div class="ctl-col">
         <h2>The data, and the display</h2>
         <label class="check"><input type="checkbox" id="fault"> Put a fault four traces away</label>
-        <p class="hint-line" style="margin:-4px 0 12px">Harmless while the window stays narrow. Widen it past
-          nine traces and the window straddles the fault.</p>
+        <p class="hint-line" style="margin:-4px 0 12px">No effect while the window stays narrow. Beyond
+          nine traces the window reaches across the fault.</p>
         <label class="check"><input type="checkbox" id="split"> Make the bed dip change with depth</label>
-        <p class="hint-line" style="margin:-4px 0 12px">The beds below about 290 ms dip the other way.
-          Harmless until the window gets tall enough to reach down to them.</p>
+        <p class="hint-line" style="margin:-4px 0 12px">Beds below about 290 ms dip in the opposite
+          direction. This affects the estimate only once the window is tall enough to include them.</p>
         <div class="ctl">
           <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
           <input type="range" id="noise" min="0" max="60" step="2" value="0">
         </div>
-        <p class="hint-line" style="margin:-8px 0 12px">Real traces are never identical. Add some and watch
-          both the score and the accuracy fall away.</p>
+        <p class="hint-line" style="margin:-8px 0 12px">Field traces are never identical. Increasing this
+          lowers both the score and the accuracy of the estimate.</p>
         <div class="ctl">
           <label>Show the traces as</label>
           <div class="seg" role="group" aria-label="Display style">
@@ -251,99 +252,99 @@
   <!-- ============================== TEACHING ============================== -->
   <div class="teach">
     <div class="tryit">
-      <h3>Try this — and what to watch for</h3>
+      <h3>Exercises</h3>
       <ol>
-        <li><b>Look in the wrong place.</b> Press "tell me the answer" so you can see the target, then drag
-          the search range down until the real dip falls outside it.
-          <span class="ans">The answer sticks at the edge of the range and stops moving. The bars are still
-            climbing when the search runs out of tilts to try. Nothing warns you — the number that comes out
-            looks just as respectable as a correct one. This is the commonest way a dip volume goes
-            wrong.</span></li>
-        <li><b>Take bigger steps.</b> Set the step size to 2 ms/trace, then turn "fine-tune the winner" off
-          and on a few times.
-          <span class="ans">With it off, the answer can only ever be one of the nine tilts that were tried,
-            so it lands in chunks and is typically about four times further from the truth. With it on,
-            fitting a curve through the winner and its two neighbours puts the answer back between the tries
-            almost for free. That is how real software affords a coarse search. Push the step to 4 ms and the
-            trick starts to fail, because a parabola needs the peak to still be sampled — with only five
-            tilts across the whole range there is no peak left to fit.</span></li>
-        <li><b>Reach across a fault.</b> Switch the fault on and leave everything else alone — nine traces
-          still lands clear of it. Now drag "traces used" up to 21.
-          <span class="ans">The score falls off a cliff — from about 0.98 to about 0.51 — the moment the
-            tilted box reaches across the break, and the winning tilt becomes a compromise between two beds
-            that are not the same bed. Notice the fault is one trace wide but the damage extends four traces
-            either side of it, because that is how far the window reaches. This is why coherence computed on
-            a smeared dip field gives fat, soft faults. Real software fights it by trying several windows
-            offset around the point and keeping the most confident one, rather than always centring the
-            window on the sample.</span></li>
-        <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then drag the window
-          height from ±30 ms up to ±100 ms and watch the box grow down into the lower beds.
-          <span class="ans">Nothing happens until about ±80 ms, then the score drops from 0.98 to around
-            0.70 and the answer slides toward the average of two things that have nothing to do with each
-            other. Switch the depth change off and repeat: the same window heights now cost you nothing at
-            all. The seismic did not get harder — your instruction about how much of it to trust at once got
-            worse. That is why window height is really a question about how far you can assume the geology
-            stays the same, which is why it is usually quoted as a fraction of a wavelength.</span></li>
-        <li><b>Use fewer traces, and watch the score go the wrong way.</b> Set noise to about 30%, then drag
-          "traces used" from 9 down to 3. Read the score and the error together.
-          <span class="ans">The score goes <em>up</em> — from around 0.68 to around 0.85 — while the answer
-            gets roughly four times worse. Three traces have less to disagree about, so they match more
-            easily and prove much less. This is the most useful thing on this page: <b>a high score is not
-            evidence of a good answer</b>, and any confidence volume has to be read next to the window that
+        <li><b>Search too narrow a range.</b> Press "tell me the answer" so the target is visible, then
+          reduce the search range until the real dip falls outside it.
+          <span class="ans">The estimate stops at the edge of the range and stays there. The bars are still
+            rising when the search runs out of tilts to try. No warning is produced, and the value returned
+            looks no different from a correct one. This is the most common cause of a bad dip
+            volume.</span></li>
+        <li><b>Coarsen the step size.</b> Set the step size to 2 ms/trace, then switch "fine-tune the
+          winner" off and on several times.
+          <span class="ans">With it off, the estimate can only take one of the nine values tested, so it
+            moves in jumps and averages roughly four times further from the correct answer. With it on, the
+            parabola fit recovers most of that precision at almost no computational cost, which is what
+            allows production software to search coarsely. At a 4 ms step the fit begins to fail: a parabola
+            needs the peak to be sampled, and five tilts across the range do not sample it.</span></li>
+        <li><b>Widen the window across a fault.</b> Switch the fault on and change nothing else; at nine
+          traces the window still clears it. Now increase "traces used" to 21.
+          <span class="ans">The score drops from about 0.98 to about 0.51 as soon as the tilted box reaches
+            across the break, and the winning tilt becomes a compromise between two beds that are not the
+            same bed. The fault is one trace wide, but the estimate is degraded for four traces either side
+            of it, because that is how far the window extends. Coherence computed on a dip field smeared this
+            way produces broad, indistinct faults. Production software addresses this by testing several
+            windows offset around the sample and keeping the most confident, rather than always centring the
+            window.</span></li>
+        <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then raise the window
+          height from ±30 ms to ±100 ms, watching the box extend into the lower beds.
+          <span class="ans">Little changes until about ±80 ms, after which the score falls from 0.98 to
+            around 0.70 and the estimate moves toward an average of two unrelated dips. Switch the depth
+            change off and repeat: the same window heights now cost nothing. The data did not become harder
+            to work with; the window was simply told to treat a larger interval as one unit. Window height is
+            really a statement about how far the geology can be assumed constant, which is why it is normally
+            quoted as a fraction of a wavelength.</span></li>
+        <li><b>Reduce the number of traces and compare the score with the error.</b> Set noise to about
+          30%, then lower "traces used" from 9 to 3, reading both figures as you go.
+          <span class="ans">The score <em>rises</em>, from around 0.68 to around 0.85, while the estimate
+            becomes roughly four times worse. Three traces have less scope to disagree, so they match more
+            easily and establish much less. <b>A high score is therefore not evidence of a good
+            estimate</b>, and a confidence volume has to be interpreted alongside the window size that
             produced it.</span></li>
-        <li><b>Add noise until it fails.</b> Push noise up in steps — 20%, 40%, 60% — pressing "new hidden
-          dip" a few times at each level.
-          <span class="ans">The answer degrades gently at first: barely wrong at 20%, a few tenths of a
-            millisecond out at 40%. Then past 50% the bars stop having one clean peak and the winner
-            occasionally lands on the wrong bump entirely. Watch the <em>score</em> though — it starts
-            falling long before the answer does, from 0.99 to below 0.6. That gap is why attribute software
-            writes a confidence volume alongside the dip: it warns you well before the number beside it goes
-            obviously wrong.</span></li>
+        <li><b>Increase the noise until the estimate fails.</b> Raise noise in stages to 20%, 40% and 60%,
+          pressing "new hidden dip" several times at each level.
+          <span class="ans">The estimate degrades gradually: barely affected at 20%, a few tenths of a
+            millisecond out at 40%. Past 50% the bars lose their single clear peak and the winner sometimes
+            settles on the wrong one. The <em>score</em> falls well before the estimate does, from 0.99 to
+            below 0.6. That difference is the reason attribute software writes a confidence volume alongside
+            the dip: it registers the problem while the dip values still look plausible.</span></li>
       </ol>
     </div>
 
     <div class="takeaway">
-      <h3>If you remember nothing else</h3>
+      <h3>The main points</h3>
       <ul>
-        <li><b>Nothing is flat.</b> Dip is not a special case for structured areas; it is the normal
-          condition of every reflector in every survey.</li>
-        <li><b>Dip is a time shift per trace.</b> Turning it into an angle needs a trace spacing and a
-          velocity, and those come from you, not from the seismic.</li>
-        <li><b>It is found by trying, not by measuring.</b> Tilt a line every way you are allowed to, score
-          how well the traces line up along it, keep the best. That is the whole algorithm.</li>
-        <li><b>A low score is a warning; a high score is not a guarantee.</b> Fewer traces and shorter
-          windows both raise the score while making the answer worse, because there is less evidence in the
-          window to disagree.</li>
-        <li><b>The window has to be small enough that the geology inside it is one thing.</b> Too wide and it
-          crosses a fault; too tall and it crosses into beds going the other way.</li>
-        <li><b>Everything downstream inherits this.</b> Coherence steers by it, curvature is computed from
-          it, aberrancy differentiates it again. Fix the dip before blaming the attribute.</li>
+        <li><b>Dip is the normal condition of a reflector,</b> not a special case reserved for structured
+          areas.</li>
+        <li><b>Dip is a time shift per trace.</b> Converting it to an angle requires a trace spacing and a
+          velocity, both supplied by the interpreter rather than measured.</li>
+        <li><b>The estimate is obtained by trial, not by measurement.</b> Every permitted tilt is tested,
+          scored on how well the traces align along it, and the best is kept.</li>
+        <li><b>A low score is a warning, but a high score is not a guarantee.</b> Fewer traces and shorter
+          windows both raise the score while worsening the estimate, because less evidence is available to
+          contradict it.</li>
+        <li><b>The window must be small enough for the geology inside it to be uniform.</b> Too wide and it
+          crosses a fault; too tall and it reaches beds dipping the other way.</li>
+        <li><b>Later attributes inherit the result.</b> Coherence is steered by it, curvature is computed
+          from it, aberrancy differentiates it again. Check the dip field before attributing a problem to
+          the attribute.</li>
       </ul>
     </div>
   </div>
 
   <details class="notes" id="notes">
     <summary>Method, assumptions, and where to read more</summary>
-    <p>Twenty-five traces sampled every 2 ms, built by convolving a set of reflection coefficients with a
-      30 Hz Ricker wavelet and shifting each trace according to the dip. The hidden dip comes from a seeded
-      random number, so "new hidden dip" gives a genuinely different case each time while a shared link
-      always reproduces the same one. The optional fault is a vertical step in arrival time applied to every
-      trace to the right of trace 17; the optional depth change reverses the dip of every bed below about 290 ms.</p>
+    <p>Twenty-five traces sampled every 2 ms, formed by convolving a set of reflection coefficients with a
+      30 Hz Ricker wavelet and shifting each trace according to the dip. The hidden dip is drawn from a
+      seeded random number, so "new hidden dip" produces a different case each time while a shared link
+      reproduces the same one. The optional fault is a vertical step in arrival time applied to every trace
+      from trace 17 rightward. The optional depth change reverses the dip of every bed below about
+      290 ms.</p>
     <p>The score is <b>semblance</b>: the energy of the summed traces divided by the summed energy of the
       individual traces, over the analysis window. It is 1 when every trace in the window is identical and
       falls toward 1/N when they are unrelated. Marfurt et al. (1998) introduced it as a coherence measure,
-      and here it is also the thing the dip search maximises — which is not a coincidence. Coherence and dip
-      are the same calculation asked two different questions.</p>
+      and it is also the quantity the dip search maximises. Coherence and dip estimation are the same
+      calculation used to answer two different questions.</p>
     <p>The search is the discrete dip scan of Marfurt et al. (1998), offered today as one of the two
       algorithms in AASPI program <span class="k">dip3d</span>. Candidate tilts are spaced evenly across the
       range, each trace is read along the tilted line with linear interpolation between samples, and the
       winner is refined by fitting a parabola through it and its two neighbours.</p>
-    <p>Simplified deliberately, with each simplification getting its own module later: this is 2D, so there
-      is a single dip component rather than the inline and crossline pair, and no dip azimuth. The search
-      range is quoted in milliseconds per trace, whereas real software asks in degrees and needs a conversion
-      velocity to get there. Semblance is computed on the plain trace rather than the analytic trace. Dip is
-      estimated at one point rather than at every sample in a volume. And there is no Kuwahara search over
-      shifted windows, which is what keeps a real dip estimate from smearing across a fault.</p>
+    <p>Several simplifications, each treated in a later module. This is 2D, so there is a single dip
+      component rather than the inline and crossline pair, and no dip azimuth. The search range is quoted in
+      milliseconds per trace, whereas production software asks for it in degrees and requires a conversion
+      velocity. Semblance is computed on the plain trace rather than the analytic trace. Dip is estimated at
+      a single point rather than at every sample in a volume. There is no Kuwahara search over shifted
+      windows, which is what keeps a production dip estimate from smearing across a fault.</p>
     <ul>
       <li>Marfurt, K. J., R. L. Kirlin, S. L. Farmer, and M. S. Bahorich, 1998, 3-D seismic attributes using
         a semblance-based coherency algorithm: <em>Geophysics</em>, 63, 1150–1165.</li>
@@ -359,9 +360,9 @@
   <section class="nextup">
     <p class="eyebrow">Next up</p>
     <h3><a href="dip3d.html">02 · Inline and crossline dip</a></h3>
-    <p>A line of traces becomes a patch of traces in a survey, and one dip becomes two: how much later the
-      reflector arrives one trace along the inline, and one line along the crossline. Those two numbers are
-      what dip magnitude and dip azimuth are made of.</p>
+    <p>A line of traces becomes a patch of traces in a survey, and one dip component becomes two: the time
+      shift per trace along the inline, and the time shift per line along the crossline. Dip magnitude and
+      dip azimuth are derived from that pair.</p>
     <a class="btn" href="dip3d.html">Open module 02 →</a>
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
@@ -626,7 +627,7 @@
         return;
       }
       ctx.restore();
-      SEIS.tag(ctx, X(4) - 64, Y(80) - 14, 'flat \u2014 and that is rare', TEAL);
+      SEIS.tag(ctx, X(4) - 52, Y(80) - 14, 'flat reflector', TEAL);
     });
   }
 
@@ -768,8 +769,8 @@
 
     ctx.font = '10.5px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
     ctx.textBaseline = 'top';
-    ctx.textAlign = 'left'; ctx.fillText('0 \u2014 nothing matches', R.x, R.y + R.h + 5);
-    ctx.textAlign = 'right'; ctx.fillText('1 \u2014 a perfect stack', R.x + R.w, R.y + R.h + 5);
+    ctx.textAlign = 'left'; ctx.fillText('0 \u2014 no match', R.x, R.y + R.h + 5);
+    ctx.textAlign = 'right'; ctx.fillText('1 \u2014 traces identical', R.x + R.w, R.y + R.h + 5);
     ctx.restore();
   }
 
@@ -868,7 +869,7 @@
     $('s2d').textContent = TOLD
       ? (TRUE_MS > 0 ? '+' : '') + TRUE_MS.toFixed(2) + ' ms/trace   (' +
         msToDeg(TRUE_MS).toFixed(1) + '\u00b0)'
-      : 'hidden \u2014 have a go first';
+      : 'hidden until you try';
 
     const a = answerMs(), err = a - TRUE_MS;
     $('s3a').textContent = (a > 0 ? '+' : '') + a.toFixed(2) + ' ms/trace';
@@ -885,18 +886,18 @@
     const crossesFault = S.fault && CX + halfTraces() >= FAULT_IX;
     const crossesSplit = S.split && CT + S.kHalf > SPLIT_T;
     $('s3f').textContent = !TOLD
-      ? 'Run the search to compare it against the real answer'
+      ? 'Run the search to compare it with the correct value'
       : pinned
-        ? 'Stuck at the edge of the search range \u2014 widen it'
+        ? 'Estimate is at the edge of the search range; widen the range'
         : crossesFault
-          ? 'The window is reaching across the fault \u2014 this answer is a compromise'
+          ? 'Window spans the fault; the estimate is a compromise between two blocks'
           : crossesSplit
-            ? 'The window is reaching into beds that dip the other way'
+            ? 'Window reaches beds that dip the other way'
             : SCAN.sem < 0.45
-              ? 'Low score \u2014 the traces never really matched, so do not trust this'
+              ? 'Low score; the traces did not match well'
               : Math.abs(err) > 0.5
                 ? 'Off by ' + Math.abs(err).toFixed(2) + ' ms/trace'
-                : 'Found it \u2014 within ' + Math.abs(err).toFixed(2) + ' ms/trace of the truth';
+                : 'Within ' + Math.abs(err).toFixed(2) + ' ms/trace of the correct value';
   }
 
   function syncLabels() {
