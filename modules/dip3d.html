@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inline and crossline dip | How Geometric Attributes Actually Work</title>
+<meta name="description" content="Dip in a 3D volume: why one number is not enough, how inline and crossline dip are measured, and why apparent dip changes with the azimuth of the section you cut.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="dip.html">Module 01</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 02 &nbsp;·&nbsp; Geometric attributes</p>
+    <h1>Inline and crossline dip: one reflector, two numbers</h1>
+    <p class="sub">In <a href="dip.html">module 01</a> we estimated dip along a single seismic line by
+      finding the tilt that best aligned neighbouring traces. A 3D volume allows the same measurement in two
+      directions, and it turns out one direction is not enough to describe where a reflector is going. This
+      module is about what changes between a line and a volume.</p>
+  </div>
+
+  <!-- ============================== STEP ONE ============================== -->
+  <section class="plot" style="margin-top:6px">
+    <div class="plot-head">
+      <h3>Step 1 &nbsp;·&nbsp; One reflector, two sections</h3>
+      <span class="hint">The same plane, viewed two ways</span>
+    </div>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      A volume of 25 inlines by 25 crosslines contains one planar reflector. Two vertical sections are cut
+      through the middle of it: one along the inline direction, one along the crossline direction. The
+      diagram shows where those two faces sit in the volume.</p>
+
+    <canvas id="cube" aria-label="Diagram of the volume showing the inline and crossline section faces"></canvas>
+
+    <div class="sec-row" id="row1" style="margin-top:12px">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Inline section
+          <span class="note">crossline held fixed at 13</span></p>
+        <canvas id="c1il" aria-label="Inline section through the volume"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Crossline section
+          <span class="note">inline held fixed at 13</span></p>
+        <canvas id="c1xl" aria-label="Crossline section through the volume"></canvas>
+      </div>
+    </div>
+
+    <div class="ctl" style="margin-top:16px">
+      <label>Try these</label>
+      <div class="seg" role="group" aria-label="Preset reflector orientations">
+        <button type="button" data-preset="0,0">Flat</button>
+        <button type="button" data-preset="4,0">Inline only</button>
+        <button type="button" data-preset="0,4">Crossline only</button>
+        <button type="button" data-preset="2,4">Both</button>
+        <button type="button" data-preset="3,-4">Opposite signs</button>
+      </div>
+    </div>
+
+    <div class="controls" style="margin-top:6px">
+      <div class="ctl-col">
+        <div class="ctl">
+          <label for="px">Inline dip <span class="val" id="pxV">0.00 ms per trace</span></label>
+          <input type="range" id="px" min="-8" max="8" step="0.25" value="0">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">How much later the reflector arrives on the next trace
+          along the inline direction.</p>
+      </div>
+      <div class="ctl-col">
+        <div class="ctl">
+          <label for="py">Crossline dip <span class="val" id="pyV">4.00 ms per line</span></label>
+          <input type="range" id="py" min="-8" max="8" step="0.25" value="4">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">How much later it arrives on the next crossline. The
+          same reflector, measured in the other direction.</p>
+      </div>
+      <div class="ctl-col">
+        <label class="check"><input type="checkbox" id="beds"> Three parallel beds instead of one</label>
+        <div class="ctl" style="margin-top:10px">
+          <label>Show sections as</label>
+          <div class="seg" role="group" aria-label="Display style">
+            <button type="button" id="dWig" aria-pressed="true">Wiggle</button>
+            <button type="button" id="dCol" aria-pressed="false">Color</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat key"><span>What the inline section shows</span><b id="s1a">—</b></div>
+      <div class="stat key"><span>What the crossline section shows</span><b id="s1b">—</b></div>
+      <div class="stat wide"><span>Both sections cut the same reflector</span><b id="s1c">—</b></div>
+    </div>
+  </section>
+
+  <!-- ============================== STEP TWO ============================== -->
+  <section class="plot" style="margin-top:20px">
+    <div class="plot-head">
+      <h3>Step 2 &nbsp;·&nbsp; Inline dip</h3>
+      <span class="hint">Move one trace along the inline. How much does the event move in time?</span>
+    </div>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      This is the question from module 01, asked in the inline direction. Step one trace to the right and
+      read how far the reflector moves down. The answer is written
+      <span class="k">&part;t/&part;x</span>, and on this section it can be measured with nothing more than
+      the time axis.</p>
+
+    <canvas id="c2" aria-label="Inline section with the inline dip annotated between two traces"></canvas>
+
+    <div class="ctl" style="margin-top:14px;max-width:520px">
+      <label for="px2">Inline dip <span class="val" id="px2V">0.00 ms per trace</span></label>
+      <input type="range" id="px2" min="-8" max="8" step="0.25" value="0">
+    </div>
+    <p class="hint-line" style="margin:-8px 0 14px;max-width:84ch">Only the inline component changes. The
+      crossline component is untouched, and this section cannot see it.</p>
+
+    <div class="stats">
+      <div class="stat key"><span>Inline dip &part;t/&part;x</span><b id="s2a">—</b></div>
+      <div class="stat"><span>Across all 25 inlines</span><b id="s2b">—</b></div>
+      <div class="stat wide"><span>Read it out loud</span><b id="s2c">—</b></div>
+    </div>
+  </section>
+
+  <!-- ============================= STEP THREE ============================= -->
+  <section class="plot" style="margin-top:20px">
+    <div class="plot-head">
+      <h3>Step 3 &nbsp;·&nbsp; Crossline dip</h3>
+      <span class="hint">Now step one line along the crossline instead</span>
+    </div>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      The same question, turned ninety degrees. Step one line in the crossline direction and read how far the
+      reflector moves. This is <span class="k">&part;t/&part;y</span>, and it is measured independently of
+      the inline answer. Neither section knows what the other one found.</p>
+
+    <canvas id="c3" aria-label="Crossline section with the crossline dip annotated between two lines"></canvas>
+
+    <div class="ctl" style="margin-top:14px;max-width:520px">
+      <label for="py3">Crossline dip <span class="val" id="py3V">4.00 ms per line</span></label>
+      <input type="range" id="py3" min="-8" max="8" step="0.25" value="4">
+    </div>
+    <p class="hint-line" style="margin:-8px 0 14px;max-width:84ch">Set the inline dip in step 2 to something
+      non-zero and come back. This section is unchanged by it.</p>
+
+    <div class="stats">
+      <div class="stat key"><span>Crossline dip &part;t/&part;y</span><b id="s3a">—</b></div>
+      <div class="stat"><span>Across all 25 crosslines</span><b id="s3b">—</b></div>
+      <div class="stat wide"><span>Read it out loud</span><b id="s3c">—</b></div>
+    </div>
+  </section>
+
+  <!-- ============================= STEP FOUR ============================== -->
+  <section class="plot" style="margin-top:20px">
+    <div class="plot-head">
+      <h3>Step 4 &nbsp;·&nbsp; Putting the two components together</h3>
+      <span class="hint">A time slice shows both at once</span>
+    </div>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      A time slice cuts the volume horizontally. Where the reflector crosses that time it leaves a band, and
+      the bands run along the direction in which travel time does not change. Perpendicular to them is the
+      direction in which it changes fastest. Those two directions are the strike and the dip direction, and
+      they are set by the two numbers you have been adjusting.</p>
+
+    <div class="sec-row" id="row4">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Time slice
+          <span class="note">arrow points downdip, dashed line is strike</span></p>
+        <canvas id="c4map" aria-label="Time slice through the volume with the dip direction marked"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> The two components as a vector
+          <span class="note">inline across, crossline up</span></p>
+        <canvas id="c4vec" aria-label="The inline and crossline dip components drawn as a vector"></canvas>
+      </div>
+    </div>
+
+    <div class="controls" style="margin-top:14px">
+      <div class="ctl-col">
+        <h2>Where the slice sits</h2>
+        <div class="ctl">
+          <label for="slice">Slice time <span class="val" id="sliceV">220 ms</span></label>
+          <input type="range" id="slice" min="60" max="380" step="2" value="220">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">Moving the slice sweeps the bands sideways. Their
+          spacing and direction do not change, because the reflector is planar.</p>
+      </div>
+      <div class="ctl-col">
+        <h2>Bin spacing</h2>
+        <div class="ctl">
+          <label for="dx">Inline bin <span class="val" id="dxV">25 m</span></label>
+          <input type="range" id="dx" min="6.25" max="50" step="6.25" value="25">
+        </div>
+        <div class="ctl">
+          <label for="dy">Crossline bin <span class="val" id="dyV">25 m</span></label>
+          <input type="range" id="dy" min="6.25" max="50" step="6.25" value="25">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">Make these different and watch the azimuth readout move
+          while the sections above do not. Explained below.</p>
+      </div>
+      <div class="ctl-col">
+        <h2>Conversion</h2>
+        <div class="ctl">
+          <label for="vel">Velocity <span class="val" id="velV">3000 m/s</span></label>
+          <input type="range" id="vel" min="1500" max="6000" step="100" value="3000">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">Needed only for the last readout. The volume itself
+          contains no velocity information.</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>&part;t/&part;x per metre</span><b id="s4a">—</b></div>
+      <div class="stat"><span>&part;t/&part;y per metre</span><b id="s4b">—</b></div>
+      <div class="stat key"><span>Dip magnitude |&nabla;t|</span><b id="s4c">—</b></div>
+      <div class="stat key"><span>Dip azimuth</span><b id="s4d">—</b></div>
+      <div class="stat"><span>Geological dip</span><b id="s4e">—</b></div>
+      <div class="stat wide"><span>Check</span><b id="s4f">—</b></div>
+    </div>
+
+    <div class="legend">
+      <span>Magnitude is not the sum of the two components, and it is not the larger of them. It is
+        &radic;(&part;t/&part;x)² + (&part;t/&part;y)², and the components have to be converted to the same
+        units first. Inline dip is quoted per trace and crossline dip per line, so if the bins are not square
+        those two are not comparable quantities.</span>
+    </div>
+  </section>
+
+  <!-- ============================= STEP FIVE ============================== -->
+  <section class="plot" style="margin-top:20px">
+    <div class="plot-head">
+      <h3>Step 5 &nbsp;·&nbsp; Rotate the section</h3>
+      <span class="hint">Apparent dip depends on which way you cut</span>
+    </div>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Inline and crossline are just two of the directions available. Cut a vertical section at any azimuth
+      through the same planar reflector and it will show a dip of its own. Rotate the section and watch that
+      dip change, all the way to zero along one particular direction.</p>
+
+    <div class="ctl" style="max-width:560px;margin-bottom:14px">
+      <label for="az">Section azimuth <span class="val" id="azV">30° from inline</span></label>
+      <input type="range" id="az" min="0" max="359" step="1" value="30">
+    </div>
+
+    <div class="sec-row" id="row5">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Where the section is cut
+          <span class="note">looking down on the volume</span></p>
+        <canvas id="c5map" aria-label="Map view showing the azimuth of the section being cut"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> The section at that azimuth
+          <span class="note">sampled every 15 m along the line</span></p>
+        <canvas id="c5sec" aria-label="Vertical section cut at the chosen azimuth"></canvas>
+      </div>
+    </div>
+
+    <p class="sublabel" style="margin-top:16px"><b>3</b> Apparent dip at every azimuth
+      <span class="note">a cosine, zero along strike</span></p>
+    <canvas id="c5curve" aria-label="Apparent dip plotted against section azimuth"></canvas>
+
+    <div class="stats" style="margin-top:14px">
+      <div class="stat"><span>This section's apparent dip</span><b id="s5a">—</b></div>
+      <div class="stat"><span>Inline section would show</span><b id="s5b">—</b></div>
+      <div class="stat"><span>Crossline section would show</span><b id="s5c">—</b></div>
+      <div class="stat key"><span>Steepest section, at azimuth</span><b id="s5d">—</b></div>
+      <div class="stat"><span>Flat section, at azimuth</span><b id="s5e">—</b></div>
+      <div class="stat wide"><span>Note</span><b id="s5f">—</b></div>
+    </div>
+  </section>
+
+  <!-- ============================== STEP SIX ============================== -->
+  <section class="plot" style="margin-top:20px">
+    <div class="plot-head">
+      <h3>Step 6 &nbsp;·&nbsp; Let the computer do it</h3>
+      <span class="hint">The fan of candidate tilts becomes a grid</span>
+    </div>
+    <p style="margin:0 0 16px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      In module 01 the algorithm tried every tilt along a line and kept the best. Here it tries every
+      combination of inline and crossline tilt, aligning a square patch of traces rather than a row of them,
+      and scores each one the same way. The result is a surface rather than a curve, and its highest point
+      is the estimate.</p>
+
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <button class="btn small" id="runBtn" type="button">Run the search</button>
+      <button class="btn ghost small" id="winBtn" type="button" style="margin-top:0">Show the winner</button>
+    </div>
+
+    <div class="sec-row" id="row6">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> The score at every combination
+          <span class="note">inline across, crossline up</span></p>
+        <canvas id="c6grid" aria-label="Semblance score over the grid of candidate inline and crossline dips"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> The patch of traces being aligned
+          <span class="note">at the current best estimate</span></p>
+        <canvas id="c6gath" aria-label="The patch of traces gathered along the current estimate"></canvas>
+      </div>
+    </div>
+
+    <div class="stats" style="margin:16px 0 20px">
+      <div class="stat key"><span>Estimated inline dip</span><b id="s6a">—</b></div>
+      <div class="stat key"><span>Estimated crossline dip</span><b id="s6b">—</b></div>
+      <div class="stat"><span>True values</span><b id="s6c">—</b></div>
+      <div class="stat"><span>Error</span><b id="s6d">—</b></div>
+      <div class="stat"><span>Score, and combinations tried</span><b id="s6e">—</b></div>
+      <div class="stat wide"><span>Verdict</span><b id="s6f">—</b></div>
+    </div>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      Now break it</h2>
+    <p style="margin:0 0 4px;font-size:15px;color:var(--ink-soft);max-width:84ch">The same parameters as
+      module 01, with one difference worth noticing: the search range and step now apply in both directions
+      at once, so halving the step multiplies the work by four rather than two.</p>
+
+    <div class="controls">
+      <div class="ctl-col">
+        <h2>Where it looks</h2>
+        <div class="ctl">
+          <label for="thMax">Search range <span class="val" id="thMaxV">± 8 ms</span></label>
+          <input type="range" id="thMax" min="1" max="10" step="0.5" value="8">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">Applied to both components. A reflector outside this
+          range in either direction cannot be found.</p>
+        <div class="ctl">
+          <label for="dStep">Step size <span class="val" id="dStepV">1.00 ms</span></label>
+          <input type="range" id="dStep" min="0.25" max="4" step="0.25" value="1">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">The spacing between candidates along each axis of the
+          grid. The number of combinations is the square of the number of steps.</p>
+      </div>
+      <div class="ctl-col">
+        <h2>How much data it judges on</h2>
+        <div class="ctl">
+          <label for="half">Patch size <span class="val" id="halfV">5 × 5 traces</span></label>
+          <input type="range" id="half" min="1" max="5" step="1" value="2">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">A square patch centred on the analysis point.
+          A 3 × 3 patch is nine traces; 11 × 11 is a hundred and twenty-one.</p>
+        <div class="ctl">
+          <label for="kHalf">Window height <span class="val" id="kHalfV">± 16 ms</span></label>
+          <input type="range" id="kHalf" min="3" max="30" step="1" value="8">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">The length of trace compared, as before.</p>
+      </div>
+      <div class="ctl-col">
+        <h2>The data</h2>
+        <div class="ctl">
+          <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
+          <input type="range" id="noise" min="0" max="60" step="2" value="0">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">Applied to the whole volume. Watch the peak on the
+          score surface broaden before the estimate moves.</p>
+        <div class="ctl">
+          <label for="freq">Peak frequency <span class="val" id="freqV">30 Hz</span></label>
+          <input type="range" id="freq" min="10" max="60" step="1" value="30">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">Lower frequencies make a broader wavelet and a
+          broader, less certain peak.</p>
+        <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== TEACHING ============================== -->
+  <div class="teach">
+    <div class="tryit">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Make a dipping bed look flat.</b> Set inline dip to 0 and crossline dip to 6, then read the
+          inline section in step 1.
+          <span class="ans">The inline section shows a perfectly horizontal reflector while the bed is
+            dipping about 20 degrees. Nothing in that section is wrong or noisy; it is simply cut along
+            strike, and along strike there is no time change to see. An interpreter working a single line
+            through this volume would report zero dip and be describing the section correctly and the
+            geology not at all.</span></li>
+        <li><b>Find the two azimuths that matter.</b> With inline 2 and crossline 4, use step 5 to find the
+          azimuth where the section is steepest and the azimuth where it is flat.
+          <span class="ans">Steepest at about 63 degrees from inline, flat at about 153 degrees, and the two
+            are exactly 90 degrees apart. The steepest direction is the dip azimuth and equals the arctangent
+            of the two components; the flat direction is strike. Every other section shows something in
+            between, following a cosine. This is why apparent dip is not a property of the reflector but of
+            the reflector and the section together.</span></li>
+        <li><b>Break the azimuth with rectangular bins.</b> In step 4 set the inline bin to 12.5 m and leave
+          the crossline bin at 25 m.
+          <span class="ans">Not one pixel of the sections or the time slice changes, because the volume is
+            stored by bin number and the reflector still crosses the same number of traces. The computed
+            azimuth moves from 63 degrees to 45, a swing of 18 degrees, because a step of one trace is now
+            half the distance a step of one line is. Anything that combines the two components has to divide
+            by the bin spacing first. The error is invisible on square-bin surveys, which is how it survives
+            into production code.</span></li>
+        <li><b>Compare a coarse grid with a coarse fan.</b> In step 6, note the number of combinations at a
+          1 ms step, then set the step to 0.5 ms.
+          <span class="ans">The count goes from 289 to 1089, close to four times as many, because the grid is
+            two-dimensional. In module 01, halving the step doubled the work. This is the practical reason
+            production dip estimators do not simply search a fine grid, and why several use a gradient
+            structure tensor instead, which solves for the orientation directly rather than trying
+            candidates.</span></li>
+        <li><b>Watch the peak spread before the answer moves.</b> Raise noise to 30% and look at the score
+          surface rather than the numbers.
+          <span class="ans">The bright spot broadens into a ridge well before the estimate becomes visibly
+            wrong, and the score falls from 1.00 to about 0.75. The ridge is elongated, meaning the search is
+            more certain about one combination of the components than the other. Averaged over several
+            orientations, the joint 2D search is about a third more accurate at this noise level than running
+            two separate 1D searches, one per direction, because it uses all the traces in the patch for both
+            components at once.</span></li>
+        <li><b>Reduce the patch to 3 × 3.</b> With noise at 30%, drag the patch size down from 11 × 11 and
+          read the score alongside the error.
+          <span class="ans">The score hardly moves: about 0.75 at 11 × 11 and about 0.77 at 3 × 3. The error
+            changes by a factor of eighteen, from roughly 0.04 ms to roughly 0.70 ms per trace. Nine traces
+            support two unknowns rather than one, and they span only a single trace either side of the
+            analysis point in each direction, which is barely enough to define a plane. The score is not
+            measuring how well determined the estimate is; it is measuring how well the traces inside the
+            window happen to agree, and a small window makes that easy. Two volumes with the same confidence
+            value can differ enormously in how much they should be trusted.</span></li>
+      </ol>
+    </div>
+
+    <div class="takeaway">
+      <h3>The main points</h3>
+      <ul>
+        <li><b>A reflector in a volume needs two numbers, not one.</b> Inline dip and crossline dip are
+          components of its orientation, and neither on its own is "the dip".</li>
+        <li><b>Apparent dip belongs to the section, not the reflector.</b> The same bed shows a different dip
+          in every vertical section, following a cosine that peaks at the dip azimuth and reaches zero along
+          strike.</li>
+        <li><b>A section can be cut along strike through a steep bed and show nothing.</b> Zero dip on one
+          line is not evidence of a flat reflector.</li>
+        <li><b>Combining the components requires common units.</b> Convert per trace and per line to per
+          metre using the bin spacing before taking a magnitude or an azimuth.</li>
+        <li><b>Time dip is still not geological dip.</b> The conversion needs a velocity, and the volume does
+          not contain one.</li>
+        <li><b>The search is the same idea, one dimension larger.</b> Align a patch of traces instead of a
+          row, score it the same way, and accept that the cost grows as the square.</li>
+      </ul>
+    </div>
+  </div>
+
+  <details class="notes" id="notes">
+    <summary>Method, assumptions, and where to read more</summary>
+    <p>The volume is 25 inlines by 25 crosslines by 220 samples at 2 ms. The reflector is defined
+      analytically as t(x, y) = t0 + px·x + py·y, and the amplitude at each sample is a 30 Hz Ricker wavelet
+      evaluated at the offset from that surface, so the geometry is exact rather than interpolated. The
+      optional second and third beds are parallel copies 70 ms above and below.</p>
+    <p>Azimuth here is measured in degrees clockwise from the inline axis and points downdip. Real surveys
+      are rotated relative to north, so a dip azimuth volume has to be corrected by the survey rotation
+      before it means anything geographic, and packages differ over whether azimuth points updip or downdip
+      and whether it is measured from north or from the inline. Check the convention before comparing two
+      volumes.</p>
+    <p>The rotated section in step 5 is sampled at a fixed 15 m along the line, using bilinear interpolation
+      between the four surrounding traces. That fixed spacing is a display choice. In a real volume the
+      natural trace spacing along a section varies with azimuth — a section cut diagonally across square bins
+      has traces &radic;2 further apart than one cut along the inline — which is a further reason apparent
+      dip is quoted per unit distance rather than per trace once you leave the acquisition directions.</p>
+    <p>The search is the discrete scan of Marfurt et al. (1998) extended to two components, which is one of
+      the two algorithms in AASPI program <span class="k">dip3d</span>. Refinement fits a parabola along each
+      axis through the winning cell. A true two-dimensional peak wants a paraboloid including a cross term;
+      the separable form used here is what most implementations do and is accurate while the peak is not
+      strongly skewed, which the elongated ridge under noise shows it can be.</p>
+    <p>Simplifications carried over from module 01, plus new ones. Dip is estimated at a single point rather
+      than at every sample. Semblance is computed on the plain trace rather than the analytic trace. There is
+      no Kuwahara search over shifted windows. The reflector is planar, so curvature is zero everywhere and
+      the estimate is not fighting a changing orientation inside the window. And the alternative family of
+      estimators, which builds a gradient structure tensor and takes its principal eigenvector rather than
+      searching candidates, is not shown here at all.</p>
+    <ul>
+      <li>Marfurt, K. J., R. L. Kirlin, S. L. Farmer, and M. S. Bahorich, 1998, 3-D seismic attributes using
+        a semblance-based coherency algorithm: <em>Geophysics</em>, 63, 1150–1165.</li>
+      <li>Marfurt, K. J., 2006, Robust estimates of 3D reflector dip and azimuth: <em>Geophysics</em>, 71,
+        P29–P40.</li>
+      <li>Luo, Y., Y. E. Wang, N. M. Albinhassan, and M. N. Alfaraj, 2006, Computation of dips and azimuths
+        with weighted structural tensor approach: <em>Geophysics</em>, 71, V119–V121.</li>
+      <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+        Reservoir Characterization</em>: SEG.</li>
+      <li>AASPI program documentation for <span class="k">dip3d</span>, University of Oklahoma —
+        <a href="https://www.ou.edu/mcee/labs/aaspi">ou.edu/mcee/labs/aaspi</a>.</li>
+    </ul>
+  </details>
+
+  <section class="nextup">
+    <p class="eyebrow">Next up</p>
+    <h3><a href="coherence.html">03 · Coherence and the analysis window</a></h3>
+    <p>Dip is now a direction at every sample rather than a number. Coherence compares neighbouring traces
+      along that direction and asks how well they agree, which is the same semblance calculation used here
+      to find the dip in the first place. What changes is the question, and what the answer is used for.</p>
+    <a class="btn" href="coherence.html">Open module 03 →</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+  </section>
+
+  <div class="pager">
+    <a class="btn ghost" href="dip.html">← Module 01: dip in 2D</a>
+    <a class="btn" href="coherence.html">Next: coherence →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma —
+        with the <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.
+        Free to use or adapt in your own courses with citation.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/seismic.js"></script>
+<script src="../assets/attributes.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof SEIS === 'undefined' || typeof ATTR === 'undefined') {
+    const missing = [];
+    if (typeof SEIS === 'undefined') missing.push('assets/seismic.js');
+    if (typeof ATTR === 'undefined') missing.push('assets/attributes.js');
+    const el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load ' + missing.join(' and ') +
+      '. It expects them one directory up, at ../assets/, and file names are ' +
+      'case-sensitive on GitHub Pages.';
+    const w = document.querySelector('.wrap');
+    (w || document.body).insertBefore(el, w ? w.firstChild : null);
+    return;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const DEG = Math.PI / 180;
+
+  /* Helpers that arrived with a later assets/attributes.js. Defined here when
+     absent so the module works against an older checkout. */
+  const gather3D = ATTR.gatherAlongDip3D || function (vol, nil, nxl, nt, ix, iy, it,
+                                                      px, py, half, kHalf, out) {
+    const K = 2 * kHalf + 1;
+    let n = 0;
+    for (let jy = -half; jy <= half; jy++) {
+      const yy = Math.min(nxl - 1, Math.max(0, iy + jy));
+      for (let jx = -half; jx <= half; jx++) {
+        const xx = Math.min(nil - 1, Math.max(0, ix + jx));
+        const shift = px * jx + py * jy;
+        const base = (yy * nil + xx) * nt;
+        for (let k = -kHalf; k <= kHalf; k++) {
+          const pos = it + k + shift;
+          const i0 = Math.floor(pos), f = pos - i0;
+          let v = 0;
+          if (i0 >= 0 && i0 < nt - 1) v = vol[base + i0] * (1 - f) + vol[base + i0 + 1] * f;
+          else if (i0 >= 0 && i0 < nt) v = vol[base + i0];
+          out[n * K + (k + kHalf)] = v;
+        }
+        n++;
+      }
+    }
+    return out;
+  };
+
+  const scan3D = ATTR.dipScan3D || function (vol, nil, nxl, nt, ix, iy, it, o) {
+    const half = o.half, kHalf = o.kHalf, pMax = o.pMax, nP = o.nP;
+    const JT = (2 * half + 1) * (2 * half + 1), K = 2 * kHalf + 1;
+    const buf = new Float64Array(JT * K);
+    const grid = new Float32Array(nP * nP);
+    const cand = (i) => -pMax + (2 * pMax * i) / (nP - 1);
+    let best = -1, ia = 0, ib = 0;
+    for (let a = 0; a < nP; a++) {
+      for (let b = 0; b < nP; b++) {
+        gather3D(vol, nil, nxl, nt, ix, iy, it, cand(a), cand(b), half, kHalf, buf);
+        const s = ATTR.semblance(buf, JT, K);
+        grid[a * nP + b] = s;
+        if (s > best) { best = s; ia = a; ib = b; }
+      }
+    }
+    const step = (2 * pMax) / (nP - 1);
+    const ref = (lo, mid, hi, at) => {
+      const den = lo - 2 * mid + hi;
+      return Math.abs(den) < 1e-12 ? at : at - 0.5 * step * (hi - lo) / den;
+    };
+    let px = cand(ia), py = cand(ib);
+    if (ia > 0 && ia < nP - 1) px = ref(grid[(ia - 1) * nP + ib], grid[ia * nP + ib],
+                                        grid[(ia + 1) * nP + ib], px);
+    if (ib > 0 && ib < nP - 1) py = ref(grid[ia * nP + ib - 1], grid[ia * nP + ib],
+                                        grid[ia * nP + ib + 1], py);
+    return { px, py, sem: best, grid, nP, pMax, ia, ib };
+  };
+
+  const magAzim = ATTR.dipMagAzim || function (gx, gy) {
+    let az = Math.atan2(gy, gx) / DEG;
+    if (az < 0) az += 360;
+    return { mag: Math.sqrt(gx * gx + gy * gy), az };
+  };
+  const apparent = ATTR.apparentDip ||
+    ((gx, gy, a) => gx * Math.cos(a * DEG) + gy * Math.sin(a * DEG));
+  const gradToDeg = ATTR.gradientToDegrees || function (mag, v) {
+    const s = (v * (mag / 1000)) / 2;
+    return Math.abs(s) >= 1 ? 90 : Math.asin(s) / DEG;
+  };
+  const SCANMAP = ATTR.MAPS.scan;
+
+  /* =====================================================================
+     THE VOLUME
+     ===================================================================== */
+
+  const NIL = 25, NXL = 25, NT = 220, DT = 0.002;
+  const CX = 12, CY = 12;                    // the analysis point, inline 13 / line 13
+  const msToS = (ms) => ms / (DT * 1000);    // milliseconds -> samples
+  const sToMs = (s) => s * DT * 1000;
+
+  const DEF = {
+    px: 0, py: 4,                            // ms per trace / per line
+    t0: 220, f: 30, noise: 0, beds: false,
+    dx: 25, dy: 25, vel: 3000,
+    slice: 220, az: 30,
+    thMax: 8, dStep: 1, half: 2, kHalf: 8,
+    disp: 'wiggle',
+  };
+  let S = SEIS.readState(DEF);
+
+  const CAN_LINK = location.protocol !== 'file:';
+  const saveState = () => {
+    if (!CAN_LINK) return;
+    try { SEIS.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  };
+
+  let VOL = new Float32Array(NIL * NXL * NT);
+  let PEAK = 1;
+
+  /* Reflector time in milliseconds at a given bin, straight from
+     t(x, y) = t0 + px·x + py·y with x and y counted from the centre. */
+  const refMs = (ix, iy, bedOffset) =>
+    S.t0 + bedOffset + S.px * (ix - CX) + S.py * (iy - CY);
+
+  function buildVolume() {
+    const wav = SEIS.makeWavelet({ type: 'ricker', f: S.f });
+    const hl = wav.halfLength;
+    const offsets = S.beds ? [-70, 0, 70] : [0];
+    const amps = S.beds ? [0.075, 0.1, -0.08] : [0.1];
+    const v = new Float32Array(NIL * NXL * NT);
+    for (let iy = 0; iy < NXL; iy++) {
+      for (let ix = 0; ix < NIL; ix++) {
+        const base = (iy * NIL + ix) * NT;
+        for (let b = 0; b < offsets.length; b++) {
+          const tr = refMs(ix, iy, offsets[b]) / 1000;          // seconds
+          const i0 = Math.max(0, Math.ceil((tr - hl) / DT));
+          const i1 = Math.min(NT - 1, Math.floor((tr + hl) / DT));
+          for (let it = i0; it <= i1; it++) v[base + it] += amps[b] * wav.fn(it * DT - tr);
+        }
+      }
+    }
+    let pk = 1e-6;
+    for (let i = 0; i < v.length; i++) pk = Math.max(pk, Math.abs(v[i]));
+    if (S.noise > 0) {
+      const nz = SEIS.bandLimitedNoise(NIL * NXL, NT, DT, wav, 17, 1);
+      const amp = (S.noise / 100) * pk;
+      for (let i = 0; i < v.length; i++) v[i] += amp * nz[i];
+      pk = 1e-6;
+      for (let i = 0; i < v.length; i++) pk = Math.max(pk, Math.abs(v[i]));
+    }
+    VOL = v; PEAK = pk;
+  }
+
+  /* ------------------------------ extractions --------------------------- */
+
+  function inlineSection() {                 // vary inline, crossline fixed
+    const a = new Float32Array(NIL * NT);
+    for (let ix = 0; ix < NIL; ix++) {
+      const base = (CY * NIL + ix) * NT;
+      for (let it = 0; it < NT; it++) a[ix * NT + it] = VOL[base + it];
+    }
+    return a;
+  }
+
+  function crosslineSection() {              // vary crossline, inline fixed
+    const a = new Float32Array(NXL * NT);
+    for (let iy = 0; iy < NXL; iy++) {
+      const base = (iy * NIL + CX) * NT;
+      for (let it = 0; it < NT; it++) a[iy * NT + it] = VOL[base + it];
+    }
+    return a;
+  }
+
+  function timeSlice(ms) {
+    const it = clamp(Math.round(msToS(ms)), 0, NT - 1);
+    const a = new Float32Array(NIL * NXL);
+    for (let iy = 0; iy < NXL; iy++) {
+      for (let ix = 0; ix < NIL; ix++) a[iy * NIL + ix] = VOL[(iy * NIL + ix) * NT + it];
+    }
+    return a;
+  }
+
+  /* A vertical section at an arbitrary azimuth. Sampled at a fixed distance
+     along the line, with bilinear interpolation between the four surrounding
+     traces, because the line does not pass through bin centres. */
+  const NR = 41, RSTEP = 15;                 // traces, and metres between them
+  function rotatedSection(azDeg) {
+    const a = new Float32Array(NR * NT);
+    const ca = Math.cos(azDeg * DEG), sa = Math.sin(azDeg * DEG);
+    for (let i = 0; i < NR; i++) {
+      const s = (i - (NR - 1) / 2) * RSTEP;                    // metres from centre
+      const fx = clamp(CX + (s * ca) / S.dx, 0, NIL - 1.001);
+      const fy = clamp(CY + (s * sa) / S.dy, 0, NXL - 1.001);
+      const x0 = Math.floor(fx), y0 = Math.floor(fy);
+      const tx = fx - x0, ty = fy - y0;
+      const b00 = (y0 * NIL + x0) * NT, b10 = (y0 * NIL + x0 + 1) * NT;
+      const b01 = ((y0 + 1) * NIL + x0) * NT, b11 = ((y0 + 1) * NIL + x0 + 1) * NT;
+      for (let it = 0; it < NT; it++) {
+        a[i * NT + it] =
+          (VOL[b00 + it] * (1 - tx) + VOL[b10 + it] * tx) * (1 - ty) +
+          (VOL[b01 + it] * (1 - tx) + VOL[b11 + it] * tx) * ty;
+      }
+    }
+    return a;
+  }
+
+  /* --------------------------- derived quantities ----------------------- */
+
+  const gx = () => S.px / S.dx;              // ms per metre, inline
+  const gy = () => S.py / S.dy;              // ms per metre, crossline
+  const grad = () => magAzim(gx(), gy());
+
+  /* ------------------------------ the search ---------------------------- */
+
+  const nCand = () => clamp(2 * Math.round(S.thMax / S.dStep) + 1, 3, 81);
+  const candMs = (i) => -S.thMax + (2 * S.thMax * i) / (nCand() - 1);
+  let RES = null, REVEAL = 0;                // REVEAL: rows of the grid drawn so far
+
+  function runScan() {
+    RES = scan3D(VOL, NIL, NXL, NT, CX, CY, Math.round(msToS(S.t0)), {
+      half: S.half, kHalf: S.kHalf, pMax: msToS(S.thMax), nP: nCand(),
+    });
+  }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  const CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+  const M = { l: 50, r: 14, t: 10, b: 34 };
+  const EXC = 0.45;
+
+  const pw = (el) => (el && el.parentElement ? el.parentElement.clientWidth : 900);
+  function rowWidth(rowId, n) {
+    const row = $(rowId);
+    const total = row ? row.clientWidth : 800;
+    if (window.innerWidth <= 700) return Math.max(240, total);
+    return Math.max(200, Math.floor((total - 10 * (n - 1)) / n));
+  }
+
+  /* An indexed image drawn into a rect, with row 0 of the grid at the bottom
+     so that a crossline axis increases upward the way a map does. */
+  function imageInto(ctx, rect, nx, ny, get, map, flipY) {
+    const off = document.createElement('canvas');
+    off.width = nx; off.height = ny;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(nx, ny);
+    for (let r = 0; r < ny; r++) {
+      const sy = flipY === false ? r : ny - 1 - r;
+      for (let c = 0; c < nx; c++) {
+        const col = map(get(c, sy));
+        const q = (r * nx + c) * 4;
+        img.data[q] = col[0]; img.data[q + 1] = col[1];
+        img.data[q + 2] = col[2]; img.data[q + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(off, rect.x, rect.y, rect.w, rect.h);
+    ctx.restore();
+  }
+
+  const grayMap = (v) => {
+    const u = clamp(0.5 + 0.5 * (v / (PEAK * 0.9)), 0, 1);
+    const g = Math.round(255 * (1 - u) * 0.92 + 12);
+    return [g, g, g];
+  };
+
+  /* ------------------------- a vertical section ------------------------- */
+
+  function sectionPanel(canvasId, arr, nTr, w, h, opts) {
+    const o = opts || {};
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+
+    if (S.disp === 'color') {
+      SEIS.drawVarDensity(ctx, arr, nTr, NT, R, { cmap: SEIS.COLORMAPS.gray, clip: PEAK * 0.9 });
+    } else {
+      ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+      SEIS.drawWiggle(ctx, arr, nTr, NT, R, { clip: PEAK, excursion: EXC, lineWidth: 1 });
+    }
+
+    const X = (i) => R.x + ((i + 0.5) / nTr) * R.w;
+    const Y = (ms) => R.y + (ms / ((NT - 1) * DT * 1000)) * R.h;
+    if (o.extras) o.extras(ctx, R, X, Y);
+
+    SEIS.frame(ctx, R);
+    SEIS.axisLeft(ctx, R, 0, (NT - 1) * DT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 5 });
+    ctx.save();
+    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const every = nTr > 15 ? 6 : 2;
+    for (let i = 0; i < nTr; i++) {
+      if (i % every === 0 || i === nTr - 1) {
+        ctx.fillText(o.label ? o.label(i) : String(i + 1), X(i), R.y + R.h + 6);
+      }
+    }
+    ctx.fillStyle = CRIM;
+    ctx.font = '600 10px "IBM Plex Mono", monospace';
+    ctx.fillText(o.dir || '', R.x + R.w / 2, R.y + R.h + 20);
+    ctx.restore();
+    return R;
+  }
+
+  // the reflector drawn straight onto a section, given its time at each trace
+  function reflectorLine(ctx, R, X, Y, nTr, msAt, colour) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    ctx.strokeStyle = colour || CRIM; ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    for (let i = 0; i < nTr; i++) {
+      const y = Y(msAt(i));
+      i === 0 ? ctx.moveTo(X(i), y) : ctx.lineTo(X(i), y);
+    }
+    ctx.stroke(); ctx.restore();
+  }
+
+  // the one-step staircase: across one trace, down by the dip
+  function staircase(ctx, R, X, Y, ia, ib, msA, msB, text) {
+    const ya = Y(msA), yb = Y(msB);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    ctx.setLineDash([3, 3]); ctx.strokeStyle = TEAL; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(X(ia), ya); ctx.lineTo(X(ib), ya); ctx.lineTo(X(ib), yb);
+    ctx.stroke(); ctx.restore();
+    SEIS.tag(ctx, X(ib) + 8, (ya + yb) / 2, text, TEAL);
+  }
+
+  /* ------------------------------ the cube ------------------------------ */
+
+  function drawCube() {
+    const w = pw($('cube'));
+    const h = 300;
+    const ctx = SEIS.fitCanvas($('cube'), w, h);
+    ctx.clearRect(0, 0, w, h);
+
+    const ex = { x: 210, y: 30 }, ey = { x: 104, y: -62 }, ez = { x: 0, y: 150 };
+    const O = { x: (w - (ex.x + ey.x)) / 2 + 12, y: 92 };
+    const P = (u, v, t) => ({
+      x: O.x + u * ex.x + v * ey.x,
+      y: O.y + u * ex.y + v * ey.y + t * ez.y,
+    });
+    const poly = (pts, fill, stroke) => {
+      ctx.beginPath();
+      pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1.2; ctx.stroke(); }
+    };
+
+    // normalised time of the reflector at a corner of the cube
+    const span = (NT - 1) * DT * 1000;
+    const tau = (u, v) => clamp(refMs(u * (NIL - 1), v * (NXL - 1), 0) / span, 0.04, 0.96);
+
+    ctx.save();
+    poly([P(0, 0, 0), P(1, 0, 0), P(1, 1, 0), P(0, 1, 0)], 'rgba(22,25,28,.07)', 'rgba(22,25,28,.35)');
+    poly([P(0, 0, 0), P(1, 0, 0), P(1, 0, 1), P(0, 0, 1)], 'rgba(255,255,255,.92)', 'rgba(22,25,28,.5)');
+    poly([P(1, 0, 0), P(1, 1, 0), P(1, 1, 1), P(1, 0, 1)], 'rgba(241,242,238,.95)', 'rgba(22,25,28,.5)');
+
+    // the reflector where it meets each visible face
+    ctx.lineWidth = 2.6; ctx.strokeStyle = CRIM;
+    ctx.beginPath();
+    const a = P(0, 0, tau(0, 0)), b = P(1, 0, tau(1, 0));
+    ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.beginPath();
+    const c = P(1, 1, tau(1, 1));
+    ctx.moveTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.stroke();
+
+    // axis arrows
+    const arrow = (from, to, text, col) => {
+      ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+      const ang = Math.atan2(to.y - from.y, to.x - from.x);
+      ctx.beginPath();
+      ctx.moveTo(to.x, to.y);
+      ctx.lineTo(to.x - 8 * Math.cos(ang - 0.4), to.y - 8 * Math.sin(ang - 0.4));
+      ctx.lineTo(to.x - 8 * Math.cos(ang + 0.4), to.y - 8 * Math.sin(ang + 0.4));
+      ctx.closePath(); ctx.fill();
+      SEIS.tag(ctx, (from.x + to.x) / 2 - 26, (from.y + to.y) / 2 - 14, text, col);
+    };
+    ctx.restore();
+
+    arrow(P(0, 0, 1.14), P(1, 0, 1.14), 'INLINE', INK);
+    arrow(P(1.06, 0, 1.06), P(1.06, 1, 1.06), 'CROSSLINE', INK);
+    arrow({ x: O.x - 30, y: O.y + 6 }, { x: O.x - 30, y: O.y + ez.y }, 'TIME', SLATE);
+
+    SEIS.tag(ctx, P(0.32, 0, 0.16).x, P(0.32, 0, 0.16).y, 'inline section', CRIM);
+    SEIS.tag(ctx, P(1, 0.34, 0.12).x, P(1, 0.34, 0.12).y, 'crossline section', CRIM);
+  }
+
+  /* ------------------------------- step 1 ------------------------------- */
+
+  function drawStep1() {
+    drawCube();
+    const w = rowWidth('row1', 2);
+    const h = clamp(Math.round(w * 0.78), 280, 360);
+    sectionPanel('c1il', inlineSection(), NIL, w, h, {
+      dir: 'INLINE \u2192', label: (i) => String(i + 1),
+      extras: (ctx, R, X, Y) => reflectorLine(ctx, R, X, Y, NIL, (i) => refMs(i, CY, 0)),
+    });
+    sectionPanel('c1xl', crosslineSection(), NXL, w, h, {
+      dir: 'CROSSLINE \u2192', label: (i) => String(i + 1),
+      extras: (ctx, R, X, Y) => reflectorLine(ctx, R, X, Y, NXL, (i) => refMs(CX, i, 0)),
+    });
+  }
+
+  /* ---------------------------- steps 2 and 3 --------------------------- */
+
+  function drawStep2() {
+    const w = pw($('c2'));
+    const h = clamp(Math.round(w * 0.34), 260, 340);
+    sectionPanel('c2', inlineSection(), NIL, w, h, {
+      dir: 'INLINE \u2192', label: (i) => String(i + 1),
+      extras: (ctx, R, X, Y) => {
+        reflectorLine(ctx, R, X, Y, NIL, (i) => refMs(i, CY, 0));
+        if (Math.abs(S.px) > 0.01) {
+          staircase(ctx, R, X, Y, CX, CX + 1, refMs(CX, CY, 0), refMs(CX + 1, CY, 0),
+            (S.px > 0 ? '+' : '') + S.px.toFixed(2) + ' ms');
+        } else {
+          SEIS.tag(ctx, X(CX) - 60, Y(refMs(CX, CY, 0)) - 14, 'no inline dip', TEAL);
+        }
+      },
+    });
+  }
+
+  function drawStep3() {
+    const w = pw($('c3'));
+    const h = clamp(Math.round(w * 0.34), 260, 340);
+    sectionPanel('c3', crosslineSection(), NXL, w, h, {
+      dir: 'CROSSLINE \u2192', label: (i) => String(i + 1),
+      extras: (ctx, R, X, Y) => {
+        reflectorLine(ctx, R, X, Y, NXL, (i) => refMs(CX, i, 0));
+        if (Math.abs(S.py) > 0.01) {
+          staircase(ctx, R, X, Y, CY, CY + 1, refMs(CX, CY, 0), refMs(CX, CY + 1, 0),
+            (S.py > 0 ? '+' : '') + S.py.toFixed(2) + ' ms');
+        } else {
+          SEIS.tag(ctx, X(CY) - 68, Y(refMs(CX, CY, 0)) - 14, 'no crossline dip', TEAL);
+        }
+      },
+    });
+  }
+
+  /* ------------------------------- step 4 ------------------------------- */
+
+  /* Map view. Inline runs across, crossline runs up. */
+  function mapPanel(canvasId, w, h, extras) {
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    const sl = timeSlice(S.slice);
+    imageInto(ctx, R, NIL, NXL, (c, r) => sl[r * NIL + c], grayMap);
+
+    const X = (ix) => R.x + ((ix + 0.5) / NIL) * R.w;
+    const Y = (iy) => R.y + R.h - ((iy + 0.5) / NXL) * R.h;
+    if (extras) extras(ctx, R, X, Y);
+
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 1, NIL, 'inline \u2192', (v) => v.toFixed(0), { ticks: 5 });
+    SEIS.axisLeft(ctx, R, 1, NXL, 'crossline \u2192', (v) => v.toFixed(0), { flip: true, ticks: 5 });
+    return R;
+  }
+
+  function drawStep4() {
+    const w = rowWidth('row4', 2);
+    const h = clamp(Math.round(w * 0.86), 280, 380);
+
+    mapPanel('c4map', w, h, (ctx, R, X, Y) => {
+      const g = grad();
+      ctx.save();
+      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+      const cx = X(CX), cy = Y(CY);
+      if (g.mag > 1e-6) {
+        const a = g.az * DEG;
+        const L = Math.min(R.w, R.h) * 0.34;
+        const tx = cx + L * Math.cos(a), ty = cy - L * Math.sin(a);
+        ctx.strokeStyle = CRIM; ctx.fillStyle = CRIM; ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tx, ty); ctx.stroke();
+        const ang = Math.atan2(ty - cy, tx - cx);
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(tx - 11 * Math.cos(ang - 0.38), ty - 11 * Math.sin(ang - 0.38));
+        ctx.lineTo(tx - 11 * Math.cos(ang + 0.38), ty - 11 * Math.sin(ang + 0.38));
+        ctx.closePath(); ctx.fill();
+        // strike, perpendicular
+        const sx = Math.cos(a + Math.PI / 2), sy = Math.sin(a + Math.PI / 2);
+        SEIS.dashedLine(ctx, cx - 900 * sx, cy + 900 * sy, cx + 900 * sx, cy - 900 * sy,
+          TEAL, [6, 5], 1.8);
+      }
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 6.2832); ctx.fill();
+      ctx.restore();
+      if (g.mag > 1e-6) SEIS.tag(ctx, R.x + 6, R.y + 12, 'downdip', CRIM);
+      else SEIS.tag(ctx, R.x + 6, R.y + 12, 'flat \u2014 no bands', TEAL);
+    });
+
+    // the two components drawn as a vector, in ms per metre
+    const ctx = SEIS.fitCanvas($('c4vec'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 54, y: 14, w: w - 68, h: h - 14 - 40 };
+    const lim = Math.max(0.05, 8 / Math.min(S.dx, S.dy));
+    const X = (v) => R.x + ((v + lim) / (2 * lim)) * R.w;
+    const Y = (v) => R.y + R.h - ((v + lim) / (2 * lim)) * R.h;
+
+    ctx.save();
+    ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h);
+    ctx.restore();
+    SEIS.dashedLine(ctx, R.x, Y(0), R.x + R.w, Y(0), 'rgba(22,25,28,.28)', [4, 4], 1);
+    SEIS.dashedLine(ctx, X(0), R.y, X(0), R.y + R.h, 'rgba(22,25,28,.28)', [4, 4], 1);
+
+    const vx = gx(), vy = gy();
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    // components, then resultant
+    SEIS.dashedLine(ctx, X(0), Y(0), X(vx), Y(0), SLATE, [5, 4], 1.6);
+    SEIS.dashedLine(ctx, X(vx), Y(0), X(vx), Y(vy), SLATE, [5, 4], 1.6);
+    ctx.strokeStyle = CRIM; ctx.fillStyle = CRIM; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(vx), Y(vy)); ctx.stroke();
+    if (Math.abs(vx) + Math.abs(vy) > 1e-6) {
+      const ang = Math.atan2(Y(vy) - Y(0), X(vx) - X(0));
+      ctx.beginPath();
+      ctx.moveTo(X(vx), Y(vy));
+      ctx.lineTo(X(vx) - 11 * Math.cos(ang - 0.38), Y(vy) - 11 * Math.sin(ang - 0.38));
+      ctx.lineTo(X(vx) - 11 * Math.cos(ang + 0.38), Y(vy) - 11 * Math.sin(ang + 0.38));
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, -lim, lim, '\u2202t/\u2202x  (ms per metre)', (v) => v.toFixed(2), { ticks: 4 });
+    SEIS.axisLeft(ctx, R, -lim, lim, '\u2202t/\u2202y', (v) => v.toFixed(2), { flip: true, ticks: 4 });
+  }
+
+  /* ------------------------------- step 5 ------------------------------- */
+
+  function drawStep5() {
+    const w = rowWidth('row5', 2);
+    const h = clamp(Math.round(w * 0.86), 280, 380);
+
+    mapPanel('c5map', w, h, (ctx, R, X, Y) => {
+      const cx = X(CX), cy = Y(CY);
+      const a = S.az * DEG;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+      // the line along which the section is cut, in bin space
+      const ux = Math.cos(a) / S.dx, uy = Math.sin(a) / S.dy;
+      const n = Math.hypot(ux, uy) || 1;
+      const L = 900;
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(cx - L * (ux / n) * (R.w / NIL), cy + L * (uy / n) * (R.h / NXL));
+      ctx.lineTo(cx + L * (ux / n) * (R.w / NIL), cy - L * (uy / n) * (R.h / NXL));
+      ctx.stroke();
+      const g = grad();
+      if (g.mag > 1e-6) {
+        const sa = (g.az + 90) * DEG;
+        SEIS.dashedLine(ctx, cx - 900 * Math.cos(sa), cy + 900 * Math.sin(sa),
+          cx + 900 * Math.cos(sa), cy - 900 * Math.sin(sa), TEAL, [6, 5], 1.6);
+      }
+      ctx.restore();
+      SEIS.tag(ctx, R.x + 6, R.y + 12, 'section line', INK);
+      SEIS.tag(ctx, R.x + 6, R.y + 30, 'strike', TEAL);
+    });
+
+    const app = apparent(gx(), gy(), S.az);           // ms per metre
+    sectionPanel('c5sec', rotatedSection(S.az), NR, w, h, {
+      dir: 'ALONG SECTION \u2192',
+      label: (i) => String(Math.round((i - (NR - 1) / 2) * RSTEP)),
+      extras: (ctx, R, X, Y) => {
+        reflectorLine(ctx, R, X, Y, NR,
+          (i) => S.t0 + app * (i - (NR - 1) / 2) * RSTEP);
+      },
+    });
+
+    drawAzCurve();
+  }
+
+  function drawAzCurve() {
+    const w = pw($('c5curve'));
+    const h = 240;
+    const ctx = SEIS.fitCanvas($('c5curve'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 58, y: 14, w: w - 72, h: h - 14 - 44 };
+    const g = grad();
+    const lim = Math.max(0.02, g.mag * 1.25);
+    const X = (a) => R.x + (a / 360) * R.w;
+    const Y = (v) => R.y + R.h - ((v + lim) / (2 * lim)) * R.h;
+
+    SEIS.axisLeft(ctx, R, -lim, lim, 'apparent dip (ms/m)', (v) => v.toFixed(2),
+      { flip: true, grid: true, ticks: 5 });
+    SEIS.dashedLine(ctx, R.x, Y(0), R.x + R.w, Y(0), 'rgba(22,25,28,.35)', [4, 4], 1);
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let a = 0; a <= 360; a += 2) {
+      const y = Y(apparent(gx(), gy(), a));
+      a === 0 ? ctx.moveTo(X(a), y) : ctx.lineTo(X(a), y);
+    }
+    ctx.stroke();
+
+    // inline and crossline are just two points on this curve
+    [[0, 'inline'], [90, 'crossline']].forEach(([a, name]) => {
+      const y = Y(apparent(gx(), gy(), a));
+      ctx.fillStyle = SLATE;
+      ctx.beginPath(); ctx.arc(X(a), y, 3.6, 0, 6.2832); ctx.fill();
+      SEIS.tag(ctx, X(a) + 6, y - 12, name, SLATE);
+    });
+    if (g.mag > 1e-6) {
+      SEIS.dashedLine(ctx, X(g.az), R.y, X(g.az), R.y + R.h, TEAL, [5, 4], 1.6);
+      const st = (g.az + 90) % 360;
+      SEIS.dashedLine(ctx, X(st), R.y, X(st), R.y + R.h, 'rgba(11,114,133,.45)', [3, 4], 1.4);
+    }
+    // where the student currently is
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(X(S.az), R.y); ctx.lineTo(X(S.az), R.y + R.h); ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath(); ctx.arc(X(S.az), Y(apparent(gx(), gy(), S.az)), 4, 0, 6.2832); ctx.fill();
+    ctx.restore();
+
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 0, 360, 'azimuth of the section (degrees from inline)',
+      (v) => v.toFixed(0), { ticks: 7 });
+  }
+
+  /* ------------------------------- step 6 ------------------------------- */
+
+  function drawStep6() {
+    const w = rowWidth('row6', 2);
+    const h = clamp(Math.round(w * 0.86), 280, 380);
+    const ctx = SEIS.fitCanvas($('c6grid'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 54, y: 14, w: w - 68, h: h - 14 - 42 };
+    if (!RES) return;
+
+    const n = RES.nP;
+    let hi = 1e-6;
+    for (let i = 0; i < RES.grid.length; i++) hi = Math.max(hi, RES.grid[i]);
+    imageInto(ctx, R, n, n, (c, r) => (r <= REVEAL ? RES.grid[c * n + r] / hi : -1),
+      (v) => (v < 0 ? [232, 234, 231] : SCANMAP(v)));
+
+    const X = (ms) => R.x + ((ms + S.thMax) / (2 * S.thMax)) * R.w;
+    const Y = (ms) => R.y + R.h - ((ms + S.thMax) / (2 * S.thMax)) * R.h;
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    if (REVEAL >= n - 1) {
+      const px = sToMs(RES.px), py = sToMs(RES.py);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(X(px), Y(py), 8, 0, 6.2832); ctx.stroke();
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(X(px), Y(py), 8, 0, 6.2832); ctx.stroke();
+    }
+    // where the truth is
+    SEIS.dashedLine(ctx, X(S.px), R.y, X(S.px), R.y + R.h, TEAL, [4, 4], 1.4);
+    SEIS.dashedLine(ctx, R.x, Y(S.py), R.x + R.w, Y(S.py), TEAL, [4, 4], 1.4);
+    ctx.restore();
+
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, -S.thMax, S.thMax, 'candidate inline dip (ms/trace)',
+      (v) => v.toFixed(0), { ticks: 5 });
+    SEIS.axisLeft(ctx, R, -S.thMax, S.thMax, 'candidate crossline dip',
+      (v) => v.toFixed(0), { flip: true, ticks: 5 });
+
+    // the patch of traces, gathered at the current estimate
+    const half = S.half, JT = (2 * half + 1) * (2 * half + 1), K = 2 * S.kHalf + 1;
+    const buf = new Float64Array(JT * K);
+    const usePx = RES ? RES.px : 0, usePy = RES ? RES.py : 0;
+    gather3D(VOL, NIL, NXL, NT, CX, CY, Math.round(msToS(S.t0)),
+      REVEAL >= n - 1 ? usePx : 0, REVEAL >= n - 1 ? usePy : 0, half, S.kHalf, buf);
+    const arr = new Float32Array(JT * K);
+    for (let i = 0; i < arr.length; i++) arr[i] = buf[i];
+
+    const g2 = SEIS.fitCanvas($('c6gath'), w, h);
+    g2.clearRect(0, 0, w, h);
+    const R2 = { x: 40, y: 14, w: w - 54, h: h - 14 - 42 };
+    g2.save(); g2.fillStyle = '#fff'; g2.fillRect(R2.x, R2.y, R2.w, R2.h); g2.restore();
+    if (S.disp === 'color') {
+      SEIS.drawVarDensity(g2, arr, JT, K, R2, { cmap: SEIS.COLORMAPS.gray, clip: PEAK * 0.9 });
+    } else {
+      SEIS.drawWiggle(g2, arr, JT, K, R2, { clip: PEAK, excursion: EXC, lineWidth: 0.9 });
+    }
+    SEIS.dashedLine(g2, R2.x, R2.y + R2.h / 2, R2.x + R2.w, R2.y + R2.h / 2,
+      'rgba(132,22,23,.5)', [4, 3], 1.2);
+    SEIS.frame(g2, R2);
+    g2.save();
+    g2.font = '10px "IBM Plex Mono", monospace'; g2.fillStyle = SLATE;
+    g2.textAlign = 'center'; g2.textBaseline = 'top';
+    g2.fillText((2 * half + 1) + ' \u00d7 ' + (2 * half + 1) + ' = ' + JT +
+      ' traces, laid side by side', R2.x + R2.w / 2, R2.y + R2.h + 8);
+    g2.restore();
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  const fmt = (v, d) => (v > 0 ? '+' : '') + v.toFixed(d === undefined ? 2 : d);
+
+  function updateStats() {
+    const flatX = Math.abs(S.px) < 0.01, flatY = Math.abs(S.py) < 0.01;
+    $('s1a').textContent = flatX ? 'a flat reflector' : fmt(S.px) + ' ms per trace';
+    $('s1b').textContent = flatY ? 'a flat reflector' : fmt(S.py) + ' ms per line';
+    $('s1c').textContent =
+      flatX && flatY ? 'The reflector is horizontal, so every section through it is flat.'
+      : flatX ? 'The inline section shows nothing while the reflector dips across the crosslines.'
+      : flatY ? 'The crossline section shows nothing while the reflector dips along the inlines.'
+      : 'Two different apparent dips, one reflector. Neither section on its own describes it.';
+
+    $('s2a').textContent = fmt(S.px) + ' ms per trace';
+    $('s2b').textContent = fmt(S.px * (NIL - 1), 1) + ' ms';
+    $('s2c').textContent = flatX
+      ? 'The reflector does not move in time along the inline direction.'
+      : 'Step one trace along the inline and the reflector arrives ' +
+        Math.abs(S.px).toFixed(2) + ' ms ' + (S.px > 0 ? 'later' : 'earlier') + '.';
+
+    $('s3a').textContent = fmt(S.py) + ' ms per line';
+    $('s3b').textContent = fmt(S.py * (NXL - 1), 1) + ' ms';
+    $('s3c').textContent = flatY
+      ? 'The reflector does not move in time along the crossline direction.'
+      : 'Step one line along the crossline and the reflector arrives ' +
+        Math.abs(S.py).toFixed(2) + ' ms ' + (S.py > 0 ? 'later' : 'earlier') + '.';
+
+    const g = grad();
+    $('s4a').textContent = fmt(gx(), 4) + ' ms/m';
+    $('s4b').textContent = fmt(gy(), 4) + ' ms/m';
+    $('s4c').textContent = g.mag.toFixed(4) + ' ms/m';
+    $('s4d').textContent = g.mag < 1e-6 ? 'undefined \u2014 no dip'
+      : g.az.toFixed(1) + '\u00b0 from inline';
+    $('s4e').textContent = gradToDeg(g.mag, S.vel).toFixed(1) + '\u00b0  at ' + S.vel + ' m/s';
+    $('s4f').textContent = S.dx === S.dy
+      ? 'Bins are square, so per trace and per line are directly comparable.'
+      : 'Bins are ' + S.dx + ' m by ' + S.dy +
+        ' m. One trace and one line are different distances, so the components must be ' +
+        'converted before combining.';
+
+    const app = apparent(gx(), gy(), S.az);
+    $('s5a').textContent = fmt(app, 4) + ' ms/m';
+    $('s5b').textContent = fmt(gx(), 4) + ' ms/m';
+    $('s5c').textContent = fmt(gy(), 4) + ' ms/m';
+    $('s5d').textContent = g.mag < 1e-6 ? '\u2014'
+      : g.az.toFixed(0) + '\u00b0,  ' + g.mag.toFixed(4) + ' ms/m';
+    $('s5e').textContent = g.mag < 1e-6 ? '\u2014' : ((g.az + 90) % 360).toFixed(0) + '\u00b0';
+    $('s5f').textContent = g.mag < 1e-6
+      ? 'With no dip, every section is flat and there is no strike direction.'
+      : Math.abs(app) < g.mag * 0.06
+        ? 'This section is close to strike, so it shows almost no dip through a dipping bed.'
+        : 'Inline and crossline are two points on this curve, not special ones.';
+
+    if (RES) {
+      const ex = sToMs(RES.px), ey = sToMs(RES.py);
+      const erx = ex - S.px, ery = ey - S.py;
+      const done = REVEAL >= RES.nP - 1;
+      $('s6a').textContent = done ? fmt(ex) + ' ms/trace' : 'searching\u2026';
+      $('s6b').textContent = done ? fmt(ey) + ' ms/line' : 'searching\u2026';
+      $('s6c').textContent = fmt(S.px) + ' , ' + fmt(S.py);
+      $('s6d').textContent = done
+        ? fmt(erx) + ' , ' + fmt(ery) + ' ms' : '\u2014';
+      $('s6e').textContent = RES.sem.toFixed(3) + '  from ' + (RES.nP * RES.nP) +
+        ' combinations';
+      const pinned = Math.abs(sToMs(RES.pMax)) - Math.max(Math.abs(ex), Math.abs(ey)) < 1e-6;
+      $('s6f').textContent = !done ? 'Running\u2026'
+        : pinned ? 'Estimate is at the edge of the search range; widen the range'
+        : RES.sem < 0.45 ? 'Low score; the traces did not match well'
+        : Math.max(Math.abs(erx), Math.abs(ery)) > 0.5
+          ? 'Off by ' + Math.max(Math.abs(erx), Math.abs(ery)).toFixed(2) + ' ms in one component'
+          : 'Both components within ' +
+            Math.max(Math.abs(erx), Math.abs(ery)).toFixed(2) + ' ms of the correct value';
+    }
+  }
+
+  function syncLabels() {
+    $('pxV').textContent = S.px.toFixed(2) + ' ms per trace';
+    $('pyV').textContent = S.py.toFixed(2) + ' ms per line';
+    $('px2V').textContent = S.px.toFixed(2) + ' ms per trace';
+    $('py3V').textContent = S.py.toFixed(2) + ' ms per line';
+    $('sliceV').textContent = S.slice + ' ms';
+    $('dxV').textContent = S.dx + ' m';
+    $('dyV').textContent = S.dy + ' m';
+    $('velV').textContent = S.vel + ' m/s';
+    $('azV').textContent = S.az + '\u00b0 from inline';
+    $('thMaxV').textContent = '\u00b1 ' + S.thMax + ' ms';
+    $('dStepV').textContent = S.dStep.toFixed(2) + ' ms';
+    $('halfV').textContent = (2 * S.half + 1) + ' \u00d7 ' + (2 * S.half + 1) + ' traces';
+    $('kHalfV').textContent = '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms';
+    $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
+    $('freqV').textContent = S.f + ' Hz';
+    $('dWig').setAttribute('aria-pressed', S.disp === 'wiggle');
+    $('dCol').setAttribute('aria-pressed', S.disp === 'color');
+    document.querySelectorAll('[data-preset]').forEach((b) => {
+      const [a, c] = b.dataset.preset.split(',').map(Number);
+      b.setAttribute('aria-pressed', a === S.px && c === S.py);
+    });
+  }
+
+  function pushToInputs() {
+    ['px', 'py', 'slice', 'dx', 'dy', 'vel', 'az', 'thMax', 'dStep', 'half', 'kHalf', 'noise']
+      .forEach((id) => { $(id).value = S[id]; });
+    $('px2').value = S.px; $('py3').value = S.py; $('freq').value = S.f;
+    $('beds').checked = S.beds;
+  }
+
+  /* =====================================================================
+     PLUMBING
+     ===================================================================== */
+
+  function drawAll() {
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5(); drawStep6();
+    syncLabels(); updateStats();
+  }
+
+  function rebuild() {
+    buildVolume(); runScan(); REVEAL = nCand() - 1;
+    drawAll(); saveState();
+  }
+
+  // geometry changed but the wavelet and noise did not
+  function reshape() {
+    buildVolume(); runScan(); REVEAL = nCand() - 1;
+    drawAll(); saveState();
+  }
+
+  let ANIM = null;
+  function stopAnim() {
+    if (!ANIM) return;
+    cancelAnimationFrame(ANIM.raf); ANIM = null;
+    $('runBtn').textContent = 'Run the search';
+  }
+  function runAnim() {
+    stopAnim();
+    const n = nCand();
+    const per = clamp(2600 / n, 40, 220);
+    REVEAL = -1;
+    ANIM = { i: -2, t0: performance.now(), raf: 0 };
+    $('runBtn').textContent = 'Stop';
+    const tick = (now) => {
+      if (!ANIM) return;
+      const i = Math.floor((now - ANIM.t0) / per);
+      if (i >= n) { stopAnim(); REVEAL = n - 1; drawStep6(); updateStats(); return; }
+      if (i !== ANIM.i) { ANIM.i = i; REVEAL = i; drawStep6(); updateStats(); }
+      ANIM.raf = requestAnimationFrame(tick);
+    };
+    ANIM.raf = requestAnimationFrame(tick);
+  }
+
+  /* ------------------------------ handlers ------------------------------ */
+
+  const bindGeom = (id, key, mirror) => $(id).addEventListener('input', () => {
+    S[key] = parseFloat($(id).value);
+    if (mirror) $(mirror).value = S[key];
+    stopAnim(); reshape();
+  });
+  bindGeom('px', 'px', 'px2');
+  bindGeom('py', 'py', 'py3');
+  bindGeom('px2', 'px', 'px');
+  bindGeom('py3', 'py', 'py');
+
+  document.querySelectorAll('[data-preset]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const [a, c] = b.dataset.preset.split(',').map(Number);
+      S.px = a; S.py = c;
+      $('px').value = a; $('px2').value = a; $('py').value = c; $('py3').value = c;
+      stopAnim(); reshape();
+    });
+  });
+
+  $('beds').addEventListener('change', () => { S.beds = $('beds').checked; stopAnim(); rebuild(); });
+  $('noise').addEventListener('input', () => { S.noise = parseFloat($('noise').value); stopAnim(); rebuild(); });
+  $('freq').addEventListener('input', () => { S.f = parseFloat($('freq').value); stopAnim(); rebuild(); });
+
+  const bindLight = (id, key, fn) => $(id).addEventListener('input', () => {
+    S[key] = parseFloat($(id).value); fn(); syncLabels(); updateStats(); saveState();
+  });
+  bindLight('slice', 'slice', () => { drawStep4(); drawStep5(); });
+  bindLight('dx', 'dx', () => { drawStep4(); drawStep5(); });
+  bindLight('dy', 'dy', () => { drawStep4(); drawStep5(); });
+  bindLight('vel', 'vel', () => {});
+  bindLight('az', 'az', () => { drawStep5(); });
+
+  const bindSearch = (id, key) => $(id).addEventListener('input', () => {
+    S[key] = parseFloat($(id).value);
+    stopAnim(); runScan(); REVEAL = nCand() - 1;
+    drawStep6(); syncLabels(); updateStats(); saveState();
+  });
+  bindSearch('thMax', 'thMax'); bindSearch('dStep', 'dStep');
+  bindSearch('half', 'half'); bindSearch('kHalf', 'kHalf');
+
+  $('runBtn').addEventListener('click', () => { ANIM ? stopAnim() : runAnim(); });
+  $('winBtn').addEventListener('click', () => {
+    stopAnim(); REVEAL = nCand() - 1; drawStep6(); updateStats();
+  });
+
+  const setDisp = (v) => { S.disp = v; drawAll(); saveState(); };
+  $('dWig').addEventListener('click', () => setDisp('wiggle'));
+  $('dCol').addEventListener('click', () => setDisp('color'));
+
+  $('resetBtn').addEventListener('click', () => {
+    stopAnim(); S = Object.assign({}, DEF);
+    pushToInputs(); rebuild();
+  });
+
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
+
+  buildVolume();
+  runScan();
+  REVEAL = nCand() - 1;
+  pushToInputs();
+  drawAll();
+  document.fonts && document.fonts.ready.then(drawAll);
+})();
+</script>
+</body>
+</html>
