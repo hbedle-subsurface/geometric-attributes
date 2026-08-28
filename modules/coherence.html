@@ -32,66 +32,15 @@
       they disagree — sometimes completely.</p>
   </div>
 
-  <!-- ============================== STEP ONE ============================== -->
-  <section class="plot" style="margin-top:6px">
-    <div class="plot-head">
-      <h3>Step 1 &nbsp;·&nbsp; How similar are two traces?</h3>
-      <span class="hint">Before any equation, decide what your eye says</span>
-    </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Four cases. Look at each and decide, before reading any number, whether you would call the two traces
-      similar. Case 3 is the interesting one: the shape is identical and only the size differs. Is that
-      similar or not? Your answer decides which attribute you should be running.</p>
-
-    <div class="ctl" style="margin-bottom:14px">
-      <label>The case</label>
-      <div class="seg" role="group" aria-label="Which pair of traces">
-        <button type="button" data-case="0">1 · Identical</button>
-        <button type="button" data-case="1">2 · Different shape</button>
-        <button type="button" data-case="2">3 · Same shape, half the size</button>
-        <button type="button" data-case="3">4 · Unrelated</button>
-      </div>
-    </div>
-
-    <canvas id="c1" aria-label="Two seismic traces compared"></canvas>
-
-    <div class="stats">
-      <div class="stat"><span>Normalised crosscorrelation at zero lag</span><b id="s1a">—</b></div>
-      <div class="stat"><span>Semblance of the pair</span><b id="s1b">—</b></div>
-      <div class="stat wide"><span>What the two numbers disagree about</span><b id="s1c">—</b></div>
-    </div>
-    <div class="legend">
-      <span>Crosscorrelation is normalised by the energy of each trace separately, so it ignores a change of
-        scale. Semblance is not, so it does not. Neither is right; they answer different questions. That
-        distinction is the whole of this module.</span>
-    </div>
-  </section>
-
-  <!-- ============================== STEP TWO ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 2 &nbsp;·&nbsp; From two traces to a window</h3>
-      <span class="hint">The question becomes: are these one event?</span>
-    </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Attributes are not computed on pairs of traces but on a window of several, aligned along the bed by
-      the dip field from modules 01 to 03. The question the algorithm asks is whether the whole window can
-      be described as one coherent seismic event. Two long-standing ways of answering it are below.</p>
-
-    <div class="sec-row" id="row2">
-      <div class="panel-col">
-        <p class="sublabel"><b>1</b> The window
-          <span class="note">traces already steered along dip</span></p>
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The analysis window <span>&mdash; the same data every step below refers to</span></p>
         <canvas id="c2win" aria-label="An analysis window of several traces"></canvas>
       </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>2</b> Semblance and variance
-          <span class="note">the same information, stated two ways round</span></p>
-        <canvas id="c2bar" aria-label="Semblance and variance for the window"></canvas>
-      </div>
-    </div>
-
-    <div class="controls" id="winControls" style="margin-top:14px">
+      <div>
+        <p class="cap">What is wrong with it <span>&mdash; every panel updates as you drag</span></p>
+        <div class="controls" id="winControls">
       <div class="ctl-col">
         <h2>What is wrong with the window</h2>
         <div class="ctl">
@@ -133,6 +82,78 @@
         <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
       </div>
     </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two traces</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · A window</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · The matrix</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · One equation</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Sobel</button>
+    <button role="tab" data-tab="p6" aria-selected="false">6 · Compare</button>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pt" aria-selected="false">Terminology</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+    <span class="spacer"></span>
+  </nav>
+
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Step 1 &nbsp;·&nbsp; How similar are two traces?</h3>
+      <span class="hint">Before any equation, decide what your eye says</span>
+    </div>
+
+        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Four cases. Look at each and decide, before reading any number, whether you would call the two traces
+      similar. Case 3 is the interesting one: the shape is identical and only the size differs. Is that
+      similar or not? Your answer decides which attribute you should be running.</p>
+
+    <div class="ctl" style="margin-bottom:14px">
+      <label>The case</label>
+      <div class="seg" role="group" aria-label="Which pair of traces">
+        <button type="button" data-case="0">1 · Identical</button>
+        <button type="button" data-case="1">2 · Different shape</button>
+        <button type="button" data-case="2">3 · Same shape, half the size</button>
+        <button type="button" data-case="3">4 · Unrelated</button>
+      </div>
+    </div>
+
+    <canvas id="c1" aria-label="Two seismic traces compared"></canvas>
+
+    <div class="stats">
+      <div class="stat"><span>Normalised crosscorrelation at zero lag</span><b id="s1a">—</b></div>
+      <div class="stat"><span>Semblance of the pair</span><b id="s1b">—</b></div>
+      <div class="stat wide"><span>What the two numbers disagree about</span><b id="s1c">—</b></div>
+    </div>
+    <div class="legend">
+      <span>Crosscorrelation is normalised by the energy of each trace separately, so it ignores a change of
+        scale. Semblance is not, so it does not. Neither is right; they answer different questions. That
+        distinction is the whole of this module.</span>
+    </div>
+    </section>
+
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Step 2 &nbsp;·&nbsp; From two traces to a window</h3>
+      <span class="hint">The question becomes: are these one event?</span>
+    </div>
+
+        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Attributes are not computed on pairs of traces but on a window of several, aligned along the bed by
+      the dip field from modules 01 to 03. The question the algorithm asks is whether the whole window can
+      be described as one coherent seismic event. Two long-standing ways of answering it are below.</p>
+
+    <div class="sec-row" id="row2">
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Semblance and variance
+          <span class="note">the same information, stated two ways round</span></p>
+        <canvas id="c2bar" aria-label="Semblance and variance for the window"></canvas>
+      </div>
+    </div>
+
 
     <div class="stats">
       <div class="stat key"><span>Semblance</span><b id="s2a">—</b></div>
@@ -147,15 +168,15 @@
         form. The raw statistical variance shown above is a different quantity — it depends on how loud the
         data is, not just on how well the traces match — which is why it is not used directly.</span>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP THREE ============================= -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
       <h3>Step 3 &nbsp;·&nbsp; One matrix underneath all of it</h3>
       <span class="hint">The covariance matrix and its eigenvalues</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
       Every attribute on this page except the Sobel filter is built from a single object: a covariance
       matrix. Entry <span class="k">C(m,n)</span> is trace m multiplied by trace n, sample by sample, summed
       down the window. A window of J traces gives a J-by-J table of those products, and the diagonal
@@ -175,8 +196,6 @@
       really does describe the window, λ₁ takes nearly everything and the rest are near zero. If the traces
       are unrelated, no single waveform helps much and the energy is spread across all of them. Panel 2
       shows each eigenvalue as a share of the total, which is why the bars always sum to 1.</p>
-
-    <div class="ctl-mirror" data-mirror="3" style="margin-bottom:16px"></div>
 
     <div class="sec-row" id="row3">
       <div class="panel-col">
@@ -202,15 +221,15 @@
       <div class="stat"><span>λ₂ as a share</span><b id="s3c">—</b></div>
       <div class="stat wide"><span>Reading the eigenvalues</span><b id="s3d">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP FOUR ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
       <h3>Step 4 &nbsp;·&nbsp; One equation, three named attributes</h3>
       <span class="hint">The difference is a single vector</span>
     </div>
-    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
       AASPI defines <b>outer-product similarity</b> as <span class="k">c = rᵀ C r / E</span>, where C is the
       covariance matrix from step 3, E is the total energy in the window, and r is a <b>test vector</b>: one
       weight per trace, the same shape as an eigenvector.</p>
@@ -243,8 +262,6 @@
       </div>
     </div>
 
-    <div class="ctl-mirror" data-mirror="4" style="margin-bottom:16px"></div>
-
     <div class="sec-row" id="row4">
       <div class="panel-col">
         <p class="sublabel"><b>1</b> The test vector you chose
@@ -275,22 +292,20 @@
       <div class="stat key"><span>Energy ratio at this L</span><b id="s4d">—</b></div>
       <div class="stat wide"><span>Where they disagree</span><b id="s4e">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP FIVE ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
       <h3>Step 5 &nbsp;·&nbsp; Sobel: the one that is not a covariance</h3>
       <span class="hint">An image-processing edge detector, steered along dip</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
       The Sobel filter comes from image processing rather than from seismic statistics. AASPI describes its
       version as the magnitude of the inline and crossline derivatives of amplitude along structural dip,
       normalised by the same derivatives taken on absolute values. It never builds a covariance matrix and
       it has no concept of a common waveform. It simply asks how fast amplitude is changing sideways, which
       makes it respond strongly to a change in size that the eigenvalue-based attributes ignore entirely.</p>
-
-    <div class="ctl-mirror" data-mirror="5" style="margin-bottom:16px"></div>
 
     <canvas id="c5" aria-label="Sobel edge response compared with the covariance-based attributes"></canvas>
 
@@ -301,15 +316,15 @@
         where 1 means coherent, so the shipped attribute is presumably one minus this. Both are shown so
         nothing is hidden. This 2D page implements the inline term only; AASPI uses inline and crossline.</span>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================== STEP SIX ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
+  <section class="tabpane" id="p6" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
       <h3>Step 6 &nbsp;·&nbsp; The same data, five problems, five attributes</h3>
       <span class="hint">Where the algorithms part company</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
       One synthetic line, flat-lying so that steering is not a factor, divided into five zones of forty
       traces each. The zones are boxed and named along the top. Every zone has a sharp vertical edge down
       its middle, and every edge is a different kind of problem: zone 1 has no problem at all and is the
@@ -318,8 +333,6 @@
       fault with 16 ms of throw. Every attribute is computed at every sample with the same window.</p>
 
     <canvas id="c6seis" aria-label="The five-zone synthetic line"></canvas>
-
-    <div class="ctl-mirror" data-mirror="6" style="margin:16px 0 6px"></div>
 
     <div class="ctl" style="margin:16px 0 10px">
       <label>Attribute displayed</label>
@@ -351,40 +364,15 @@
       <div class="stat wide"><span>At the fault, zone 5</span><b id="s6b">—</b></div>
       <div class="stat wide"><span>What that means when you choose one</span><b id="s6c">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= TERMINOLOGY ============================ -->
-  <section class="plot" style="margin-top:20px" id="terms">
-    <div class="plot-head">
-      <h3>Terminology, and who owns which word</h3>
-      <span class="hint">These names are not standardised</span>
-    </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      AASPI notes that the coherence family acquired many of its names to avoid conflicts with the original
-      Amoco patents rather than because the algorithms differ. Check which definition your software means
-      before comparing two volumes or two papers.</p>
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        <thead>
-          <tr style="text-align:left;border-bottom:1px solid var(--rule)">
-            <th style="padding:8px 10px 8px 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson)">Term</th>
-            <th style="padding:8px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson)">What it means here</th>
-            <th style="padding:8px 0 8px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson)">Whose word</th>
-          </tr>
-        </thead>
-        <tbody id="termBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ============================== TEACHING ============================== -->
-  <div class="teach">
-    <div class="tryit">
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+<div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
         <li><b>Make the two attributes disagree completely.</b> In step 2, set the amplitude change to 65%
           and leave the waveform change at zero. Then read semblance and eigenstructure in step 4.
-          <span class="ans">Eigenstructure and energy ratio read exactly 1.000 while semblance reads 0.896.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Eigenstructure and energy ratio read exactly 1.000 while semblance reads 0.896.
             Push the amplitude change to 80% and semblance falls to 0.818 while the other two do not move
             at all.
             This is not a bug in either. If every trace is the same waveform at a different size, the whole
@@ -392,50 +380,52 @@
             eigenvalue and the eigenvalue-based attributes correctly report one coherent event. Semblance
             compares each trace with the average trace, and a half-size trace is not the average trace.
             AASPI states this explicitly: energy ratio measures lateral changes in waveform but is
-            independent of amplitude, while semblance is sensitive to both.</span></li>
+            independent of amplitude, while semblance is sensitive to both.</span></details></li>
         <li><b>Watch the eigenvalues collapse to one.</b> With the amplitude change still at 65%, look at
           the eigenvalue panel in step 3.
-          <span class="ans">λ₁ holds essentially all the energy and λ₂ onwards are at the level of rounding
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">λ₁ holds essentially all the energy and λ₂ onwards are at the level of rounding
             error: the readout shows λ₁ holding 100.00% of the energy and λ₂ holding 0.00%. The matrix is
             rank one. That is the mathematical statement of "same waveform, different size", and it is why
             the ratio λ₁ / Σλ cannot see the amplitude change. Now add a waveform
-            change and a second eigenvalue lifts off the floor immediately.</span></li>
+            change and a second eigenvalue lifts off the floor immediately.</span></details></li>
         <li><b>Turn the gain up and down.</b> First set the waveform change to about 40°, so that there is
           something for the variance to measure. Then move the overall amplitude slider from 0.2 to 3 and
           watch the three numbers underneath.
-          <span class="ans">Semblance holds at 0.9405 and normalised variance at 0.0590 through the whole
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Semblance holds at 0.9405 and normalised variance at 0.0590 through the whole
             sweep, because both are ratios of energies and the scale cancels exactly. The raw variance goes
             from 3.5 × 10⁻⁷ to 8.0 × 10⁻⁵, a factor of 225, which is 15 squared. That is why raw statistical
             variance is not usable as a seismic attribute and why packages displaying "variance" display a
             normalised form. It is also the reminder that a bright reflector and a dim one can be equally
-            coherent.</span></li>
+            coherent.</span></details></li>
         <li><b>Raise L and watch coherence appear from nowhere.</b> In step 4, set the noise in step 2 to
           about 40% and then move L from 1 to 3.
-          <span class="ans">Energy ratio climbs from 0.78 at L = 1 to 0.96 at L = 2 and 0.99 at L = 3,
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Energy ratio climbs from 0.78 at L = 1 to 0.96 at L = 2 and 0.99 at L = 3,
             without the data changing at all. Keeping more principal components means calling more of the window "signal", so of course
             more of it looks coherent. AASPI notes that for small windows of 5 or 9 traces the first
             component usually represents more than 95% of the variability, and that L = 2 or 3 is intended
             for windows of 25 traces or more. Using a large L on a small window quietly erases the anomaly
-            you were looking for.</span></li>
+            you were looking for.</span></details></li>
         <li><b>Find the case where they rank the opposite way round.</b> In step 6, compare zone 2 with
           zone 5 across all five attributes.
-          <span class="ans">At the amplitude edge semblance reads 0.79 and energy ratio 1.00: semblance sees
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">At the amplitude edge semblance reads 0.79 and energy ratio 1.00: semblance sees
             an edge, energy ratio sees nothing. At the fault semblance reads 0.29 and energy ratio 0.88:
             both see something, but semblance far more strongly. So the two attributes do not simply differ
             in sharpness, they order the two features differently. If you are mapping architectural elements
             inside a thin channel, where the waveform is constant and only amplitude changes, energy ratio
             will show you nothing and semblance will show you the edges — which is exactly the end member
-            AASPI identifies.</span></li>
+            AASPI identifies.</span></details></li>
         <li><b>Check that low coherence is not the same as a fault.</b> In step 6, look at the noise zone in
           each attribute.
-          <span class="ans">Every attribute goes dark in zone 4, and there is no fault there, no
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Every attribute goes dark in zone 4, and there is no fault there, no
             stratigraphic edge and no geology of any kind — only noise. Nothing in the number distinguishes
             it from zone 5. That distinction has to come from you, from the seismic itself, and from whether
-            the anomaly is planar, laterally persistent and consistent between attributes.</span></li>
+            the anomaly is planar, laterally persistent and consistent between attributes.</span></details></li>
       </ol>
     </div>
+  </section>
 
-    <div class="takeaway">
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+<div class="takeaway" style="max-width:none">
       <h3>The main points</h3>
       <ul>
         <li><b>Coherence names a family, not a formula.</b> Semblance, eigenstructure, energy ratio, variance
@@ -453,10 +443,35 @@
         <li><b>Do not share a colour bar between attributes that do not share a range or a sign.</b> An edge
           response and a similarity are not the same quantity even when both happen to run 0 to 1.</li>
       </ul>
-    </div>
-  </div>
+      </div>
+  </section>
 
-  <details class="notes" id="notes">
+  <section class="tabpane" id="pt" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Terminology, and who owns which word</h3>
+      <span class="hint">These names are not standardised</span>
+    </div>
+
+        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      AASPI notes that the coherence family acquired many of its names to avoid conflicts with the original
+      Amoco patents rather than because the algorithms differ. Check which definition your software means
+      before comparing two volumes or two papers.</p>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <thead>
+          <tr style="text-align:left;border-bottom:1px solid var(--rule)">
+            <th style="padding:8px 10px 8px 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson)">Term</th>
+            <th style="padding:8px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson)">What it means here</th>
+            <th style="padding:8px 0 8px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson)">Whose word</th>
+          </tr>
+        </thead>
+        <tbody id="termBody"></tbody>
+      </table>
+    </div>
+    </section>
+
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+  <details class="notes" id="notes" open>
     <summary>Method, sources, and what has been simplified</summary>
     <p><b>Source.</b> The definitions on this page are taken from AASPI, <em>Geometric Attributes: Program
       similarity3d</em>, Attribute-Assisted Seismic Processing and Interpretation, University of Oklahoma,
@@ -512,6 +527,8 @@
     </ul>
   </details>
 
+  </section>
+
   <section class="nextup">
     <p class="eyebrow">Next up</p>
     <h3>Where this goes</h3>
@@ -529,9 +546,13 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma —
-        with the <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.
-        Free to use or adapt in your own courses with citation.</p>
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
+      <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
+        is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
+        If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
+      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
     </div>
   </footer>
 </div>
@@ -705,7 +726,7 @@
   const EXC = 0.45;
 
   const DEF = {
-    kase: 0, amp: 0, phase: 0, noise: 0, gain: 1,
+    tab: 'p1', kase: 0, amp: 0, phase: 0, noise: 0, gain: 1,
     half: 2, kHalf: 8, npc: 1, rkind: 'const', attr: 'semb',
   };
   let S = SEIS.readState(DEF);
@@ -1045,25 +1066,13 @@
   }
 
   function drawStep2(A) {
-    const w = rowWidth('row2', 2);
-    const h = clamp(Math.round(w * 0.68), 240, 320);
-    const J = 2 * S.half + 1;
-    const sub = new Float32Array(J * WT);
-    for (let j = 0; j < J; j++) {
-      const xx = clamp(WCX - S.half + j, 0, WN - 1);
-      for (let t = 0; t < WT; t++) sub[j * WT + t] = WIN.f[xx * WT + t];
-    }
-    tracePanel('c2win', sub, J, WT, WIN.pk, w, h, (ctx, R, X, Y) => {
-      ctx.save();
-      ctx.strokeStyle = CRIM; ctx.lineWidth = 1.6; ctx.setLineDash([4, 3]);
-      ctx.strokeRect(R.x + 2, Y(WCT - S.kHalf), R.w - 4, Y(WCT + S.kHalf) - Y(WCT - S.kHalf));
-      ctx.restore();
-    });
+    const w = rowWidth('row2', 1);
+    const h = clamp(Math.round(w * 0.34), 200, 280);
     const v = variances(windowData());
     barChart('c2bar', [
       { label: 'semblance', v: A.semb, hi: true },
-      { label: 'variance (1 \u2212 semblance)', v: v.norm, map: ATTR.MAPS.coherence },
-    ], w, h);
+      { label: 'variance', v: v.norm, map: ATTR.MAPS.coherence },
+    ], w, h, { labW: 132 });
     $('s2a').textContent = A.semb.toFixed(4);
     $('s2b').textContent = v.norm.toFixed(4);
     $('s2c').textContent = v.raw.toExponential(3);
@@ -1366,24 +1375,10 @@
      PLUMBING
      ===================================================================== */
 
-  /* The page is long, and the controls were only at the top of step 2, so by
-     step 6 the reader had to scroll back and lose their place. The block is
-     cloned into each later step instead; copies carry no ids, only data-key,
-     and every copy of a control moves whenever any one of them does. */
-  function mirrorControls() {
-    const src = $('winControls');
-    if (!src) return;
-    document.querySelectorAll('.ctl-mirror').forEach((slot) => {
-      if (slot.childElementCount) return;
-      const copy = src.cloneNode(true);
-      copy.removeAttribute('id');
-      copy.setAttribute('style', 'margin-top:0');
-      copy.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
-      copy.querySelectorAll('label[for]').forEach((el) => el.removeAttribute('for'));
-      copy.querySelectorAll('button').forEach((el) => el.remove());
-      slot.appendChild(copy);
-    });
-  }
+  /* The controls live in the header above the tabs, which stays on screen for
+     every step that uses the window, so no copies are needed. The data-key
+     wiring below is kept because it is what lets the labels and the inputs be
+     addressed without ids. */
 
   const allOf = (key) => document.querySelectorAll('[data-key="' + key + '"]');
   const setVal = (key, text) => {
@@ -1409,12 +1404,41 @@
   function drawWindowSteps() {
     const w0 = windowData();
     const A = analyse(w0, S.npc);
-    drawStep2(A); drawStep3(A); drawStep4(A, w0); drawStep5(A);
+    drawWindowPanel();
+    if (visible('p2')) drawStep2(A);
+    if (visible('p3')) drawStep3(A);
+    if (visible('p4')) drawStep4(A, w0);
+    if (visible('p5')) drawStep5(A);
   }
 
+  /* The window itself now lives in the header, above the tabs, so it is on
+     screen whatever step you are reading. */
+  function drawWindowPanel() {
+    const el = $('c2win');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el);
+    const h = clamp(Math.round(w * 0.62), 200, 280);
+    const J = 2 * S.half + 1;
+    const sub = new Float32Array(J * WT);
+    for (let j = 0; j < J; j++) {
+      const xx = clamp(WCX - S.half + j, 0, WN - 1);
+      for (let t = 0; t < WT; t++) sub[j * WT + t] = WIN.f[xx * WT + t];
+    }
+    tracePanel('c2win', sub, J, WT, WIN.pk, w, h, (ctx, R, X, Y) => {
+      ctx.save();
+      ctx.strokeStyle = CRIM; ctx.lineWidth = 1.6; ctx.setLineDash([4, 3]);
+      ctx.strokeRect(R.x + 2, Y(WCT - S.kHalf), R.w - 4, Y(WCT + S.kHalf) - Y(WCT - S.kHalf));
+      ctx.restore();
+    });
+  }
+
+  const visible = (id) => { const el = $(id); return el && !el.hidden; };
+
   function drawAll() {
-    fillTerms(); mirrorControls(); syncLabels();
-    drawStep1(); drawWindowSteps(); drawStep6();
+    fillTerms(); syncLabels();
+    if (visible('p1')) drawStep1();
+    if (visible('p2') || visible('p3') || visible('p4') || visible('p5')) drawWindowSteps();
+    if (visible('p6')) drawStep6();
   }
 
   let zoneTimer = null;
@@ -1449,13 +1473,31 @@
     WIN = buildWindow(); zoneAttrs(); drawAll(); saveState();
   });
 
+  /* Tabs. Canvases in a hidden pane have no width, so anything drawn while
+     hidden comes out at zero size; every pane is redrawn on the way in. */
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'pe', 'pk', 'pt', 'pm'];
+  function showTab(id) {
+    PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach((b) => {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    // the shared window and its sliders are only meaningful for steps 2 to 5
+    const lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !(id === 'p2' || id === 'p3' || id === 'p4' || id === 'p5');
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
 
-  mirrorControls();
   buildZones();
   zoneAttrs();
-  drawAll();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
   document.fonts && document.fonts.ready.then(drawAll);
 })();
 </script>
