@@ -32,159 +32,15 @@
   </div>
 
   <!-- ============================== STEP ONE ============================== -->
-  <section class="plot" style="margin-top:6px">
-    <div class="plot-head">
-      <h3>Step 1 &nbsp;·&nbsp; What dip is</h3>
-      <span class="hint">Nine traces, one reflector</span>
-    </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Each wiggle is one seismic trace. Traces are plotted side by side, and time increases downward. These
-      nine contain a single reflector, with a small amount of random noise added. Move the slider to change
-      how steeply the reflector crosses them.</p>
-
-    <canvas id="c1" aria-label="Nine seismic traces with a single dipping reflector"></canvas>
-
-    <div class="ctl" style="margin-top:14px;max-width:520px">
-      <label for="d1">Dip <span class="val" id="d1V">3.0 ms per trace</span></label>
-      <input type="range" id="d1" min="-8" max="8" step="0.5" value="3">
-    </div>
-    <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">The time difference between one trace and
-      the next. Negative values mean the reflector arrives earlier as you move right, so it climbs rather
-      than falls. Zero gives a flat reflector, which is uncommon in real data.</p>
-
-    <div class="stats">
-      <div class="stat key"><span>Dip</span><b id="s1a">—</b></div>
-      <div class="stat"><span>Total shift across all nine traces</span><b id="s1b">—</b></div>
-      <div class="stat"><span>The same dip as an angle in the ground</span><b id="s1c">—</b></div>
-      <div class="stat wide"><span>Read it out loud</span><b id="s1d">—</b></div>
-    </div>
-    <div class="legend">
-      <span>Converting the time shift into an angle requires a trace spacing and a velocity, here 25 m and
-        3000 m/s. The seismic data itself contains only the time shift.</span>
-    </div>
-  </section>
-
-  <!-- ========================= WHY THIS COMES FIRST ======================== -->
-  <div class="teach" id="why">
-    <div class="tryit">
-      <h3>Why dip is computed first</h3>
-      <p style="margin-top:0;font-size:14.5px">Geometric attributes are measured <b>along</b> the reflector
-        rather than horizontally across the display. That requires knowing the reflector orientation in
-        advance, and because bedding is rarely flat, the orientation differs from sample to sample.</p>
-      <p style="font-size:14.5px;margin-bottom:0">A <b>dip volume</b> is therefore computed first: an
-        estimate of bed dip at every sample, made without picking a horizon. The attributes listed opposite
-        are then computed relative to it.</p>
-    </div>
-    <div class="takeaway">
-      <h3>What depends on it</h3>
-      <ul>
-        <li><b>Coherence</b> compares neighbouring traces along the bed. Compared horizontally instead, a
-          continuous dipping reflector reads as a discontinuity, and the output images bedding rather than
-          faults.</li>
-        <li><b>Curvature</b> describes how quickly dip changes laterally. It is computed from the dip field,
-          so its quality is limited by the quality of the dip estimate.</li>
-        <li><b>Aberrancy</b> takes a further derivative, so any error in the dip field is amplified
-          again.</li>
-        <li><b>Structure-oriented filtering</b> smooths along bedding. Given the wrong orientation it smooths
-          across reflectors instead, and the result still looks clean.</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ============================== STEP TWO ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 2 &nbsp;·&nbsp; Find the dip yourself</h3>
-      <span class="hint">Tilt the line until it lies along the bed</span>
-    </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Twenty-five traces, and this time the dip is not shown. The crimson line is your estimate of the bed
-      orientation. Adjust its tilt until it follows a reflector instead of cutting across one. This is the
-      same judgement an interpreter makes by eye on a section.</p>
-
-    <canvas id="c2" aria-label="Twenty-five traces with a tiltable line representing the guessed dip"></canvas>
-
-    <div class="ctl" style="margin-top:14px;max-width:520px">
-      <label for="guess">Tilt of your line <span class="val" id="guessV">0.00 ms per trace</span></label>
-      <input type="range" id="guess" min="-8" max="8" step="0.25" value="0">
-    </div>
-    <p class="hint-line" style="margin:-8px 0 16px;max-width:84ch">The dashed box outlines the data being
-      scored. It tilts with the line, so the window follows the bedding rather than the time axis.</p>
-
-    <p class="sublabel"><b>1</b> How well the traces match along your line
-      <span class="note">1.0 would mean every trace is identical</span></p>
-    <canvas id="c2c" aria-label="Match score for the current tilt"></canvas>
-
-    <p class="sublabel" style="margin-top:16px"><b>2</b> The same traces, redrawn along your line
-      <span class="note">what the score is measuring</span></p>
-    <canvas id="c2b" aria-label="The traces from inside the window, laid side by side along the guessed dip"></canvas>
-    <p class="hint-line" style="margin:8px 0 14px;max-width:84ch">Each trace is sampled along the tilted
-      line and the results are plotted side by side. At the correct tilt they coincide. At the wrong tilt
-      they are offset from one another.</p>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-      <button class="btn small" id="newBtn" type="button">New hidden dip</button>
-      <button class="btn ghost small" id="tellBtn" type="button">Tell me the answer</button>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><span>Your tilt</span><b id="s2a">—</b></div>
-      <div class="stat key"><span>Match score</span><b id="s2b">—</b></div>
-      <div class="stat"><span>How close you are</span><b id="s2c">—</b></div>
-      <div class="stat wide"><span>The real answer</span><b id="s2d">—</b></div>
-    </div>
-    <div class="legend">
-      <span>The highest score you can reach is rarely 1.0, and on field data it is much lower. Traces differ
-        for reasons unrelated to dip, including noise, bed thinning and lateral changes in lithology. The aim
-        is the best available match, not a perfect one.</span>
-    </div>
-  </section>
-
-  <!-- ============================= STEP THREE ============================= -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 3 &nbsp;·&nbsp; Let the computer do it</h3>
-      <span class="hint">Same data, same job, every tilt tried in turn</span>
-    </div>
-    <p style="margin:0 0 16px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      The algorithm cannot judge by eye whether the line follows a bed, but it can do the rest of what you
-      just did: sample the traces along a tilted line, measure how well they agree, and record the result. It
-      repeats this for every tilt in a range and keeps the highest-scoring one. The estimate it returns is
-      the tilt that best aligns the traces, which is what correcting for bed dip amounts to in practice.</p>
-
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
-      <button class="btn small" id="runBtn" type="button">Run the search</button>
-      <div style="flex:1 1 240px;min-width:200px">
-        <label for="cand" style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px">
-          Currently trying <span class="val" id="candV">—</span></label>
-        <input type="range" id="cand" min="0" max="16" step="1" value="0" style="width:100%">
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The seismic <span>&mdash; and the line you are fitting to it</span></p>
+        <canvas id="cMain" aria-label="Twenty-five seismic traces with a tiltable line drawn across them"></canvas>
       </div>
-      <button class="btn ghost small" id="winBtn" type="button" style="margin-top:0">Show the winner</button>
-    </div>
-
-    <canvas id="c3" aria-label="The traces with the line at the tilt currently being tried"></canvas>
-
-    <p class="sublabel" style="margin-top:16px"><b>1</b> The score for every tilt it has tried
-      <span class="note">the tallest bar wins</span></p>
-    <canvas id="c3b" aria-label="Match score plotted against every candidate tilt"></canvas>
-
-    <div class="stats" style="margin:16px 0 20px">
-      <div class="stat key"><span>The computer's answer</span><b id="s3a">—</b></div>
-      <div class="stat"><span>Score at the winner</span><b id="s3b">—</b></div>
-      <div class="stat"><span>The real answer</span><b id="s3c">—</b></div>
-      <div class="stat"><span>How far off it is</span><b id="s3d">—</b></div>
-      <div class="stat"><span>Tilts tried</span><b id="s3e">—</b></div>
-      <div class="stat wide"><span>Verdict</span><b id="s3f">—</b></div>
-    </div>
-
-    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
-      Now break it</h2>
-    <p style="margin:0 0 4px;font-size:15px;color:var(--ink-soft);max-width:84ch">These are the parameters
-      attribute software asks for, and in practice they are often left at their default values. The sliders
-      extend well past the usual range in both directions so the failure modes become visible. The two
-      switches add features to the data for those failures to act on.</p>
-
-    <div class="controls">
+      <div>
+        <p class="cap">The search settings <span>&mdash; results update as you drag</span></p>
+        <div class="controls" id="winControls">
       <div class="ctl-col">
         <h2>Where it looks</h2>
         <div class="ctl">
@@ -247,11 +103,173 @@
         <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
       </div>
     </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the three steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · What dip is</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Find it yourself</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Let the computer do it</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>What dip is</h3>
+      <span class="hint">Nine traces, one reflector</span>
+    </div>
+
+        <p class="lede">
+      Each wiggle is one seismic trace. Traces are plotted side by side, and time increases downward. These
+      nine contain a single reflector, with a small amount of random noise added. Move the slider to change
+      how steeply the reflector crosses them.</p>
+
+    <canvas id="c1" aria-label="Nine seismic traces with a single dipping reflector"></canvas>
+
+    <div class="ctl" style="margin-top:14px;max-width:520px">
+      <label for="d1">Dip <span class="val" id="d1V">3.0 ms per trace</span></label>
+      <input type="range" id="d1" min="-8" max="8" step="0.5" value="3">
+    </div>
+    <p class="hint-line" style="margin:-8px 0 12px">The time difference between one trace and
+      the next. Negative values mean the reflector arrives earlier as you move right, so it climbs rather
+      than falls. Zero gives a flat reflector, which is uncommon in real data.</p>
+
+    <div class="stats">
+      <div class="stat key"><span>Dip</span><b id="s1a">—</b></div>
+      <div class="stat"><span>Total shift across all nine traces</span><b id="s1b">—</b></div>
+      <div class="stat"><span>The same dip as an angle in the ground</span><b id="s1c">—</b></div>
+      <div class="stat wide"><span>Read it out loud</span><b id="s1d">—</b></div>
+    </div>
+    <div class="legend">
+      <span>Converting the time shift into an angle requires a trace spacing and a velocity, here 25 m and
+        3000 m/s. The seismic data itself contains only the time shift.</span>
+    </div>
+    </section>
+
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Find the dip yourself</h3>
+      <span class="hint">Tilt the line until it lies along the bed</span>
+    </div>
+
+        <p class="lede">
+      Twenty-five traces, and this time the dip is not shown. The crimson line is your estimate of the bed
+      orientation. Adjust its tilt until it follows a reflector instead of cutting across one. This is the
+      same judgement an interpreter makes by eye on a section.</p>
+
+
+    <div class="ctl" style="margin-top:14px;max-width:520px">
+      <label for="guess">Tilt of your line <span class="val" id="guessV">0.00 ms per trace</span></label>
+      <input type="range" id="guess" min="-8" max="8" step="0.25" value="0">
+    </div>
+    <p class="hint-line" style="margin:-8px 0 16px">The dashed box outlines the data being
+      scored. It tilts with the line, so the window follows the bedding rather than the time axis.</p>
+
+    <p class="sublabel"><b>1</b> How well the traces match along your line
+      <span class="note">1.0 would mean every trace is identical</span></p>
+    <canvas id="c2c" aria-label="Match score for the current tilt"></canvas>
+
+    <p class="sublabel" style="margin-top:16px"><b>2</b> The same traces, redrawn along your line
+      <span class="note">what the score is measuring</span></p>
+    <canvas id="c2b" aria-label="The traces from inside the window, laid side by side along the guessed dip"></canvas>
+    <p class="hint-line" style="margin:8px 0 14px">Each trace is sampled along the tilted
+      line and the results are plotted side by side. At the correct tilt they coincide. At the wrong tilt
+      they are offset from one another.</p>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn small" id="newBtn" type="button">New hidden dip</button>
+      <button class="btn ghost small" id="tellBtn" type="button">Tell me the answer</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Your tilt</span><b id="s2a">—</b></div>
+      <div class="stat key"><span>Match score</span><b id="s2b">—</b></div>
+      <div class="stat"><span>How close you are</span><b id="s2c">—</b></div>
+      <div class="stat wide"><span>The real answer</span><b id="s2d">—</b></div>
+    </div>
+    <div class="legend">
+      <span>The highest score you can reach is rarely 1.0, and on field data it is much lower. Traces differ
+        for reasons unrelated to dip, including noise, bed thinning and lateral changes in lithology. The aim
+        is the best available match, not a perfect one.</span>
+    </div>
+    </section>
+
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Let the computer do it</h3>
+      <span class="hint">Same data, same job, every tilt tried in turn</span>
+    </div>
+
+        <p class="lede">
+      The algorithm cannot judge by eye whether the line follows a bed, but it can do the rest of what you
+      just did: sample the traces along a tilted line, measure how well they agree, and record the result. It
+      repeats this for every tilt in a range and keeps the highest-scoring one. The estimate it returns is
+      the tilt that best aligns the traces, which is what correcting for bed dip amounts to in practice.</p>
+
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <button class="btn small" id="runBtn" type="button">Run the search</button>
+      <div style="flex:1 1 240px;min-width:200px">
+        <label for="cand" style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px">
+          Currently trying <span class="val" id="candV">—</span></label>
+        <input type="range" id="cand" min="0" max="16" step="1" value="0" style="width:100%">
+      </div>
+      <button class="btn ghost small" id="winBtn" type="button" style="margin-top:0">Show the winner</button>
+    </div>
+
+
+    <p class="sublabel" style="margin-top:16px"><b>1</b> The score for every tilt it has tried
+      <span class="note">the tallest bar wins</span></p>
+    <canvas id="c3b" aria-label="Match score plotted against every candidate tilt"></canvas>
+
+    <div class="stats" style="margin:16px 0 20px">
+      <div class="stat key"><span>The computer's answer</span><b id="s3a">—</b></div>
+      <div class="stat"><span>Score at the winner</span><b id="s3b">—</b></div>
+      <div class="stat"><span>The real answer</span><b id="s3c">—</b></div>
+      <div class="stat"><span>How far off it is</span><b id="s3d">—</b></div>
+      <div class="stat"><span>Tilts tried</span><b id="s3e">—</b></div>
+      <div class="stat wide"><span>Verdict</span><b id="s3f">—</b></div>
+    </div>
+
+    </section>
+
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+  <div class="teach" id="why" style="padding-top:0">
+    <div class="tryit">
+      <h3>Why dip is computed first</h3>
+      <p style="margin-top:0;font-size:14.5px">Geometric attributes are measured <b>along</b> the reflector
+        rather than horizontally across the display. That requires knowing the reflector orientation in
+        advance, and because bedding is rarely flat, the orientation differs from sample to sample.</p>
+      <p style="font-size:14.5px;margin-bottom:0">A <b>dip volume</b> is therefore computed first: an
+        estimate of bed dip at every sample, made without picking a horizon. The attributes listed opposite
+        are then computed relative to it.</p>
+    </div>
+    <div class="takeaway">
+      <h3>What depends on it</h3>
+      <ul>
+        <li><b>Coherence</b> compares neighboring traces along the bed. Compared horizontally instead, a
+          continuous dipping reflector reads as a discontinuity, and the output images bedding rather than
+          faults.</li>
+        <li><b>Curvature</b> describes how quickly dip changes laterally. It is computed from the dip field,
+          so its quality is limited by the quality of the dip estimate.</li>
+        <li><b>Aberrancy</b> takes a further derivative, so any error in the dip field is amplified
+          again.</li>
+        <li><b>Structure-oriented filtering</b> smooths along bedding. Given the wrong orientation it smooths
+          across reflectors instead, and the result still looks clean.</li>
+      </ul>
+    </div>
+  </div>
+
   </section>
 
-  <!-- ============================== TEACHING ============================== -->
-  <div class="teach">
-    <div class="tryit">
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+<div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
         <li><b>Search too narrow a range.</b> Press "tell me the answer" so the target is visible, then
@@ -300,8 +318,10 @@
             the dip: it registers the problem while the dip values still look plausible.</span></li>
       </ol>
     </div>
+  </section>
 
-    <div class="takeaway">
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+<div class="takeaway" style="max-width:none">
       <h3>The main points</h3>
       <ul>
         <li><b>Dip is the normal condition of a reflector,</b> not a special case reserved for structured
@@ -319,10 +339,11 @@
           from it, aberrancy differentiates it again. Check the dip field before attributing a problem to
           the attribute.</li>
       </ul>
-    </div>
-  </div>
+      </div>
+  </section>
 
-  <details class="notes" id="notes">
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+  <details class="notes" id="notes" open>
     <summary>Method, assumptions, and where to read more</summary>
     <p>Twenty-five traces sampled every 2 ms, formed by convolving a set of reflection coefficients with a
       30 Hz Ricker wavelet and shifting each trace according to the dip. The hidden dip is drawn from a
@@ -357,7 +378,9 @@
     </ul>
   </details>
 
-  <section class="nextup">
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
     <h3><a href="dip3d.html">02 · Inline and crossline dip</a></h3>
     <p>A line of traces becomes a patch of traces in a survey, and one dip component becomes two: the time
@@ -367,7 +390,7 @@
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
-  <div class="pager">
+  <div class="pager" id="pager" hidden>
     <a class="btn ghost" href="../index.html">← All modules</a>
     <a class="btn" href="dip3d.html">Next: inline and crossline dip →</a>
   </div>
@@ -407,6 +430,7 @@
 
   const $ = (id) => document.getElementById(id);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const visible = (id) => { const el = $(id); return el && !el.hidden; };
 
   /* =====================================================================
      THE MODEL
@@ -422,7 +446,7 @@
 
   const N1X = 9, N1T = 160, C1X = 4;    // step 1: nine traces
   const NX = 25, NT = 220;              // steps 2 and 3
-  const CX = 12, CT = 110;              // the point being analysed: trace 13, 220 ms
+  const CX = 12, CT = 110;              // the point being analyzed: trace 13, 220 ms
   const FAULT_IX = 17;                  // traces from here rightward are downthrown
   const THROW = 11;                     // samples, about 22 ms
   const SPLIT_T = 145;                  // beds below here can dip the other way
@@ -437,7 +461,7 @@
     thMax: 8, dStep: 1,                 // search range and step, ms/trace
     half: 4, kHalf: 30,                 // traces either side, samples either side
     noise: 0, fault: false, split: false,
-    refine: true, disp: 'wiggle',
+    refine: true, disp: 'wiggle', tab: 'p1',
   };
   let S = SEIS.readState(DEF);
 
@@ -558,9 +582,19 @@
   const EXC = 0.45;      // wiggle excursion, in trace spacings. Under 0.5 so a
                          // full-amplitude peak cannot reach its neighbour.
 
-  const panelWidth = (el) => (el.parentElement ? el.parentElement.clientWidth : 900);
+  /* clientWidth includes padding, and a tab pane has plenty of it, so sizing a
+     canvas to it pushes the panel past the right-hand edge. Measure the
+     content box instead. */
+  function panelWidth(el) {
+    const par = el && el.parentElement;
+    if (!par) return 900;
+    const cs = window.getComputedStyle(par);
+    const inner = par.clientWidth
+      - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+    return Math.max(240, Math.floor(inner));
+  }
 
-  /* One panel of traces, wiggle or colour, trace numbers along the bottom
+  /* One panel of traces, wiggle or color, trace numbers along the bottom
      and milliseconds up the side. */
   function tracePanel(canvasId, field, nx, nt, peak, w, h, extras) {
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
@@ -696,13 +730,24 @@
 
   /* -------------------------------- step 2 ----------------------------- */
 
-  function drawStep2() {
-    const w = panelWidth($('c2'));
-    const h = clamp(Math.round(w * 0.46), 320, 440);
-    tracePanel('c2', F2.f, NX, NT, F2.pk, w, h, (ctx, R, X, Y) => {
-      drawTilt(ctx, R, X, Y, S.guess, TOLD);
+  /* The seismic lives in the header now, so it stays on screen whichever step
+     you are reading. Step 2 draws your line on it; step 3 draws whatever tilt
+     the search is currently trying. */
+  function drawMain() {
+    const el = $('cMain');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = panelWidth(el);
+    const h = clamp(Math.round(w * 0.52), 230, 310);
+    const onStep3 = visible('p3');
+    const ms = onStep3 ? candMs(CAND) : S.guess;
+    tracePanel('cMain', F2.f, NX, NT, F2.pk, w, h, (ctx, R, X, Y) => {
+      drawTilt(ctx, R, X, Y, ms, TOLD);
+      SEIS.tag(ctx, R.x + 7, R.y + 14,
+        onStep3 ? 'the tilt being tried' : 'your line', CRIM);
     });
+  }
 
+  function drawStep2() {
     drawScore('c2c', scoreFor(S.guess));
     drawGathered('c2b', S.guess);
   }
@@ -776,14 +821,7 @@
 
   /* -------------------------------- step 3 ----------------------------- */
 
-  function drawStep3() {
-    const w = panelWidth($('c3'));
-    const h = clamp(Math.round(w * 0.46), 320, 440);
-    tracePanel('c3', F2.f, NX, NT, F2.pk, w, h, (ctx, R, X, Y) => {
-      drawTilt(ctx, R, X, Y, candMs(CAND), TOLD);
-    });
-    drawCurve();
-  }
+  function drawStep3() { drawCurve(); }
 
   function drawCurve() {
     const w = panelWidth($('c3b'));
@@ -928,7 +966,13 @@
      PLUMBING
      ===================================================================== */
 
-  function drawAll() { drawStep1(); drawStep2(); drawStep3(); syncLabels(); updateStats(); }
+  function drawAll() {
+    if (visible('p1')) drawStep1();
+    if (visible('p2') || visible('p3')) drawMain();
+    if (visible('p2')) drawStep2();
+    if (visible('p3')) drawStep3();
+    syncLabels(); updateStats();
+  }
 
   function refreshSearch(keepCand) {
     $('cand').max = nCand() - 1;
@@ -1044,13 +1088,69 @@
     pushToInputs(); drawAll(); saveState();
   });
 
+  const PANES = ['p1', 'p2', 'p3', 'pw', 'pe', 'pk', 'pm'];
+  const STEPNAMES = {
+    p1: 'What dip is', p2: 'Find it yourself', p3: 'Let the computer do it',
+    pw: 'Why it matters', pe: 'Exercises', pk: 'Key points', pm: 'Method',
+  };
+
+  function buildStepNav() {
+    PANES.forEach((id, i) => {
+      const pane = $(id);
+      if (!pane || pane.querySelector('.stepnav')) return;
+      const prev = PANES[i - 1], next = PANES[i + 1];
+      const nav = document.createElement('div');
+      nav.className = 'stepnav';
+      const mk = (target, text, ghost) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (ghost ? ' ghost' : '') + ' small';
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          showTab(target);
+          const t = document.querySelector('.tabhint');
+          if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return b;
+      };
+      nav.appendChild(prev ? mk(prev, '\u2190 ' + STEPNAMES[prev], true)
+                           : document.createElement('span'));
+      const where = document.createElement('span');
+      where.className = 'where';
+      where.textContent = i < 3 ? 'step ' + (i + 1) + ' of 3' : STEPNAMES[id];
+      nav.appendChild(where);
+      nav.appendChild(next ? mk(next, STEPNAMES[next] + ' \u2192')
+                           : document.createElement('span'));
+      pane.appendChild(nav);
+    });
+  }
+
+  function showTab(id) {
+    PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach((b) => {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    const lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !(id === 'p2' || id === 'p3');
+    const last = (id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !last;
+    if ($('pager')) $('pager').hidden = !last;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
 
   runScan();
   CAND = BESTI;
   pushToInputs();
-  drawAll();
+  buildStepNav();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
   document.fonts && document.fonts.ready.then(drawAll);
 })();
 </script>
