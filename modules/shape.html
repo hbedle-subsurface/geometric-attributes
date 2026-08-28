@@ -34,8 +34,10 @@
   <div class="labhead">
     <div class="labgrid">
       <div>
-        <p class="cap">The shape you have built <span>&mdash; a patch of reflector, seen obliquely</span></p>
+        <p class="cap" id="capL">The shape you have built
+          <span id="capR">&mdash; a patch of reflector, seen obliquely</span></p>
         <canvas id="cShape" aria-label="A patch of surface with the principal curvatures you have set"></canvas>
+        <canvas id="cSurf" hidden aria-label="Depth to the modeled surface the maps are computed over"></canvas>
       </div>
       <div>
         <p class="cap">Set the two curvatures <span>&mdash; everything follows from these</span></p>
@@ -63,7 +65,7 @@
                 <button type="button" data-shape="flat">Flat</button>
               </div>
             </div>
-            <div class="ctl">
+            <div class="ctl" id="opWrap">
               <label for="opLen">Map operator length <span class="val" id="opLenV">3 traces</span></label>
               <input type="range" data-key="opLen" id="opLen" min="1" max="13" step="2" value="3">
             </div>
@@ -160,6 +162,12 @@
       <h3><span class="stepno">3</span>Curvedness: how hard is it bending?</h3>
       <span class="hint">One number, no shape information at all</span>
     </div>
+    <p class="lede"><b>From one point to a whole map.</b> Steps 1 and 2 worked on a single point whose two
+      curvatures you set by hand. From here on the same arithmetic runs at every sample of a modeled
+      surface, shown in the header: a <b>dome</b> in the south-west, a north–south <b>ridge</b> above it, a
+      <b>syncline</b> and a <b>bowl</b> on the eastern side, and a broad gentle swell underneath the lot
+      which makes <b>saddles</b> wherever it meets the sharper features. One of every shape, so every
+      component in step 5 has something to find.</p>
     <p class="lede">Curvedness is the other half of the pair, and it throws the shape away completely. A
       sharp dome and an equally sharp bowl have identical curvedness, because both are bent just as hard —
       one up, one down. It is always positive or zero.</p>
@@ -247,9 +255,9 @@
 
     <div class="sec-row" id="row5">
       <div class="panel-col">
-        <p class="sublabel"><b>1</b> The structure
-          <span class="note">what is actually there</span></p>
-        <canvas id="c5z" aria-label="Depth to the modeled surface"></canvas>
+        <p class="sublabel"><b>1</b> Shape index, modulated
+          <span class="note">for reference, from step 4</span></p>
+        <canvas id="c5z" aria-label="Shape index modulated by curvedness"></canvas>
       </div>
       <div class="panel-col">
         <p class="sublabel"><b>2</b> The shape component you chose
@@ -631,6 +639,25 @@
     return ATTR.MAPS.dip(-(2 * u - 1));
   }
 
+  /* The header carries whichever object the current step is about: the little
+     quadratic patch for steps 1 and 2, the modeled surface for steps 3 to 5,
+     so the maps are never computed over something the reader has not seen. */
+  function drawSurf() {
+    const el = $('cSurf');
+    if (!el || el.hidden || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el), h = clamp(Math.round(w * 0.62), 190, 260);
+    let zl = Infinity, zh = -Infinity;
+    for (let i = 0; i < Z.length; i++) { zl = Math.min(zl, Z[i]); zh = Math.max(zh, Z[i]); }
+    const R = mapPanel('cSurf', w, h, (ix, iy) => (Z[iy * NG + ix] - zl) / Math.max(zh - zl, 1e-6),
+      (u) => ATTR.MAPS.coherence(clamp(u, 0, 1)));
+    const ctx = el.getContext('2d');
+    const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
+    const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
+    [[28, 80, 'dome'], [30, 34, 'ridge'], [78, 78, 'bowl'], [80, 32, 'syncline']].forEach((f) => {
+      SEIS.tag(ctx, clamp(X(f[0]) - 20, R.x + 2, R.x + R.w - 58), Y(f[1]) - 8, f[2], INK);
+    });
+  }
+
   /* ------------------- the surface patch in the header ------------------ */
 
   function drawShape() {
@@ -882,15 +909,19 @@
 
   function drawStep5() {
     const w = rowWidth('row5', 2), h = clamp(Math.round(w * 0.94), 250, 340) + 52;
-    let zl = Infinity, zh = -Infinity;
-    for (let i = 0; i < Z.length; i++) { zl = Math.min(zl, Z[i]); zh = Math.max(zh, Z[i]); }
-    mapPanel('c5z', w, h, (ix, iy) => (Z[iy * NG + ix] - zl) / Math.max(zh - zl, 1e-6),
-      (u) => ATTR.MAPS.coherence(clamp(u, 0, 1)),
-      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.coherence(u),
-        'shallow', 'deep', 'depth'));
+    const cl = rangeOf(FIELD.C);
+    mapPanel('c5z', w, h, (ix, iy) => {
+      const i = iy * NG + ix;
+      return { s: FIELD.SI[i], m: clamp(FIELD.C[i] / (cl * 0.35), 0, 1) };
+    }, (v) => {
+      const col = shapeColor(v.s);
+      return [Math.round(255 - (255 - col[0]) * v.m),
+              Math.round(255 - (255 - col[1]) * v.m),
+              Math.round(255 - (255 - col[2]) * v.m)];
+    }, (ctx, R) => colorbar(ctx, R, (u) => shapeColor(2 * u - 1),
+      '\u22121 bowl', 'dome +1', 'shape index \u00b7 saddle 0'));
 
     const q = SHAPES.find((x) => x.key === S.comp) || SHAPES[3];
-    const cl = rangeOf(FIELD.C);
     let kept = 0, tot = 0;
     mapPanel('c5comp', w, h, (ix, iy) => {
       const i = iy * NG + ix;
@@ -934,7 +965,7 @@
   function drawAll() {
     syncLabels();
     if (!$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
-    drawShape();
+    drawShape(); drawSurf();
     if (visible('p1')) drawStep1();
     if (visible('p2')) drawStep2();
     if (visible('p3')) drawStep3();
@@ -987,6 +1018,20 @@
     });
     const lab = document.querySelector('.labhead');
     if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    // steps 1 and 2 are about one point; 3 to 5 are about the whole surface
+    const onMaps = (id === 'p3' || id === 'p4' || id === 'p5');
+    if ($('cShape')) $('cShape').hidden = onMaps;
+    if ($('cSurf')) $('cSurf').hidden = !onMaps;
+    if ($('capL')) {
+      $('capL').firstChild.nodeValue = onMaps
+        ? 'The surface the maps are computed over ' : 'The shape you have built ';
+    }
+    if ($('capR')) {
+      $('capR').innerHTML = onMaps
+        ? '&mdash; one of every shape, so every component has something to find'
+        : '&mdash; a patch of reflector, seen obliquely';
+    }
+    if ($('opWrap')) $('opWrap').style.display = onMaps ? '' : 'none';
     const last = (id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !last;
     if ($('pager')) $('pager').hidden = !last;
