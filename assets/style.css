@@ -640,27 +640,49 @@ details.notes p, details.notes li { font-size: 14px; color: var(--ink-soft); max
 }
 .labhead .cap span { text-transform: none; letter-spacing: 0; color: var(--slate); }
 
+/* The tab strip has to read as a set of file tabs sitting on top of the panel
+   it opens, otherwise it looks like a toolbar and nobody clicks it. */
+
+.tabhint {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--slate); margin: 22px 0 8px;
+}
+.tabhint b { color: var(--crimson); font-weight: 600; }
+
 .tabs {
-  display: flex; flex-wrap: wrap; gap: 0;
-  border: 1px solid var(--rule); border-top: 0;
-  background: var(--panel); margin: 0 0 20px;
+  display: flex; flex-wrap: wrap; gap: 3px;
+  border-bottom: 2px solid var(--crimson); margin: 0;
 }
 .tabs button {
-  font-family: var(--body); font-size: 12.5px; padding: 10px 14px;
-  background: none; border: 0; border-right: 1px solid var(--rule);
-  border-bottom: 3px solid transparent;
-  color: var(--slate); cursor: pointer; white-space: nowrap;
+  font-family: var(--body); font-size: 13px; padding: 9px 15px 8px;
+  background: var(--cream); color: var(--slate); cursor: pointer;
+  border: 1px solid var(--rule); border-bottom: 0;
+  border-top: 3px solid transparent;
+  white-space: nowrap; position: relative; top: 1px;
 }
-.tabs button:last-child { border-right: 0; }
-.tabs button:hover { color: var(--ink); background: var(--cream); }
+.tabs button:hover { color: var(--ink); background: #fff; }
 .tabs button[aria-selected="true"] {
-  color: var(--crimson); font-weight: 600; border-bottom-color: var(--crimson);
-  background: var(--cream);
+  background: var(--panel); color: var(--crimson); font-weight: 600;
+  border-top-color: var(--crimson); top: 0; padding-bottom: 10px;
 }
-.tabs .spacer { flex: 1; border-right: 0; }
+.tabs .gap { flex: 1 0 14px; border: 0; background: none; pointer-events: none; }
 
-.tabpane { animation: fade .18s ease-out; }
+.tabpane {
+  background: var(--panel); border: 1px solid var(--rule); border-top: 0;
+  padding: 22px 24px 24px; animation: fade .18s ease-out;
+}
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* forward and back inside the module, so the way on is never the way out */
+.stepnav {
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin: 26px 0 0; padding-top: 16px; border-top: 1px solid var(--rule);
+}
+.stepnav .btn { margin: 0; }
+.stepnav .where {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  color: var(--slate); align-self: center;
+}
 
 /* --- reveal-on-demand answers -------------------------------------------- */
 
