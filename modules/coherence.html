@@ -139,7 +139,7 @@
       <div class="stat"><span>Semblance of the pair</span><b id="s1b">—</b></div>
       <div class="stat wide"><span>What the two numbers disagree about</span><b id="s1c">—</b></div>
     </div>
-    <div class="legend">
+    <div class="legend prose">
       <span>Crosscorrelation is normalised by the energy of each trace separately, so it ignores a change of
         scale. Semblance is not, so it does not. Neither is right; they answer different questions. That
         distinction is the whole of this module.</span>
@@ -186,7 +186,7 @@
       <div class="stat"><span>Raw variance about the mean trace</span><b id="s2c">—</b></div>
       <div class="stat wide"><span>Why the raw number is a problem</span><b id="s2d">—</b></div>
     </div>
-    <div class="legend">
+    <div class="legend prose">
       <span><b>A note on the word.</b> Semblance and variance here are two ways of saying the same thing:
         variance is what is left over when semblance is subtracted from one, so a coherent window has high
         semblance and low variance. Packages that display a "variance" attribute display this normalised
@@ -334,7 +334,7 @@
 
     <canvas id="c5" aria-label="Sobel edge response compared with the covariance-based attributes"></canvas>
 
-    <div class="legend">
+    <div class="legend prose">
       <span><b>Sign convention.</b> As published, the equation gives a value near 0 where traces are
         identical and near 1 across an edge, so it is an edge response. The AASPI output volume is named
         <span class="k">sobel_filter_similarity</span> and is used elsewhere in the software as a similarity
@@ -376,7 +376,7 @@
       <span class="note">taller is more coherent, except Sobel, which is an edge response</span></p>
     <canvas id="c6bars" aria-label="Every attribute at the edge of every zone"></canvas>
 
-    <div class="legend">
+    <div class="legend prose">
       <span>Semblance, eigenstructure and energy ratio run 0 to 1 and share a grey scale, so they can be
         compared directly. Variance runs the other way, dark where the others are light, because it is what
         is left when semblance is taken from one. The Sobel panel cannot: it is an edge response, high where the others
@@ -1034,6 +1034,9 @@
   }
 
   /* horizontal bars, 0 to 1, one row per named quantity */
+  // height follows the number of rows, so two bars are two bars
+  const barHeight = (rows, extra) => 30 * rows + (extra === undefined ? 22 : extra);
+
   function barChart(canvasId, rows, w, h, opts) {
     const o = opts || {};
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
@@ -1121,12 +1124,12 @@
 
   function drawStep2(A) {
     const w = rowWidth('row2', 1);
-    const h = clamp(Math.round(w * 0.34), 200, 280);
     const v = variances(windowData());
+    const h = barHeight(2);
     barChart('c2bar', [
       { label: 'semblance', v: A.semb, hi: true },
       { label: 'variance', v: v.norm, map: ATTR.MAPS.coherence },
-    ], w, h, { labW: 132 });
+    ], w, h, { labW: 152 });
     $('s2a').textContent = A.semb.toFixed(4);
     $('s2b').textContent = v.norm.toFixed(4);
     $('s2c').textContent = v.raw.toExponential(3);
@@ -1175,7 +1178,7 @@
     for (let i = 0; i < A.e.values.length; i++) sum += A.e.values[i];
     barChart('c3eig', Array.from(A.e.values).map((v, i) => ({
       label: '\u03bb' + (i + 1), v: sum > 1e-20 ? v / sum : 0, hi: i === 0,
-    })), w, h, { labW: 44 });
+    })), w, Math.min(h, barHeight(A.e.values.length)), { labW: 44 });
 
     // first eigenvector
     const v1 = A.e.vectors[0];
@@ -1258,7 +1261,7 @@
       { label: 'eigenstructure', v: A.eig, hi: true },
       { label: 'energy ratio L=' + S.npc, v: A.er, hi: true },
       { label: 'Sobel edge', v: A.sob, map: ATTR.MAPS.coherence },
-    ], w, h);
+    ], w, Math.min(h, barHeight(4)), { labW: 150 });
 
     $('s4a').textContent = outer.toFixed(4);
     $('s4b').textContent = A.semb.toFixed(4);
@@ -1278,7 +1281,7 @@
   }
 
   function drawStep5(A) {
-    const w = pw($('c5')), h = 190;
+    const w = pw($('c5')), h = barHeight(4);
     barChart('c5', [
       { label: 'Sobel, as published', v: A.sob, map: ATTR.MAPS.coherence, hi: true },
       { label: '1 \u2212 Sobel', v: 1 - A.sob },
@@ -1471,7 +1474,7 @@
     const el = $('c2win');
     if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
     const w = pw(el);
-    const h = clamp(Math.round(w * 0.46), 150, 210);
+    const h = clamp(Math.round(w * 0.58), 190, 250);
     const J = 2 * S.half + 1;
     const sub = new Float32Array(J * WT);
     for (let j = 0; j < J; j++) {
