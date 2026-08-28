@@ -26,38 +26,15 @@
     <p class="eyebrow">Module 02 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Inline and crossline dip: one trace, two numbers</h1>
     <p class="sub">In <a href="dip.html">module 01</a> we estimated dip along a single seismic line by
-      finding the tilt that best aligned neighbouring traces. A 3D volume allows that measurement in two
+      finding the tilt that best aligned neighboring traces. A 3D volume allows that measurement in two
       directions, and one direction turns out not to be enough. This module is about what changes between a
       line and a volume.</p>
   </div>
 
   <!-- ============================== STEP ONE ============================== -->
-  <section class="plot" style="margin-top:6px">
-    <div class="plot-head">
-      <h3>Step 1 &nbsp;·&nbsp; One reflector, two sections</h3>
-      <span class="hint">The same plane, viewed two ways</span>
-    </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      A volume of 25 inlines by 25 crosslines contains one planar reflector. Two vertical sections are cut
-      through the middle of it, one along each acquisition direction. Both sections pass through the same
-      trace at inline 13, crossline 13, marked in teal on each.</p>
-
-    <canvas id="cube" aria-label="Diagram of the volume showing the inline and crossline section faces"></canvas>
-
-    <div class="sec-row" id="row1" style="margin-top:12px">
-      <div class="panel-col">
-        <p class="sublabel"><b>1</b> Inline section
-          <span class="note">crossline held at 13</span></p>
-        <canvas id="c1il" aria-label="Inline section through the volume"></canvas>
-      </div>
-      <div class="panel-col">
-        <p class="sublabel"><b>2</b> Crossline section
-          <span class="note">inline held at 13</span></p>
-        <canvas id="c1xl" aria-label="Crossline section through the volume"></canvas>
-      </div>
-    </div>
-
-    <div class="ctl" style="margin-top:16px">
+  <div class="labhead">
+    <p class="cap">The reflector orientation <span>&mdash; these two numbers drive every step</span></p>
+    <div class="ctl" style="margin:0 0 8px">
       <label>Try these</label>
       <div class="seg" role="group" aria-label="Preset reflector orientations">
         <button type="button" data-preset="0,0">Flat</button>
@@ -68,7 +45,7 @@
       </div>
     </div>
 
-    <div class="controls" style="margin-top:6px">
+    <div class="controls" id="winControls" style="margin-top:0">
       <div class="ctl-col">
         <div class="ctl">
           <label for="px">Inline dip <span class="val" id="pxV">0.00 ms per trace</span></label>
@@ -97,20 +74,64 @@
       </div>
     </div>
 
+  </div>
+
+  <p class="tabhint">Work through the seven steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two sections</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Inline dip</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Crossline dip</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Every trace</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Together</button>
+    <button role="tab" data-tab="p6" aria-selected="false">6 · Rotate</button>
+    <button role="tab" data-tab="p7" aria-selected="false">7 · The computer</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>One reflector, two sections</h3>
+      <span class="hint">The same plane, viewed two ways</span>
+    </div>
+
+        <p class="lede">
+      A volume of 25 inlines by 25 crosslines contains one planar reflector. Two vertical sections are cut
+      through the middle of it, one along each acquisition direction. Both sections pass through the same
+      trace at inline 13, crossline 13, marked in teal on each.</p>
+
+    <canvas id="cube" aria-label="Diagram of the volume showing the inline and crossline section faces"></canvas>
+
+    <div class="sec-row" id="row1" style="margin-top:12px">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Inline section
+          <span class="note">crossline held at 13</span></p>
+        <canvas id="c1il" aria-label="Inline section through the volume"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Crossline section
+          <span class="note">inline held at 13</span></p>
+        <canvas id="c1xl" aria-label="Crossline section through the volume"></canvas>
+      </div>
+    </div>
+
     <div class="stats">
       <div class="stat key"><span>At that one trace, the inline section gives</span><b id="s1a">—</b></div>
       <div class="stat key"><span>At that same trace, the crossline section gives</span><b id="s1b">—</b></div>
       <div class="stat wide"><span>Both numbers describe the same trace</span><b id="s1c">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================== STEP TWO ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 2 &nbsp;·&nbsp; Inline dip at this trace</h3>
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Inline dip at this trace</h3>
       <span class="hint">Step one trace along the inline. How far does the event move in time?</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       This is module 01's question, asked in the inline direction at the marked trace. Step one trace to the
       right and read how far the reflector moves down. The answer is written
       <span class="k">&part;t/&part;x</span>, and this section is all you need to measure it.</p>
@@ -121,7 +142,7 @@
       <label for="px2">Inline dip <span class="val" id="px2V">0.00 ms per trace</span></label>
       <input type="range" id="px2" min="-8" max="8" step="0.25" value="0">
     </div>
-    <p class="hint-line" style="margin:-8px 0 14px;max-width:84ch">Only the inline component changes. The
+    <p class="hint-line" style="margin:-8px 0 14px">Only the inline component changes. The
       crossline component is untouched, and this section cannot see it.</p>
 
     <div class="stats">
@@ -129,15 +150,15 @@
       <div class="stat"><span>Across all 25 inlines</span><b id="s2b">—</b></div>
       <div class="stat wide"><span>Read it out loud</span><b id="s2c">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP THREE ============================= -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 3 &nbsp;·&nbsp; Crossline dip at the same trace</h3>
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Crossline dip at the same trace</h3>
       <span class="hint">Now step one line along the crossline instead</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       The same question, turned ninety degrees, at the same trace. Step one line in the crossline direction
       and read how far the reflector moves. This is <span class="k">&part;t/&part;y</span>. It is measured
       independently of the inline answer, and neither section knows what the other one found.</p>
@@ -148,7 +169,7 @@
       <label for="py3">Crossline dip <span class="val" id="py3V">4.00 ms per line</span></label>
       <input type="range" id="py3" min="-8" max="8" step="0.25" value="4">
     </div>
-    <p class="hint-line" style="margin:-8px 0 14px;max-width:84ch">Set the inline dip in step 2 to something
+    <p class="hint-line" style="margin:-8px 0 14px">Set the inline dip in step 2 to something
       non-zero and come back. This section does not change.</p>
 
     <div class="stats">
@@ -156,22 +177,22 @@
       <div class="stat"><span>Across all 25 crosslines</span><b id="s3b">—</b></div>
       <div class="stat wide"><span>Read it out loud</span><b id="s3c">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP FOUR ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 4 &nbsp;·&nbsp; Every trace gets its own pair</h3>
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Every trace gets its own pair</h3>
       <span class="hint">The two numbers belong to a location, not to the volume</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       Steps 2 and 3 produced two numbers at one trace. That pair describes the reflector <em>there</em>. Move
       to the next trace and the measurement is repeated, and repeated again at every sample down each trace.
       A dip volume is the result of doing this everywhere, so it holds two numbers for every sample in the
       input.</p>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       With a planar reflector every trace returns the same pair, so the maps below come out a single flat
-      colour. Curve the reflector and the pair starts changing from trace to trace, which is what it does in
+      color. Curve the reflector and the pair starts changing from trace to trace, which is what it does in
       real data and the reason the measurement has to be repeated rather than assumed.</p>
 
     <label class="check" style="margin-bottom:14px"><input type="checkbox" id="dome">
@@ -194,7 +215,7 @@
       <span>Both maps look down on the volume: inline runs left to right, crossline runs up, and every
         pixel is one trace coloured by the estimate made at that trace. The outer two traces on each side are
         left out, because the analysis patch does not fit inside the volume there — real dip volumes have the
-        same problem at survey edges. The azimuth scale is a colour wheel that returns to where it started,
+        same problem at survey edges. The azimuth scale is a color wheel that returns to where it started,
         because 359° and 1° are nearly the same direction and a scale with different colours at its ends
         would draw a boundary that is not there.</span>
     </div>
@@ -205,19 +226,19 @@
       <div class="stat"><span>Range of dip magnitude across the volume</span><b id="s4c">—</b></div>
       <div class="stat wide"><span>Estimates in a volume this size</span><b id="s4d">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP FIVE ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 5 &nbsp;·&nbsp; Putting the two components together</h3>
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Putting the two components together</h3>
       <span class="hint">A time slice shows both at once</span>
     </div>
-    <p style="margin:0 0 6px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       Steps 1 to 4 all cut the volume <em>vertically</em>. A time slice cuts it <em>horizontally</em>: pick
       one travel time and read the amplitude of every trace at that one time. The result is a map with a
       seismic value at every bin, and no time axis at all.</p>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       The diagram below shows why that map is useful. A horizontal cut through a dipping reflector meets it
       along a straight line. On one side of that line the slice sits above the reflector, on the other side
       below it, and along the line itself it is passing straight through the peak. So the reflector prints
@@ -239,12 +260,12 @@
     </div>
 
     <div class="legend">
-      <span><b>Left, what the grey scale means:</b> exactly the same black-to-white scale as the wiggle
-        sections above. Black is a peak, white is a trough, mid grey is zero amplitude. It is a picture of
+      <span><b>Left, what the gray scale means:</b> exactly the same black-to-white scale as the wiggle
+        sections above. Black is a peak, white is a trough, mid gray is zero amplitude. It is a picture of
         the seismic data at one travel time, not a picture of dip. The dark band is the reflector crossing
         that time. The crimson arrow points downdip, straight across the band; the dashed teal line lies
         along it and is strike. <b>Right:</b> the two numbers from steps 2 and 3 plotted as a vector, after
-        converting both to milliseconds per metre. The grey dashed lines are the components; the crimson
+        converting both to milliseconds per meter. The gray dashed lines are the components; the crimson
         arrow is their resultant, whose length is the dip magnitude and whose direction is the dip
         azimuth.</span>
     </div>
@@ -284,8 +305,8 @@
     </div>
 
     <div class="stats">
-      <div class="stat"><span>&part;t/&part;x per metre</span><b id="s5a">—</b></div>
-      <div class="stat"><span>&part;t/&part;y per metre</span><b id="s5b">—</b></div>
+      <div class="stat"><span>&part;t/&part;x per meter</span><b id="s5a">—</b></div>
+      <div class="stat"><span>&part;t/&part;y per meter</span><b id="s5b">—</b></div>
       <div class="stat key"><span>Dip magnitude</span><b id="s5c">—</b></div>
       <div class="stat key"><span>Dip azimuth</span><b id="s5d">—</b></div>
       <div class="stat"><span>Geological dip</span><b id="s5e">—</b></div>
@@ -298,15 +319,15 @@
         Inline dip is quoted per trace and crossline dip per line, so if the bins are not square those two
         are not comparable quantities.</span>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================== STEP SIX ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 6 &nbsp;·&nbsp; Rotate the section</h3>
+  <section class="tabpane" id="p6" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">6</span>Rotate the section</h3>
       <span class="hint">Apparent dip depends on which way you cut</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       Inline and crossline are only two of the directions available. Cut a vertical section at any azimuth
       through the same reflector and it shows a dip of its own. Rotate the section and watch that dip change,
       reaching zero along one particular direction.</p>
@@ -341,19 +362,19 @@
       <div class="stat"><span>Flat section, at azimuth</span><b id="s6e">—</b></div>
       <div class="stat wide"><span>Note</span><b id="s6f">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP SEVEN ============================= -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 7 &nbsp;·&nbsp; Let the computer do it</h3>
+  <section class="tabpane" id="p7" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">7</span>Let the computer do it</h3>
       <span class="hint">Two tilts at once, tried in every combination</span>
     </div>
-    <p style="margin:0 0 12px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       In module 01 the algorithm tilted one line, scored how well the traces lined up along it, and kept the
       best tilt. Here it has to tilt <b>two</b> lines at the same time: one along the inline, one along the
       crossline. Every combination of the two is tried.</p>
-    <p style="margin:0 0 16px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       Press run and watch the two lines below rock back and forth. Each pair of positions they take is one
       square on the grid, and that square is coloured by how well the traces agreed.</p>
 
@@ -398,7 +419,7 @@
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       Now break it</h2>
-    <p style="margin:0 0 4px;font-size:15px;color:var(--ink-soft);max-width:84ch">The same parameters as
+    <p class="lede">The same parameters as
       module 01, with one difference worth noticing: the search range and step apply in both directions at
       once, so halving the step multiplies the work by four rather than two.</p>
 
@@ -424,7 +445,7 @@
           <label for="half">Patch size <span class="val" id="halfV">5 × 5 traces</span></label>
           <input type="range" id="half" min="1" max="5" step="1" value="2">
         </div>
-        <p class="hint-line" style="margin:-8px 0 14px">A square patch centred on the trace. The two panels
+        <p class="hint-line" style="margin:-8px 0 14px">A square patch centered on the trace. The two panels
           show one row and one column of it; the score uses all of it at once.</p>
         <div class="ctl">
           <label for="kHalf">Window height <span class="val" id="kHalfV">± 16 ms</span></label>
@@ -449,11 +470,10 @@
         <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
       </div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================== TEACHING ============================== -->
-  <div class="teach">
-    <div class="tryit">
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+<div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
         <li><b>Make a dipping bed look flat.</b> Set inline dip to 0 and crossline dip to 6, then read the
@@ -464,10 +484,10 @@
             report zero dip, describe the section correctly, and describe the geology not at all.</span></li>
         <li><b>Watch the pair change across the volume.</b> Press the <em>Flat</em> preset, then switch the
           dome on in step 4 and compare the two maps before and after.
-          <span class="ans">With a plane both maps are a single flat colour. Every trace returns the same
+          <span class="ans">With a plane both maps are a single flat color. Every trace returns the same
             pair, so one measurement would have described the whole volume. With the dome on a flat regional,
             magnitude climbs from zero at the crest to about 0.12 ms/m at the edge, and azimuth runs right
-            round the colour wheel from 0 to 349 degrees, because the reflector falls away in every
+            round the color wheel from 0 to 349 degrees, because the reflector falls away in every
             direction. Now put the crossline dip back to 4 and switch the dome on again: the azimuth range
             collapses to about 95 degrees, because the regional dip dominates and the dome only perturbs it.
             Real data behaves like these two cases rather than like the plane, which is why the estimate is
@@ -504,8 +524,10 @@
             window happen to agree, and a small window makes that easy.</span></li>
       </ol>
     </div>
+  </section>
 
-    <div class="takeaway">
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+<div class="takeaway" style="max-width:none">
       <h3>The main points</h3>
       <ul>
         <li><b>Dip in a volume is a pair of numbers at a location.</b> Inline dip and crossline dip are
@@ -518,14 +540,15 @@
         <li><b>A section cut along strike through a steep bed shows nothing.</b> Zero dip on one line is not
           evidence of a flat reflector.</li>
         <li><b>Combining the components requires common units.</b> Convert per trace and per line to per
-          metre using the bin spacing before taking a magnitude or an azimuth.</li>
+          meter using the bin spacing before taking a magnitude or an azimuth.</li>
         <li><b>Time dip is still not geological dip.</b> The conversion needs a velocity, and the volume does
           not contain one.</li>
       </ul>
-    </div>
-  </div>
+      </div>
+  </section>
 
-  <details class="notes" id="notes">
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+  <details class="notes" id="notes" open>
     <summary>Method, assumptions, and where to read more</summary>
     <p>The volume is 25 inlines by 25 crosslines by 220 samples at 2 ms. The reflector is defined
       analytically as t(x, y) = t0 + px·x + py·y, plus a quadratic term when the dome is switched on, and the
@@ -569,18 +592,20 @@
     </ul>
   </details>
 
-  <section class="nextup">
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
     <h3><a href="dipsteer.html">03 · Dip steering</a></h3>
     <p>Dip is now a direction at every sample. The next module is about what that direction is for: every
-      attribute that compares neighbouring traces has to decide where to look on each of them, and the
+      attribute that compares neighboring traces has to decide where to look on each of them, and the
       difference between looking along the bed and looking straight across the screen decides what the
       attribute ends up imaging.</p>
     <a class="btn" href="dipsteer.html">Open module 03 →</a>
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
-  <div class="pager">
+  <div class="pager" id="pager" hidden>
     <a class="btn ghost" href="dip.html">← Module 01: dip in 2D</a>
     <a class="btn" href="dipsteer.html">Next: dip steering →</a>
   </div>
@@ -617,6 +642,7 @@
 
   const $ = (id) => document.getElementById(id);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const visible = (id) => { const el = $(id); return el && !el.hidden; };
   const DEG = Math.PI / 180;
 
   /* Helpers that arrived with a later assets/attributes.js, defined here when
@@ -712,7 +738,7 @@
   const DEF = {
     px: 0, py: 4, t0: 220, f: 30, noise: 0, beds: false, dome: false,
     dx: 25, dy: 25, vel: 3000, slice: 220, az: 30,
-    thMax: 8, dStep: 1, half: 2, kHalf: 8, disp: 'wiggle',
+    thMax: 8, dStep: 1, half: 2, kHalf: 8, disp: 'wiggle', tab: 'p1',
   };
   let S = SEIS.readState(DEF);
 
@@ -815,7 +841,7 @@
 
   /* --------------------------- derived quantities ----------------------- */
 
-  const gxOf = (msPerTrace) => msPerTrace / S.dx;      // ms per metre
+  const gxOf = (msPerTrace) => msPerTrace / S.dx;      // ms per meter
   const gyOf = (msPerLine) => msPerLine / S.dy;
   const gradAt = (ix, iy) => magAzim(gxOf(truePx(ix)), gyOf(truePy(iy)));
 
@@ -868,13 +894,22 @@
   const M = { l: 50, r: 14, t: 10, b: 34 };
   const EXC = 0.45;
 
-  const pw = (el) => (el && el.parentElement ? el.parentElement.clientWidth : 900);
+  /* clientWidth includes padding, and a tab pane has plenty, so sizing a
+     canvas to it pushes the panel past the right-hand edge. */
+  function pw(el) {
+    const par = el && el.parentElement;
+    if (!par) return 900;
+    const cs = window.getComputedStyle(par);
+    const inner = par.clientWidth
+      - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+    return Math.max(240, Math.floor(inner));
+  }
 
   /* .panel-col is flex:none with no width, so without this it sizes to the
      widest line of its caption and a three-panel row runs off the page. */
   function rowWidth(rowId, n) {
     const row = $(rowId);
-    const total = row ? row.clientWidth : 800;
+    const total = row ? pw(row.firstElementChild || row) : 800;
     const w = window.innerWidth <= 700
       ? Math.max(240, total)
       : Math.max(190, Math.floor((total - 10 * (n - 1)) / n));
@@ -969,10 +1004,10 @@
     return R;
   }
 
-  function reflectorLine(ctx, R, X, Y, nTr, msAt, colour, width) {
+  function reflectorLine(ctx, R, X, Y, nTr, msAt, color, width) {
     ctx.save();
     ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-    ctx.strokeStyle = colour || CRIM; ctx.lineWidth = width || 2.2;
+    ctx.strokeStyle = color || CRIM; ctx.lineWidth = width || 2.2;
     ctx.beginPath();
     for (let i = 0; i < nTr; i++) {
       const y = Y(msAt(i));
@@ -1141,7 +1176,7 @@
     const g = MAPF;
     const top = Math.max(g.hi, 1e-4);
     // Scaled from zero, not from the smallest value present. Stretching a
-    // planar reflector's own estimation scatter across the full colour range
+    // planar reflector's own estimation scatter across the full color range
     // produces a vivid pattern that is entirely noise.
     const flat = (g.hi - g.lo) < 0.06 * top;
 
@@ -1170,7 +1205,7 @@
   /* ------------------------------- step 5 ------------------------------- */
 
   /* A cube with the reflector inside it and a horizontal cut through both, so
-     that the grey band on the map has somewhere to come from. */
+     that the gray band on the map has somewhere to come from. */
   function drawSliceCube() {
     const w = pw($('c5cube')), h = 320;
     const ctx = SEIS.fitCanvas($('c5cube'), w, h);
@@ -1319,7 +1354,7 @@
     SEIS.tag(ctx, X(vx) * 0.5 + X(0) * 0.5 - 20, Y(0) + 14, '\u2202t/\u2202x', SLATE);
     SEIS.tag(ctx, X(vx) + 6, (Y(0) + Y(vy)) / 2, '\u2202t/\u2202y', SLATE);
     SEIS.frame(ctx, R);
-    SEIS.axisBottom(ctx, R, -lim, lim, 'inline component (ms per metre)',
+    SEIS.axisBottom(ctx, R, -lim, lim, 'inline component (ms per meter)',
       (v) => v.toFixed(2), { ticks: 4 });
     SEIS.axisLeft(ctx, R, -lim, lim, 'crossline component', (v) => v.toFixed(2),
       { flip: true, ticks: 4 });
@@ -1644,9 +1679,16 @@
      PLUMBING
      ===================================================================== */
 
+  /* Only the pane on screen is drawn. A canvas in a hidden pane has no width,
+     so anything drawn there comes out at zero size. */
   function drawAll() {
-    drawStep1(); drawStep2(); drawStep3(); drawStep4();
-    drawStep5(); drawStep6(); drawStep7();
+    if (visible('p1')) drawStep1();
+    if (visible('p2')) drawStep2();
+    if (visible('p3')) drawStep3();
+    if (visible('p4')) drawStep4();
+    if (visible('p5')) drawStep5();
+    if (visible('p6')) drawStep6();
+    if (visible('p7')) drawStep7();
     syncLabels(); updateStats();
   }
 
@@ -1749,6 +1791,64 @@
     stopAnim(); S = Object.assign({}, DEF); pushToInputs(); rebuild();
   });
 
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'pe', 'pk', 'pm'];
+  const STEPNAMES = {
+    p1: 'Two sections', p2: 'Inline dip', p3: 'Crossline dip', p4: 'Every trace',
+    p5: 'Together', p6: 'Rotate', p7: 'The computer',
+    pe: 'Exercises', pk: 'Key points', pm: 'Method',
+  };
+
+  function buildStepNav() {
+    PANES.forEach((id, i) => {
+      const pane = $(id);
+      if (!pane || pane.querySelector('.stepnav')) return;
+      const prev = PANES[i - 1], next = PANES[i + 1];
+      const nav = document.createElement('div');
+      nav.className = 'stepnav';
+      const mk = (target, text, ghost) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (ghost ? ' ghost' : '') + ' small';
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          showTab(target);
+          const t = document.querySelector('.tabhint');
+          if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return b;
+      };
+      nav.appendChild(prev ? mk(prev, '\u2190 ' + STEPNAMES[prev], true)
+                           : document.createElement('span'));
+      const where = document.createElement('span');
+      where.className = 'where';
+      where.textContent = i < 7 ? 'step ' + (i + 1) + ' of 7' : STEPNAMES[id];
+      nav.appendChild(where);
+      nav.appendChild(next ? mk(next, STEPNAMES[next] + ' \u2192')
+                           : document.createElement('span'));
+      pane.appendChild(nav);
+    });
+  }
+
+  function showTab(id) {
+    PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach((b) => {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    // the two dip sliders drive every step, so the header stays up for all of
+    // them and only steps aside for the reference tabs
+    const lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    const last = (id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !last;
+    if ($('pager')) $('pager').hidden = !last;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
 
@@ -1757,7 +1857,8 @@
   CELL = nCand() * nCand() - 1;
   buildMaps();
   pushToInputs();
-  drawAll();
+  buildStepNav();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
   document.fonts && document.fonts.ready.then(drawAll);
 })();
 </script>
