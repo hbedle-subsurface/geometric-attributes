@@ -569,6 +569,9 @@ footer p { margin: 0 0 6px; max-width: 62ch; }
   min-width: 0; max-width: 100%;
 }
 .legend span { display: flex; align-items: center; gap: 6px; min-width: 0; }
+/* prose legends: a paragraph, not a row of keyed swatches */
+.legend.prose { display: block; }
+.legend.prose span { display: block; line-height: 1.65; max-width: none; }
 .legend i {
   width: 15px; height: 0; flex: none;
   border-top-width: 2px; border-top-style: solid; display: inline-block;
@@ -638,23 +641,24 @@ details.notes p, details.notes li { font-size: 14px; color: var(--ink-soft); max
   box-shadow: 0 6px 14px -8px rgba(22, 25, 28, .35);
 }
 .labhead .labgrid {
-  display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  gap: 16px; align-items: start;
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 18px; align-items: start;
 }
 .labhead canvas { display: block; width: 100%; height: auto; }
 .labhead .controls {
   margin: 0; border: 0; padding: 0; background: none;
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 2px 16px; align-items: start;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px; align-items: start;
 }
 .labhead .ctl-col { display: contents; }
 .labhead .ctl { margin-bottom: 4px; }
 .labhead .ctl label { font-size: 10px; margin-bottom: 1px; }
 .labhead .ctl input[type="range"] { margin: 0; }
 .labhead .ctl-col h2 {
-  grid-column: 1 / -1; font-size: 9.5px; margin: 6px 0 2px;
-  padding-bottom: 3px;
+  grid-column: 1 / -1; font-size: 9.5px; margin: 5px 0 1px;
+  padding-bottom: 2px;
 }
+.labhead .ctl-col h2:first-child { margin-top: 0; }
 /* the long explanations belong in the step that introduces them, not in a
    header that has to stay short */
 .labhead .hint-line, .labhead .btn { display: none; }
