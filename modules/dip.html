@@ -113,8 +113,8 @@
     <button role="tab" data-tab="p1" aria-selected="false">1 · What dip is</button>
     <button role="tab" data-tab="p2" aria-selected="false">2 · Find it yourself</button>
     <button role="tab" data-tab="p3" aria-selected="false">3 · Let the computer do it</button>
-    <span class="gap"></span>
     <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
     <button role="tab" data-tab="pm" aria-selected="false">Method</button>
@@ -240,32 +240,47 @@
     </section>
 
   <section class="tabpane" id="pw" role="tabpanel" hidden>
-  <div class="teach" id="why" style="padding-top:0">
-    <div class="tryit">
-      <h3>Why dip is computed first</h3>
-      <p style="margin-top:0;font-size:14.5px">Geometric attributes are measured <b>along</b> the reflector
-        rather than horizontally across the display. That requires knowing the reflector orientation in
-        advance, and because bedding is rarely flat, the orientation differs from sample to sample.</p>
-      <p style="font-size:14.5px;margin-bottom:0">A <b>dip volume</b> is therefore computed first: an
-        estimate of bed dip at every sample, made without picking a horizon. The attributes listed opposite
-        are then computed relative to it.</p>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">?</span>Why dip is computed first</h3>
+      <span class="hint">Everything downstream is measured relative to it</span>
     </div>
-    <div class="takeaway">
-      <h3>What depends on it</h3>
-      <ul>
-        <li><b>Coherence</b> compares neighboring traces along the bed. Compared horizontally instead, a
-          continuous dipping reflector reads as a discontinuity, and the output images bedding rather than
-          faults.</li>
-        <li><b>Curvature</b> describes how quickly dip changes laterally. It is computed from the dip field,
-          so its quality is limited by the quality of the dip estimate.</li>
-        <li><b>Aberrancy</b> takes a further derivative, so any error in the dip field is amplified
-          again.</li>
-        <li><b>Structure-oriented filtering</b> smooths along bedding. Given the wrong orientation it smooths
-          across reflectors instead, and the result still looks clean.</li>
-      </ul>
-    </div>
-  </div>
+    <p class="lede">Geometric attributes are measured <b>along</b> the reflector, not horizontally across
+      the display. That requires knowing the reflector orientation before you can compute anything else, and
+      because bedding is rarely flat, the orientation differs from sample to sample. So the dip field is not
+      an attribute you would normally interpret on its own — it is the coordinate system every other
+      attribute in this course is expressed in.</p>
+    <p class="lede">Get it wrong and nothing downstream announces the fact. A coherence volume computed on a
+      bad dip field still looks like a coherence volume. It is simply imaging the wrong thing, and it will
+      keep doing so all the way to the interpretation.</p>
 
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      What depends on it</h2>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Coherence</b> compares neighboring traces along the bed. Compared horizontally instead, a
+        perfectly continuous dipping reflector reads as a discontinuity, and the output images bedding
+        rather than faults. Module 03 measures exactly how bad that gets.</li>
+      <li><b>Curvature</b> is the derivative of the dip field, so its quality is limited by the dip
+        estimate's — and differentiating amplifies whatever error is there.</li>
+      <li><b>Aberrancy</b> takes a further derivative again, so the same error arrives cubed. It is the
+        attribute that demands the cleanest dip volume of anything here.</li>
+      <li><b>Structure-oriented filtering</b> smooths along bedding. Given the wrong orientation it smooths
+        <em>across</em> reflectors instead, quietly destroying the very discontinuities you were about to go
+        looking for, and the result still looks clean.</li>
+      <li><b>Horizon auto-tracking</b> follows the local dip from seed point to seed point, so a poor dip
+        field sends the tracker across a fault or onto the wrong loop.</li>
+    </ul>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      And on its own</h2>
+    <p class="lede">Dip azimuth and dip magnitude do get displayed in their own right. A dip magnitude map
+      highlights fault planes and steep flanks; a dip azimuth map shows structural grain and picks out
+      lineaments that are hard to see on amplitude, which is why the two are often co-rendered. But the main
+      reason to spend real effort here is the one above: dip is the foundation, and a foundation error
+      propagates into every attribute built on top of it without ever raising a flag.</p>
+    <div class="legend prose">
+      <span>This is also why modules 01 to 03 come before any of the discontinuity or curvature attributes.
+        The order is not arbitrary — it is the order the computation actually happens in.</span>
+    </div>
   </section>
 
   <section class="tabpane" id="pe" role="tabpanel" hidden>
@@ -274,48 +289,48 @@
       <ol>
         <li><b>Search too narrow a range.</b> Press "tell me the answer" so the target is visible, then
           reduce the search range until the real dip falls outside it.
-          <span class="ans">The estimate stops at the edge of the range and stays there. The bars are still
+          <details class="reveal"><summary>Hint</summary><span class="ans">The estimate stops at the edge of the range and stays there. The bars are still
             rising when the search runs out of tilts to try. No warning is produced, and the value returned
             looks no different from a correct one. This is the most common cause of a bad dip
-            volume.</span></li>
+            volume.</span></details></li>
         <li><b>Coarsen the step size.</b> Set the step size to 2 ms/trace, then switch "fine-tune the
           winner" off and on several times.
-          <span class="ans">With it off, the estimate can only take one of the nine values tested, so it
+          <details class="reveal"><summary>Hint</summary><span class="ans">With it off, the estimate can only take one of the nine values tested, so it
             moves in jumps and averages roughly four times further from the correct answer. With it on, the
             parabola fit recovers most of that precision at almost no computational cost, which is what
             allows production software to search coarsely. At a 4 ms step the fit begins to fail: a parabola
-            needs the peak to be sampled, and five tilts across the range do not sample it.</span></li>
+            needs the peak to be sampled, and five tilts across the range do not sample it.</span></details></li>
         <li><b>Widen the window across a fault.</b> Switch the fault on and change nothing else; at nine
           traces the window still clears it. Now increase "traces used" to 21.
-          <span class="ans">The score drops from about 0.98 to about 0.51 as soon as the tilted box reaches
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score drops from about 0.98 to about 0.51 as soon as the tilted box reaches
             across the break, and the winning tilt becomes a compromise between two beds that are not the
             same bed. The fault is one trace wide, but the estimate is degraded for four traces either side
             of it, because that is how far the window extends. Coherence computed on a dip field smeared this
             way produces broad, indistinct faults. Production software addresses this by testing several
             windows offset around the sample and keeping the most confident, rather than always centring the
-            window.</span></li>
+            window.</span></details></li>
         <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then raise the window
           height from ±30 ms to ±100 ms, watching the box extend into the lower beds.
-          <span class="ans">Little changes until about ±80 ms, after which the score falls from 0.98 to
+          <details class="reveal"><summary>Hint</summary><span class="ans">Little changes until about ±80 ms, after which the score falls from 0.98 to
             around 0.70 and the estimate moves toward an average of two unrelated dips. Switch the depth
             change off and repeat: the same window heights now cost nothing. The data did not become harder
             to work with; the window was simply told to treat a larger interval as one unit. Window height is
             really a statement about how far the geology can be assumed constant, which is why it is normally
-            quoted as a fraction of a wavelength.</span></li>
+            quoted as a fraction of a wavelength.</span></details></li>
         <li><b>Reduce the number of traces and compare the score with the error.</b> Set noise to about
           30%, then lower "traces used" from 9 to 3, reading both figures as you go.
-          <span class="ans">The score <em>rises</em>, from around 0.68 to around 0.85, while the estimate
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em>, from around 0.68 to around 0.85, while the estimate
             becomes roughly four times worse. Three traces have less scope to disagree, so they match more
             easily and establish much less. <b>A high score is therefore not evidence of a good
             estimate</b>, and a confidence volume has to be interpreted alongside the window size that
-            produced it.</span></li>
+            produced it.</span></details></li>
         <li><b>Increase the noise until the estimate fails.</b> Raise noise in stages to 20%, 40% and 60%,
           pressing "new hidden dip" several times at each level.
-          <span class="ans">The estimate degrades gradually: barely affected at 20%, a few tenths of a
+          <details class="reveal"><summary>Hint</summary><span class="ans">The estimate degrades gradually: barely affected at 20%, a few tenths of a
             millisecond out at 40%. Past 50% the bars lose their single clear peak and the winner sometimes
             settles on the wrong one. The <em>score</em> falls well before the estimate does, from 0.99 to
             below 0.6. That difference is the reason attribute software writes a confidence volume alongside
-            the dip: it registers the problem while the dip values still look plausible.</span></li>
+            the dip: it registers the problem while the dip values still look plausible.</span></details></li>
       </ol>
     </div>
   </section>
