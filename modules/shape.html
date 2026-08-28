@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curvedness and shape index | How Geometric Attributes Actually Work</title>
+<meta name="description" content="Curvedness and shape index: turning two principal curvatures into how much it bends and what shape it bends into — dome, ridge, saddle, valley or bowl.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="curvature.html">Module 05</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 06 &nbsp;·&nbsp; Geometric attributes</p>
+    <h1>Curvedness and shape index: how much, and what shape</h1>
+    <p class="sub">Module 05 left you with two numbers at every sample, k₁ and k₂, and two numbers are hard
+      to look at. Recombining them into <b>how strongly it bends</b> and <b>what shape it bends into</b>
+      turns out to be far easier to interpret — and the shape half of that pair asks a question no single
+      curvature volume can answer: is this a dome, a ridge, a saddle, a valley or a bowl?</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The shape you have built <span>&mdash; a patch of reflector, seen obliquely</span></p>
+        <canvas id="cShape" aria-label="A patch of surface with the principal curvatures you have set"></canvas>
+      </div>
+      <div>
+        <p class="cap">Set the two curvatures <span>&mdash; everything follows from these</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>The principal curvatures</h2>
+            <div class="ctl">
+              <label for="k1">k₁, the more positive <span class="val" id="k1V">+0.60</span></label>
+              <input type="range" data-key="k1" id="k1" min="-100" max="100" step="1" value="60">
+            </div>
+            <div class="ctl">
+              <label for="k2">k₂, the more negative <span class="val" id="k2V">+0.20</span></label>
+              <input type="range" data-key="k2" id="k2" min="-100" max="100" step="1" value="20">
+            </div>
+          </div>
+          <div class="ctl-col">
+            <h2>Jump to a shape</h2>
+            <div class="ctl">
+              <div class="seg" role="group" aria-label="Preset shapes" style="flex-wrap:wrap">
+                <button type="button" data-shape="dome">Dome</button>
+                <button type="button" data-shape="ridge">Ridge</button>
+                <button type="button" data-shape="saddle">Saddle</button>
+                <button type="button" data-shape="valley">Valley</button>
+                <button type="button" data-shape="bowl">Bowl</button>
+                <button type="button" data-shape="flat">Flat</button>
+              </div>
+            </div>
+            <div class="ctl">
+              <label for="opLen">Map operator length <span class="val" id="opLenV">3 traces</span></label>
+              <input type="range" data-key="opLen" id="opLen" min="1" max="13" step="2" value="3">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two numbers, recombined</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · The shape scale</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Curvedness</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Shape alone lies</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Shape components</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>The same information, asked differently</h3>
+      <span class="hint">From k₁ and k₂ to magnitude and shape</span>
+    </div>
+    <p class="lede">Every point on a reflector carries two principal curvatures. Plot them as a point on a
+      graph with k₁ across and k₂ up, and the whole vocabulary of shapes falls out of <em>where</em> the
+      point sits rather than what its coordinates are.</p>
+    <p class="lede">Two things about that point turn out to matter, and they are independent of one another.
+      <b>How far it is from the origin</b> says how strongly the surface is bent — that is
+      <span class="k">curvedness</span>. <b>Which direction it lies in</b> says what shape it is bent into —
+      that is the <span class="k">shape index</span>. A dome and a bowl sit on opposite sides; a saddle sits
+      on the diagonal where k₁ and k₂ are equal and opposite; and the origin is a flat plane, where the
+      shape question has no answer at all.</p>
+
+    <div class="sec-row" id="row1">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> The k₁–k₂ plane
+          <span class="note">your point, and the five named regions</span></p>
+        <canvas id="c1plane" aria-label="The k1 k2 plane with the five shape regions marked"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> The same point, in polar terms
+          <span class="note">distance is curvedness, angle is shape</span></p>
+        <canvas id="c1polar" aria-label="Curvedness as distance and shape index as angle"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>k₁ and k₂</span><b id="s1a">—</b></div>
+      <div class="stat key"><span>Curvedness, how much it bends</span><b id="s1b">—</b></div>
+      <div class="stat key"><span>Shape index, what shape</span><b id="s1c">—</b></div>
+      <div class="stat wide"><span>Which means</span><b id="s1d">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>The shape scale, end to end</h3>
+      <span class="hint">Five names on one number line</span>
+    </div>
+    <p class="lede">Shape index runs from −1 to +1 and every value along it has a name. Walk the preset
+      buttons in the header from Dome to Bowl and watch the marker travel down the scale while the little
+      surface in the header morphs from one shape into the next.</p>
+    <p class="lede">The useful thing about this scale is that it is <b>continuous</b>. Real geology is not
+      obligingly one of five shapes; it sits somewhere between them, and the number tells you where. A value
+      of +0.7 is a dome that has been stretched a bit, +0.3 is a ridge with a slight bowl to it, and so on.
+      The five names are landmarks on a continuum, not boxes.</p>
+
+    <canvas id="c2scale" aria-label="The shape index scale from bowl to dome with the current value marked"></canvas>
+
+    <div class="stats" style="margin-top:14px">
+      <div class="stat key"><span>Shape index now</span><b id="s2a">—</b></div>
+      <div class="stat"><span>Nearest named shape</span><b id="s2b">—</b></div>
+      <div class="stat"><span>k₂ divided by k₁</span><b id="s2c">—</b></div>
+      <div class="stat wide"><span>Why the ratio is what matters</span><b id="s2d">—</b></div>
+    </div>
+    <div class="legend prose">
+      <span>Shape index depends only on the <em>ratio</em> of the two curvatures, never on their size.
+        Double both k₁ and k₂ and the shape index does not move at all, while curvedness doubles. That is
+        the whole point of splitting the pair this way: one number carries the size, the other carries the
+        form, and you can ask about either without the other getting in the way.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Curvedness: how hard is it bending?</h3>
+      <span class="hint">One number, no shape information at all</span>
+    </div>
+    <p class="lede">Curvedness is the other half of the pair, and it throws the shape away completely. A
+      sharp dome and an equally sharp bowl have identical curvedness, because both are bent just as hard —
+      one up, one down. It is always positive or zero.</p>
+    <p class="lede">On its own that makes it a good <b>deformation intensity</b> map. Bright means the
+      reflector is strongly bent, whatever way it happens to be bending, so faults, flexures and fold hinges
+      all come out bright and gently dipping monoclines come out dark.</p>
+
+    <div class="sec-row" id="row3">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Curvedness over the map
+          <span class="note">deformation intensity, sign discarded</span></p>
+        <canvas id="c3c" aria-label="Curvedness across the modeled surface"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> k₁ for comparison
+          <span class="note">signed, so anticlines and synclines separate</span></p>
+        <canvas id="c3k" aria-label="Most-positive curvature for comparison"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Largest curvedness on the map</span><b id="s3a">—</b></div>
+      <div class="stat"><span>Curvedness at the dome</span><b id="s3b">—</b></div>
+      <div class="stat"><span>Curvedness at the bowl</span><b id="s3c">—</b></div>
+      <div class="stat wide"><span>What curvedness cannot tell you</span><b id="s3d">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Shape index on its own is misleading</h3>
+      <span class="hint">The trap, and the standard fix</span>
+    </div>
+    <p class="lede">Here is the problem. Shape index is built from a ratio, and on a flat piece of reflector
+      both curvatures are essentially zero, so the ratio is noise divided by noise. The attribute happily
+      returns a confident-looking value of +0.5 or −1 for a patch of ground that has no shape whatsoever.</p>
+    <p class="lede">Displayed raw, a shape index map is therefore <b>loud everywhere</b>, and the loudest
+      areas are often the flattest ones. The standard fix is to modulate it by curvedness, so that shape is
+      only allowed to show where there is enough bend for the question to mean anything. Compare the two
+      panels — the second is the same attribute with its brightness governed by curvedness.</p>
+
+    <div class="sec-row" id="row4">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Shape index, raw
+          <span class="note">confident nonsense on the flats</span></p>
+        <canvas id="c4raw" aria-label="Shape index displayed without modulation"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Shape index modulated by curvedness
+          <span class="note">shape only where there is shape</span></p>
+        <canvas id="c4mod" aria-label="Shape index modulated by curvedness"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat key"><span>Map area with almost no curvature</span><b id="s4a">—</b></div>
+      <div class="stat"><span>Shape index still reported there</span><b id="s4b">—</b></div>
+      <div class="stat wide"><span>The rule</span><b id="s4c">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Shape components</h3>
+      <span class="hint">One volume per shape</span>
+    </div>
+    <p class="lede">Rather than ask you to read a shape index map by eye, the shape can be split into five
+      separate volumes. Each one is simply curvedness, kept where the shape index falls in that shape's band
+      and zeroed everywhere else. So the dome volume is bright where the surface is strongly bent
+      <em>and</em> dome-shaped, and blank everywhere else.</p>
+    <p class="lede">These are easy to interpret and easy to co-render, and they are the form most people end
+      up using. Pick a shape below and see where on this surface it occurs.</p>
+
+    <div class="ctl" style="margin-bottom:14px">
+      <div class="seg" role="group" aria-label="Which shape component">
+        <button type="button" data-comp="dome">Dome</button>
+        <button type="button" data-comp="ridge">Ridge</button>
+        <button type="button" data-comp="saddle">Saddle</button>
+        <button type="button" data-comp="valley">Valley</button>
+        <button type="button" data-comp="bowl">Bowl</button>
+      </div>
+    </div>
+
+    <div class="sec-row" id="row5">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> The structure
+          <span class="note">what is actually there</span></p>
+        <canvas id="c5z" aria-label="Depth to the modeled surface"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> The shape component you chose
+          <span class="note">curvedness, gated by shape</span></p>
+        <canvas id="c5comp" aria-label="The selected shape component"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat key"><span>Component shown</span><b id="s5a">—</b></div>
+      <div class="stat"><span>Shape index band it keeps</span><b id="s5b">—</b></div>
+      <div class="stat"><span>Share of the map it occupies</span><b id="s5c">—</b></div>
+      <div class="stat wide"><span>Reading it</span><b id="s5d">—</b></div>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Check that shape index ignores size.</b> Set k₁ to +0.30 and k₂ to +0.10, note the shape
+          index, then double both to +0.60 and +0.20.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The shape index
+            does not move — it stays at +0.70 — while curvedness doubles from 0.22 to 0.45. Shape index is built from the
+            ratio of the two curvatures, so any uniform scaling cancels out of it entirely. This is exactly
+            what you want from a shape descriptor: a small gentle dome and a huge sharp dome are both domes,
+            and one number should say so while a different number carries the difference in
+            intensity.</span></details></li>
+        <li><b>Walk the five landmarks.</b> Click each preset in turn and write down the shape index.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Dome +1.00,
+            ridge +0.50, saddle 0.00, valley −0.50, bowl −1.00, evenly spaced across the scale. The pattern
+            is worth internalizing: positive means convex-up somewhere, negative means concave-up, and zero
+            means the two curvatures are equal and opposite so the surface goes up one way and down the
+            other. Anything between the landmarks is a blend, and real data is mostly
+            blends.</span></details></li>
+        <li><b>Break it on a flat surface.</b> Set both k₁ and k₂ close to zero and read the shape index,
+          then look at step 4.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The shape index
+            still reports a value, and it will swing wildly for tiny changes in either curvature, because it
+            is a ratio of two numbers that are both nearly zero. Look at the raw panel in step 4: it is
+            fully saturated from corner to corner, including the broad quiet ground between the features
+            where there is barely any curvature to speak of. The color there is not weak or uncertain
+            looking, it is as strong as the color on the dome, and none of it means anything. This is the single most common way a shape index display
+            misleads people, and it is why the modulated version is the one worth
+            trusting.</span></details></li>
+        <li><b>Find a saddle you would not have guessed at.</b> In step 5, select the saddle component.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Saddles turn up
+            between adjacent highs, on the plunging noses of ridges, and around the rims of bowls — places
+            you would not naturally call a saddle by eye, but which genuinely curve up one way and down the
+            other. Saddles are far more common on real surfaces than the textbook diagram suggests, which is
+            why a saddle component often looks busier than people expect the first time they run one — on
+            this surface it claims 18% of the map, against 2.9% for the dome and 2.3% for the
+            bowl.</span></details></li>
+        <li><b>Compare curvedness with k₁.</b> In step 3, find the bowl on both panels.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">On the k₁ panel
+            the bowl is dark, because k₁ is negative there. On the curvedness panel it is just as bright as
+            the dome, because curvedness has thrown the sign away and only reports how hard the surface is
+            bending. If you want deformation intensity, curvedness is the right choice. If you need to know
+            whether something is arching up or sagging down, curvedness cannot tell you and you need the
+            signed curvatures or the shape index.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway" style="max-width:none">
+      <h3>The main points</h3>
+      <ul>
+        <li><b>Curvedness and shape index are k₁ and k₂ in polar form.</b> Distance from the origin is how
+          much it bends; direction is what shape it bends into.</li>
+        <li><b>Shape index ignores magnitude entirely.</b> It is built from a ratio, so a gentle dome and a
+          violent one give the same number.</li>
+        <li><b>Curvedness ignores shape entirely.</b> A dome and a bowl of the same intensity are
+          indistinguishable on it.</li>
+        <li><b>The five names are landmarks, not boxes.</b> Dome +1, ridge +0.5, saddle 0, valley −0.5,
+          bowl −1, with everything in between perfectly legitimate.</li>
+        <li><b>Never display shape index raw.</b> On flat ground it is a ratio of noise to noise and returns
+          confident nonsense. Modulate it by curvedness.</li>
+        <li><b>Shape components are the practical form.</b> Curvedness gated by shape band, one volume per
+          shape, easy to co-render and hard to misread.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD ============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <details class="notes" id="notes" open>
+      <summary>Method, sources, and what has been simplified</summary>
+      <p>The header sliders set k₁ and k₂ directly, so the first two steps are arithmetic on two numbers you
+        control rather than anything extracted from data. The little surface patch is the quadratic
+        z = ½(k₁x² + k₂y²), which is the surface those two principal curvatures describe near a point, drawn
+        in oblique projection. The maps in steps 3 to 5 come from a modeled structure containing a dome, a
+        ridge, a syncline and a bowl, with curvature computed the same way module 05 computes it.</p>
+      <p><b>Curvedness</b> is <span class="k">C = √((k₁² + k₂²) / 2)</span>, always positive or zero.
+        <b>Shape index</b> is <span class="k">s = (2/π)·tan⁻¹[(k₁ + k₂) / (k₁ − k₂)]</span> with k₁ ≥ k₂,
+        which gives +1 for a dome, +0.5 for a ridge, 0 for a saddle, −0.5 for a valley and −1 for a bowl.
+        Those five values are checked numerically by the code rather than asserted. The
+        <b>shape components</b> are curvedness kept inside a shape index band and zeroed outside it: bowl
+        below −0.75, valley from −0.75 to −0.25, saddle from −0.25 to +0.25, ridge from +0.25 to +0.75, and
+        dome above +0.75.</p>
+      <p><b>A discrepancy in the source, stated plainly.</b> The AASPI <span class="k">curvature3d</span>
+        documentation gives curvedness twice, once as √(k₁² + k₂²) and once as √((k₁² + k₂²)/2). The second
+        matches Roberts (2001) and is the one used here; the two differ by a factor of √2, which matters if
+        you are comparing absolute numbers between packages and not at all if you are looking at a map.
+        The shape index likewise appears in that document with two opposite sign conventions. The one used
+        here is the one that puts domes at +1, which is the common convention, but it is worth checking
+        which way round your own software has it before trusting the sign of a printed number.</p>
+      <p>Because shape index is a ratio, it is undefined where the surface is planar and both curvatures
+        vanish. AASPI's approach, followed here, is to modulate the display by curvedness so that the shape
+        is only visible where there is enough curvature to define it — and the shape components do the same
+        thing by construction, since curvedness is what they are made of.</p>
+      <p>Simplifications. This is one surface rather than a volume. Everything here applies unchanged to
+        amplitude curvature: the same curvedness and shape index are built from e_pos and e_neg in module
+        07, and AASPI outputs the same five shape components for them, prefixed <span class="k">e_</span>.</p>
+      <ul>
+        <li>Roberts, A., 2001, Curvature attributes and their application to 3D interpreted horizons:
+          <em>First Break</em>, 19, 85–100.</li>
+        <li>al-Dossary, S., and K. J. Marfurt, 2006, 3D volumetric multispectral estimates of reflector
+          curvature and rotation: <em>Geophysics</em>, 71, P41–P51.</li>
+        <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+          Reservoir Characterization</em>: SEG Geophysical Development Series, 11.</li>
+        <li>AASPI, <em>Geometric Attributes: Program curvature3d</em>, University of Oklahoma.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3><a href="ampcurv.html">07 · Amplitude curvature</a></h3>
+    <p>The same arithmetic on a completely different surface: not the shape of the reflector, but how bright
+      it is as you walk along it.</p>
+    <a class="btn" href="ampcurv.html">Open module 07 →</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="curvature.html">← Module 05: structural curvature</a>
+    <a class="btn" href="ampcurv.html">Next: amplitude curvature →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
+      <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
+        is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
+        If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
+      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/seismic.js"></script>
+<script src="../assets/attributes.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof SEIS === 'undefined' || typeof ATTR === 'undefined') {
+    const el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load its assets. It expects them one directory up, at ' +
+      '../assets/, and file names are case-sensitive on GitHub Pages.';
+    const w = document.querySelector('.wrap');
+    (w || document.body).insertBefore(el, w ? w.firstChild : null);
+    return;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const visible = (id) => { const el = $(id); return el && !el.hidden; };
+  const CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  const DEF = { k1: 60, k2: 20, opLen: 3, comp: 'ridge', tab: 'p1' };
+  let S = SEIS.readState(DEF);
+  const CAN_LINK = location.protocol !== 'file:';
+  const saveState = () => {
+    if (!CAN_LINK) return;
+    try { SEIS.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  };
+
+  // the sliders are in hundredths of a reciprocal kilometre
+  const K1 = () => S.k1 / 100, K2 = () => S.k2 / 100;
+
+  /* ---------------------------------------------------------------------
+     The two definitions this module is about. Curvedness after Roberts
+     (2001); shape index with k1 >= k2, giving dome +1 through bowl -1.
+     --------------------------------------------------------------------- */
+  const curvedness = (a, b) => Math.sqrt((a * a + b * b) / 2);
+  function shapeIndex(a, b) {
+    const hi = Math.max(a, b), lo = Math.min(a, b);
+    if (Math.abs(hi - lo) < 1e-12) return hi > 0 ? 1 : (hi < 0 ? -1 : 0);
+    return (2 / Math.PI) * Math.atan((hi + lo) / (hi - lo));
+  }
+
+  const SHAPES = [
+    { key: 'bowl',   name: 'Bowl',   lo: -1.00, hi: -0.75, s: -1.0 },
+    { key: 'valley', name: 'Valley', lo: -0.75, hi: -0.25, s: -0.5 },
+    { key: 'saddle', name: 'Saddle', lo: -0.25, hi:  0.25, s:  0.0 },
+    { key: 'ridge',  name: 'Ridge',  lo:  0.25, hi:  0.75, s:  0.5 },
+    { key: 'dome',   name: 'Dome',   lo:  0.75, hi:  1.00, s:  1.0 },
+  ];
+  const PRESETS = {
+    dome:   [60, 60], ridge: [60, 0], saddle: [60, -60],
+    valley: [0, -60], bowl:  [-60, -60], flat: [2, -1],
+  };
+  const nameFor = (s) => (SHAPES.find((q) => s >= q.lo && s <= q.hi) || SHAPES[2]).name;
+
+  /* ------------------------- the modeled surface ------------------------ */
+
+  const NG = 111, BIN = 25, EDGE = 8;
+  let Z = null, FIELD = null;
+  const at = (g, ix, iy) => g[clamp(iy, 0, NG - 1) * NG + clamp(ix, 0, NG - 1)];
+
+  function buildSurface() {
+    const z = new Float32Array(NG * NG);
+    // one of each shape, so every component has something to find
+    const feats = [
+      { cx: 28, cy: 80, sx: 11, sy: 11, a: -70 },   // dome
+      { cx: 30, cy: 34, sx: 9,  sy: 30, a: -60 },   // ridge
+      { cx: 78, cy: 78, sx: 10, sy: 10, a:  70 },   // bowl
+      { cx: 80, cy: 32, sx: 9,  sy: 30, a:  60 },   // syncline / valley
+      { cx: 55, cy: 56, sx: 26, sy: 26, a: -22 },   // broad swell, makes saddles
+    ];
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let v = 0;
+        for (let f = 0; f < feats.length; f++) {
+          const F = feats[f];
+          const u = (ix - F.cx) / F.sx, w = (iy - F.cy) / F.sy;
+          v += F.a * Math.exp(-0.5 * (u * u + w * w));
+        }
+        z[iy * NG + ix] = v;
+      }
+    }
+    Z = z;
+  }
+
+  function smoothGrid(g, len) {
+    if (len <= 1) return g;
+    const h = Math.floor(len / 2);
+    const t = new Float32Array(NG * NG), o = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let s = 0, n = 0;
+        for (let k = -h; k <= h; k++) { s += at(g, ix + k, iy); n++; }
+        t[iy * NG + ix] = s / n;
+      }
+    }
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let s = 0, n = 0;
+        for (let k = -h; k <= h; k++) { s += at(t, ix, iy + k); n++; }
+        o[iy * NG + ix] = s / n;
+      }
+    }
+    return o;
+  }
+
+  function computeField() {
+    const p = new Float32Array(NG * NG), q = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        p[iy * NG + ix] = (at(Z, ix + 1, iy) - at(Z, ix - 1, iy)) / (2 * BIN);
+        q[iy * NG + ix] = (at(Z, ix, iy + 1) - at(Z, ix, iy - 1)) / (2 * BIN);
+      }
+    }
+    const ps = smoothGrid(p, S.opLen), qs = smoothGrid(q, S.opLen);
+    const k1 = new Float32Array(NG * NG), k2 = new Float32Array(NG * NG);
+    const C = new Float32Array(NG * NG), SI = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        const i = iy * NG + ix;
+        const r = (at(ps, ix + 1, iy) - at(ps, ix - 1, iy)) / (2 * BIN);
+        const t = (at(qs, ix, iy + 1) - at(qs, ix, iy - 1)) / (2 * BIN);
+        const s = 0.5 * ((at(ps, ix, iy + 1) - at(ps, ix, iy - 1)) / (2 * BIN)
+                       + (at(qs, ix + 1, iy) - at(qs, ix - 1, iy)) / (2 * BIN));
+        const P = ps[i], Q = qs[i], den = 1 + P * P + Q * Q;
+        const km = ((1 + Q * Q) * r - 2 * P * Q * s + (1 + P * P) * t) / (2 * Math.pow(den, 1.5));
+        const kg = (r * t - s * s) / (den * den);
+        const rt = Math.sqrt(Math.max(0, km * km - kg));
+        k1[i] = (km + rt) * 1000;         // work in 1/km on the maps
+        k2[i] = (km - rt) * 1000;
+        C[i] = curvedness(k1[i], k2[i]);
+        SI[i] = shapeIndex(k1[i], k2[i]);
+      }
+    }
+    FIELD = { k1, k2, C, SI };
+  }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  const M = { l: 46, r: 14, t: 12, b: 34 };
+  function pw(el) {
+    const par = el && el.parentElement;
+    if (!par) return 900;
+    const cs = window.getComputedStyle(par);
+    return Math.max(240, Math.floor(par.clientWidth
+      - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0)));
+  }
+  function rowWidth(rowId, n) {
+    const row = $(rowId);
+    const total = row ? pw(row.firstElementChild || row) : 800;
+    const w = window.innerWidth <= 700
+      ? Math.max(240, total)
+      : Math.max(180, Math.floor((total - 10 * (n - 1)) / n));
+    if (row) {
+      row.querySelectorAll(':scope > .panel-col').forEach((el) => {
+        el.style.width = w + 'px'; el.style.maxWidth = w + 'px';
+      });
+    }
+    return w;
+  }
+
+  function colorbar(ctx, R, map, loLabel, hiLabel, midLabel) {
+    const B = { x: R.x, y: R.y + R.h + 40, w: R.w, h: 9 };
+    const n = Math.max(2, Math.round(B.w));
+    for (let i = 0; i < n; i++) {
+      const col = map(i / (n - 1));
+      ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      ctx.fillRect(B.x + i * (B.w / n), B.y, B.w / n + 1, B.h);
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.4)'; ctx.lineWidth = 1;
+    ctx.strokeRect(B.x + 0.5, B.y + 0.5, B.w, B.h);
+    ctx.font = '9.5px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left'; ctx.fillText(loLabel, B.x, B.y + B.h + 3);
+    ctx.textAlign = 'right'; ctx.fillText(hiLabel, B.x + B.w, B.y + B.h + 3);
+    if (midLabel) { ctx.textAlign = 'center'; ctx.fillText(midLabel, B.x + B.w / 2, B.y + B.h + 3); }
+    ctx.restore();
+  }
+
+  function mapPanel(canvasId, w, h, get, map, bar) {
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 52 : 0) };
+    const off = document.createElement('canvas');
+    off.width = NG; off.height = NG;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(NG, NG);
+    for (let r = 0; r < NG; r++) {
+      const iy = NG - 1 - r;
+      for (let c = 0; c < NG; c++) {
+        const col = map(get(c, iy));
+        const k = (r * NG + c) * 4;
+        img.data[k] = col[0]; img.data[k + 1] = col[1];
+        img.data[k + 2] = col[2]; img.data[k + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(off, R.x, R.y, R.w, R.h); ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 0, (NG - 1) * BIN / 1000, 'east (km)', (v) => v.toFixed(1), { ticks: 4 });
+    SEIS.axisLeft(ctx, R, 0, (NG - 1) * BIN / 1000, 'north (km)', (v) => v.toFixed(1),
+      { flip: true, ticks: 4 });
+    if (bar) bar(ctx, R);
+    return R;
+  }
+
+  const rangeOf = (arr) => {
+    let m = 1e-9;
+    for (let iy = EDGE; iy < NG - EDGE; iy++) {
+      for (let ix = EDGE; ix < NG - EDGE; ix++) m = Math.max(m, Math.abs(arr[iy * NG + ix]));
+    }
+    return m;
+  };
+
+  // the shape index color scale: bowl through saddle to dome
+  function shapeColor(s) {
+    const u = clamp((s + 1) / 2, 0, 1);
+    return ATTR.MAPS.dip(-(2 * u - 1));
+  }
+
+  /* ------------------- the surface patch in the header ------------------ */
+
+  function drawShape() {
+    const el = $('cShape');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el), h = clamp(Math.round(w * 0.56), 170, 240);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const a = K1(), b = K2();
+    const cx = w / 2, cy = h * 0.56;
+    const N = 13, span = 1.0;
+    const sc = Math.min(w, h) * 0.34;
+    // oblique projection of z = 1/2 (k1 x^2 + k2 y^2)
+    const proj = (x, y) => {
+      const z = 0.5 * (a * x * x + b * y * y);
+      return [cx + (x - y * 0.55) * sc, cy - z * sc * 0.9 + (x + y) * sc * 0.20];
+    };
+    ctx.save();
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < N; i++) {
+      const t = -span + (2 * span * i) / (N - 1);
+      ctx.strokeStyle = 'rgba(22,25,28,.42)';
+      ctx.beginPath();
+      for (let j = 0; j < N; j++) {
+        const u = -span + (2 * span * j) / (N - 1);
+        const P = proj(t, u); j ? ctx.lineTo(P[0], P[1]) : ctx.moveTo(P[0], P[1]);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      for (let j = 0; j < N; j++) {
+        const u = -span + (2 * span * j) / (N - 1);
+        const P = proj(u, t); j ? ctx.lineTo(P[0], P[1]) : ctx.moveTo(P[0], P[1]);
+      }
+      ctx.stroke();
+    }
+    // the two principal directions, in the colors used everywhere else
+    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = CRIM; ctx.beginPath();
+    for (let j = 0; j < 41; j++) {
+      const u = -span + (2 * span * j) / 40;
+      const P = proj(u, 0); j ? ctx.lineTo(P[0], P[1]) : ctx.moveTo(P[0], P[1]);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = TEAL; ctx.beginPath();
+    for (let j = 0; j < 41; j++) {
+      const u = -span + (2 * span * j) / 40;
+      const P = proj(0, u); j ? ctx.lineTo(P[0], P[1]) : ctx.moveTo(P[0], P[1]);
+    }
+    ctx.stroke();
+    ctx.restore();
+    const s = shapeIndex(a, b);
+    SEIS.tag(ctx, 10, 10, nameFor(s) + '   s = ' + s.toFixed(2), CRIM);
+    SEIS.tag(ctx, 10, 28, 'curvedness ' + curvedness(a, b).toFixed(2) + ' km\u207b\u00b9', SLATE);
+    SEIS.tag(ctx, w - 92, h - 22, 'k\u2081 along here', CRIM);
+    SEIS.tag(ctx, 10, h - 22, 'k\u2082 along here', TEAL);
+  }
+
+  /* ------------------------------- step 1 ------------------------------ */
+
+  function drawStep1() {
+    const w = rowWidth('row1', 2), h = clamp(Math.round(w * 0.86), 260, 350);
+    const a = K1(), b = K2(), LIM = 1.05;
+
+    // the k1-k2 plane
+    const ctx = SEIS.fitCanvas($('c1plane'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 52, y: 14, w: w - 66, h: h - 14 - 42 };
+    const X = (v) => R.x + ((v + LIM) / (2 * LIM)) * R.w;
+    const Y = (v) => R.y + R.h - ((v + LIM) / (2 * LIM)) * R.h;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    // color the plane by the shape index it implies
+    const step = 4;
+    for (let px = R.x; px < R.x + R.w; px += step) {
+      for (let py = R.y; py < R.y + R.h; py += step) {
+        const kx = ((px - R.x) / R.w) * 2 * LIM - LIM;
+        const ky = ((R.y + R.h - py) / R.h) * 2 * LIM - LIM;
+        const col = shapeColor(shapeIndex(kx, ky));
+        const fade = clamp(curvedness(kx, ky) / 0.35, 0.12, 1);
+        ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + (0.20 + 0.55 * fade) + ')';
+        ctx.fillRect(px, py, step, step);
+      }
+    }
+    SEIS.dashedLine(ctx, X(-LIM), Y(0), X(LIM), Y(0), 'rgba(22,25,28,.35)', [4, 4], 1);
+    SEIS.dashedLine(ctx, X(0), Y(-LIM), X(0), Y(LIM), 'rgba(22,25,28,.35)', [4, 4], 1);
+    SEIS.dashedLine(ctx, X(-LIM), Y(LIM), X(LIM), Y(-LIM), 'rgba(22,25,28,.3)', [3, 4], 1);
+    ctx.restore();
+    // the named landmarks
+    const marks = [[0.8, 0.8, 'dome'], [0.9, 0.0, 'ridge'], [0.8, -0.8, 'saddle'],
+                   [0.0, -0.9, 'valley'], [-0.8, -0.8, 'bowl']];
+    marks.forEach((m) => {
+      SEIS.tag(ctx, clamp(X(m[0]) - 22, R.x + 2, R.x + R.w - 54), Y(m[1]) - 8, m[2], INK);
+    });
+    ctx.save();
+    ctx.fillStyle = INK; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(X(a), Y(b), 6, 0, 6.2832); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, -LIM, LIM, 'k\u2081 (1/km)', (v) => v.toFixed(1), { ticks: 5 });
+    SEIS.axisLeft(ctx, R, -LIM, LIM, 'k\u2082 (1/km)', (v) => v.toFixed(1), { flip: true, ticks: 5 });
+
+    // the same point in polar terms
+    const c2 = SEIS.fitCanvas($('c1polar'), w, h);
+    c2.clearRect(0, 0, w, h);
+    const R2 = { x: 52, y: 14, w: w - 66, h: h - 14 - 42 };
+    const cx = R2.x + R2.w / 2, cy = R2.y + R2.h / 2;
+    const rad = Math.min(R2.w, R2.h) * 0.42;
+    c2.save();
+    c2.strokeStyle = 'rgba(22,25,28,.2)'; c2.lineWidth = 1;
+    [0.33, 0.66, 1].forEach((f) => {
+      c2.beginPath(); c2.arc(cx, cy, rad * f, 0, 6.2832); c2.stroke();
+    });
+    // the shape index runs round the circle
+    for (let d = 0; d < 360; d += 2) {
+      const sIdx = Math.cos(d * Math.PI / 180) >= 0 ? 1 : -1;
+      const kk1 = Math.cos(d * Math.PI / 180), kk2 = Math.sin(d * Math.PI / 180);
+      const col = shapeColor(shapeIndex(kk1, kk2));
+      c2.strokeStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      c2.lineWidth = 7;
+      c2.beginPath();
+      c2.arc(cx, cy, rad + 12, d * Math.PI / 180, (d + 2.4) * Math.PI / 180);
+      c2.stroke();
+      void sIdx;
+    }
+    const C = curvedness(a, b), sVal = shapeIndex(a, b);
+    const ang = Math.atan2(b, a);
+    const rr = clamp(C / 0.85, 0, 1) * rad;
+    c2.strokeStyle = CRIM; c2.lineWidth = 2.4;
+    c2.beginPath(); c2.moveTo(cx, cy); c2.lineTo(cx + rr * Math.cos(ang), cy - rr * Math.sin(ang));
+    c2.stroke();
+    c2.fillStyle = INK;
+    c2.beginPath(); c2.arc(cx + rr * Math.cos(ang), cy - rr * Math.sin(ang), 5, 0, 6.2832); c2.fill();
+    c2.restore();
+    SEIS.tag(c2, cx + 8, cy - rr / 2 - 10, 'curvedness = length', CRIM);
+    SEIS.tag(c2, R2.x + 4, R2.y + 4, 'shape index = direction', TEAL);
+
+    $('s1a').textContent = 'k\u2081 ' + a.toFixed(2) + ' , k\u2082 ' + b.toFixed(2) + ' km\u207b\u00b9';
+    $('s1b').textContent = C.toFixed(3) + ' km\u207b\u00b9';
+    $('s1c').textContent = sVal.toFixed(3) + '   (' + nameFor(sVal) + ')';
+    $('s1d').textContent = C < 0.02
+      ? 'The point is almost at the origin. The surface is flat, and the shape index is meaningless here — that is step 4.'
+      : 'A ' + nameFor(sVal).toLowerCase() + ', bending at ' + C.toFixed(2) +
+        ' km\u207b\u00b9. Move both sliders together and only the curvedness changes.';
+  }
+
+  /* ------------------------------- step 2 ------------------------------ */
+
+  function drawStep2() {
+    const w = pw($('c2scale')), h = 180;
+    const ctx = SEIS.fitCanvas($('c2scale'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 40, y: 54, w: w - 80, h: 34 };
+    const n = Math.max(2, Math.round(R.w));
+    for (let i = 0; i < n; i++) {
+      const s = -1 + (2 * i) / (n - 1);
+      const col = shapeColor(s);
+      ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      ctx.fillRect(R.x + i * (R.w / n), R.y, R.w / n + 1, R.h);
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.45)'; ctx.lineWidth = 1;
+    ctx.strokeRect(R.x + 0.5, R.y + 0.5, R.w, R.h);
+    const X = (s) => R.x + ((s + 1) / 2) * R.w;
+    SHAPES.forEach((q) => {
+      ctx.strokeStyle = 'rgba(22,25,28,.35)';
+      if (q.lo > -1) {
+        ctx.beginPath(); ctx.moveTo(X(q.lo), R.y); ctx.lineTo(X(q.lo), R.y + R.h); ctx.stroke();
+      }
+      SEIS.tag(ctx, clamp(X(q.s) - 24, R.x, R.x + R.w - 56), R.y - 24, q.name, INK);
+      ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(q.s.toFixed(1), X(q.s), R.y + R.h + 8);
+    });
+    const sVal = shapeIndex(K1(), K2());
+    ctx.strokeStyle = INK; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.moveTo(X(sVal), R.y - 8); ctx.lineTo(X(sVal), R.y + R.h + 4); ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.moveTo(X(sVal), R.y - 8); ctx.lineTo(X(sVal) - 5, R.y - 17);
+    ctx.lineTo(X(sVal) + 5, R.y - 17); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    SEIS.tag(ctx, 40, h - 30, 'shape index runs \u22121 (bowl) to +1 (dome); '
+      + 'the five names are landmarks on a continuum', SLATE);
+
+    const ratio = Math.abs(K1()) > 1e-9 ? K2() / K1() : 0;
+    $('s2a').textContent = sVal.toFixed(3);
+    $('s2b').textContent = nameFor(sVal);
+    $('s2c').textContent = Math.abs(K1()) < 1e-6 ? 'undefined' : ratio.toFixed(2);
+    $('s2d').textContent = 'Shape index is built from (k\u2081+k\u2082)/(k\u2081\u2212k\u2082), which is a '
+      + 'ratio, so scaling both curvatures leaves it untouched. Size lives in curvedness instead.';
+  }
+
+  /* ------------------------------- step 3 ------------------------------ */
+
+  function drawStep3() {
+    const w = rowWidth('row3', 2), h = clamp(Math.round(w * 0.94), 250, 340) + 52;
+    const cl = rangeOf(FIELD.C), kl = rangeOf(FIELD.k1);
+    mapPanel('c3c', w, h, (ix, iy) => FIELD.C[iy * NG + ix] / cl,
+      (u) => ATTR.MAPS.scan(clamp(u, 0, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.scan(u),
+        '0  flat', 'strongly bent  ' + cl.toFixed(2), 'curvedness, 1/km'));
+    mapPanel('c3k', w, h, (ix, iy) => FIELD.k1[iy * NG + ix] / kl,
+      (u) => ATTR.MAPS.dip(-clamp(u, -1, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.dip(-(2 * u - 1)),
+        '\u2212' + kl.toFixed(2), '+' + kl.toFixed(2), 'k\u2081, 1/km \u00b7 0'));
+
+    const domeI = 80 * NG + 28, bowlI = 78 * NG + 78;
+    $('s3a').textContent = cl.toFixed(3) + ' km\u207b\u00b9';
+    $('s3b').textContent = FIELD.C[domeI].toFixed(3) + ' km\u207b\u00b9';
+    $('s3c').textContent = FIELD.C[bowlI].toFixed(3) + ' km\u207b\u00b9';
+    $('s3d').textContent = 'The dome and the bowl read almost the same curvedness, because both are bent '
+      + 'equally hard. Curvedness cannot tell up from down; the k\u2081 panel beside it can.';
+  }
+
+  /* ------------------------------- step 4 ------------------------------ */
+
+  function drawStep4() {
+    const w = rowWidth('row4', 2), h = clamp(Math.round(w * 0.94), 250, 340) + 52;
+    const cl = rangeOf(FIELD.C);
+    mapPanel('c4raw', w, h, (ix, iy) => FIELD.SI[iy * NG + ix],
+      (s) => shapeColor(s),
+      (ctx, R) => colorbar(ctx, R, (u) => shapeColor(2 * u - 1),
+        '\u22121 bowl', 'dome +1', 'shape index \u00b7 saddle 0'));
+    mapPanel('c4mod', w, h, (ix, iy) => {
+      const i = iy * NG + ix;
+      return { s: FIELD.SI[i], m: clamp(FIELD.C[i] / (cl * 0.35), 0, 1) };
+    }, (v) => {
+      const col = shapeColor(v.s);
+      return [Math.round(255 - (255 - col[0]) * v.m),
+              Math.round(255 - (255 - col[1]) * v.m),
+              Math.round(255 - (255 - col[2]) * v.m)];
+    }, (ctx, R) => colorbar(ctx, R, (u) => shapeColor(2 * u - 1),
+      '\u22121 bowl', 'dome +1', 'shape, faded where flat'));
+
+    let flat = 0, tot = 0;
+    for (let iy = EDGE; iy < NG - EDGE; iy++) {
+      for (let ix = EDGE; ix < NG - EDGE; ix++) {
+        tot++;
+        if (FIELD.C[iy * NG + ix] < cl * 0.05) flat++;
+      }
+    }
+    $('s4a').textContent = (100 * flat / tot).toFixed(0) + '% of the map';
+    $('s4b').textContent = 'yes, at full saturation';
+    $('s4c').textContent = 'Shape index is a ratio, so it returns a value wherever you ask, including '
+      + 'where there is nothing to describe. Always modulate it by curvedness before believing it.';
+  }
+
+  /* ------------------------------- step 5 ------------------------------ */
+
+  function drawStep5() {
+    const w = rowWidth('row5', 2), h = clamp(Math.round(w * 0.94), 250, 340) + 52;
+    let zl = Infinity, zh = -Infinity;
+    for (let i = 0; i < Z.length; i++) { zl = Math.min(zl, Z[i]); zh = Math.max(zh, Z[i]); }
+    mapPanel('c5z', w, h, (ix, iy) => (Z[iy * NG + ix] - zl) / Math.max(zh - zl, 1e-6),
+      (u) => ATTR.MAPS.coherence(clamp(u, 0, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.coherence(u),
+        'shallow', 'deep', 'depth'));
+
+    const q = SHAPES.find((x) => x.key === S.comp) || SHAPES[3];
+    const cl = rangeOf(FIELD.C);
+    let kept = 0, tot = 0;
+    mapPanel('c5comp', w, h, (ix, iy) => {
+      const i = iy * NG + ix;
+      const inBand = FIELD.SI[i] >= q.lo && FIELD.SI[i] <= q.hi;
+      return inBand ? clamp(FIELD.C[i] / cl, 0, 1) : 0;
+    }, (u) => ATTR.MAPS.scan(clamp(u, 0, 1)),
+    (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.scan(u),
+      '0  not this shape', 'strongly ' + q.name.toLowerCase(), q.name + ' component'));
+
+    for (let iy = EDGE; iy < NG - EDGE; iy++) {
+      for (let ix = EDGE; ix < NG - EDGE; ix++) {
+        const i = iy * NG + ix;
+        tot++;
+        if (FIELD.SI[i] >= q.lo && FIELD.SI[i] <= q.hi && FIELD.C[i] > cl * 0.08) kept++;
+      }
+    }
+    document.querySelectorAll('[data-comp]').forEach((b) => {
+      b.setAttribute('aria-pressed', b.dataset.comp === S.comp);
+    });
+    $('s5a').textContent = q.name;
+    $('s5b').textContent = q.lo.toFixed(2) + ' to ' + q.hi.toFixed(2);
+    $('s5c').textContent = (100 * kept / tot).toFixed(1) + '% is a well-developed ' + q.name.toLowerCase();
+    $('s5d').textContent = 'Bright means both strongly bent and this shape. Blank means either flat or a '
+      + 'different shape, and the component alone cannot tell you which.';
+  }
+
+  /* =====================================================================
+     PLUMBING
+     ===================================================================== */
+
+  function syncLabels() {
+    $('k1V').textContent = (K1() >= 0 ? '+' : '') + K1().toFixed(2);
+    $('k2V').textContent = (K2() >= 0 ? '+' : '') + K2().toFixed(2);
+    $('opLenV').textContent = S.opLen + (S.opLen === 1 ? ' trace' : ' traces');
+    ['k1', 'k2', 'opLen'].forEach((k) => {
+      const el = $(k);
+      if (el && parseFloat(el.value) !== S[k]) el.value = S[k];
+    });
+  }
+
+  function drawAll() {
+    syncLabels();
+    if (!$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
+    drawShape();
+    if (visible('p1')) drawStep1();
+    if (visible('p2')) drawStep2();
+    if (visible('p3')) drawStep3();
+    if (visible('p4')) drawStep4();
+    if (visible('p5')) drawStep5();
+  }
+
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pe', 'pk', 'pm'];
+  const STEPNAMES = {
+    p1: 'Two numbers, recombined', p2: 'The shape scale', p3: 'Curvedness',
+    p4: 'Shape alone lies', p5: 'Shape components',
+    pe: 'Exercises', pk: 'Key points', pm: 'Method',
+  };
+
+  function buildStepNav() {
+    PANES.forEach((id, i) => {
+      const pane = $(id);
+      if (!pane || pane.querySelector('.stepnav')) return;
+      const prev = PANES[i - 1], next = PANES[i + 1];
+      const nav = document.createElement('div');
+      nav.className = 'stepnav';
+      const mk = (target, text, ghost) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (ghost ? ' ghost' : '') + ' small';
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          showTab(target);
+          const t = document.querySelector('.tabhint');
+          if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return b;
+      };
+      nav.appendChild(prev ? mk(prev, '\u2190 ' + STEPNAMES[prev], true)
+                           : document.createElement('span'));
+      const where = document.createElement('span');
+      where.className = 'where';
+      where.textContent = i < 5 ? 'step ' + (i + 1) + ' of 5' : STEPNAMES[id];
+      nav.appendChild(where);
+      nav.appendChild(next ? mk(next, STEPNAMES[next] + ' \u2192')
+                           : document.createElement('span'));
+      pane.appendChild(nav);
+    });
+  }
+
+  function showTab(id) {
+    PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach((b) => {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    const lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    const last = (id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !last;
+    if ($('pager')) $('pager').hidden = !last;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  document.addEventListener('input', (ev) => {
+    const key = ev.target && ev.target.dataset && ev.target.dataset.key;
+    if (!key) return;
+    S[key] = parseFloat(ev.target.value);
+    // k1 is the more positive of the pair, by definition
+    if (key === 'k1' && S.k1 < S.k2) S.k2 = S.k1;
+    if (key === 'k2' && S.k2 > S.k1) S.k1 = S.k2;
+    if (key === 'opLen') computeField();
+    drawAll(); saveState();
+  });
+  document.querySelectorAll('[data-shape]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = PRESETS[b.dataset.shape];
+      S.k1 = v[0]; S.k2 = v[1];
+      drawAll(); saveState();
+    });
+  });
+  document.querySelectorAll('[data-comp]').forEach((b) => {
+    b.addEventListener('click', () => { S.comp = b.dataset.comp; drawAll(); saveState(); });
+  });
+
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
+
+  buildSurface();
+  computeField();
+  buildStepNav();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+  document.fonts && document.fonts.ready.then(drawAll);
+})();
+</script>
+</body>
+</html>
