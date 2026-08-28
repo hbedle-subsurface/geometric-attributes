@@ -293,20 +293,19 @@
         <li><b>Compare the two volumes as an interpreter would.</b> In step 3, look at the steered and
           unsteered panels and ask which anomalies you would pick as faults.
           <span class="ans">With the noise slider at its default 12%, the steered panel has bedding at
-            0.939 against a fault at 0.53, and the darkest point on a row is the fault 88% of the time. The
-            unsteered panel has bedding averaging 0.81 and falling to 0.56 on the steepest flanks, and the
-            darkest point is the fault only 44% of the time. So on more than half the rows of the unsteered
-            volume, the darkest thing you could pick is a fold flank. Turn the noise off and the steered
-            background goes to a flat 1.000 while the unsteered one still bands; the flanks are not a noise
-            problem.</span></li>
+            0.924 against a fault at 0.49, and the darkest point on a row is the fault 90% of the time. The
+            unsteered panel has bedding averaging 0.78 and falling to 0.47 on the steepest flanks, and the
+            darkest point is the fault only 45% of the time. So on more than half the rows of the unsteered
+            volume the darkest thing available to pick is a fold flank, not the fault. Turn the noise off
+            and the steered background climbs to a flat 1.0 while the unsteered one still bands: the flanks
+            are not a noise problem, they are a steering problem.</span></li>
         <li><b>Give the steering a small, plausible error.</b> In step 4, step the error through 0.25, 0.5
           and 1 ms per trace and watch the bedding value.
-          <span class="ans">Bedding coherence falls 0.939, 0.934, 0.919, 0.861 as the error goes 0, 0.25,
-            0.5, 1 ms per trace, while the fault only moves from 0.527 to 0.489. The whole cost comes out
-            of the background rather than out of the anomaly, and the separation drops from 0.412 to 0.372.
+          <span class="ans">Bedding coherence falls 0.924, 0.918, 0.899, 0.831 as the error goes 0, 0.25,
+            0.5, 1 ms per trace, while the fault only moves from 0.488 to 0.442. The cost comes out of the
+            background rather than out of the anomaly, and the separation narrows from 0.435 to 0.389.
             These are small errors by the standards of module 01 — 0.5 ms per trace is less than the cost of
-            coarsening the dip search step to 2 ms — and they are already being spent. Steering is not a
-            switch that is either on or off.</span></li>
+            coarsening the dip search step to 2 ms — and they are already being spent.</span></li>
         <li><b>Read the two time slices.</b> In step 3, look at the map pair rather than the sections and
           ask what the concentric rings on the right actually are.
           <span class="ans">They are contours of the dome. Wherever the bed dips more steeply than a
@@ -319,11 +318,11 @@
         <li><b>Push the error past the structure itself.</b> Set the error to 2 ms per trace and compare it
           with the steepest dip in the section, shown in the readout.
           <span class="ans">The steepest true dip is 1.96 ms per trace, so an error of 2 is a hundred
-            percent error. Bedding coherence collapses to 0.670, which is below the 0.812 the unsteered
-            window managed, and the darkest point on a row is the fault only 68% of the time rather than
-            88%. Badly wrong steering is therefore worse than no steering at all, and more dangerous,
+            percent error. Bedding coherence collapses to 0.614, well below the 0.78 the unsteered window
+            managed, and the darkest point on a row is the fault only 41% of the time rather than 90%.
+            Steering by a badly wrong dip is therefore worse than not steering at all, and more dangerous,
             because the volume is labelled as dip-steered. Push on to 4 ms per trace and the fault is found
-            on 9% of rows: the attribute is imaging the error.</span></li>
+            on 10% of rows: the attribute is imaging the error.</span></li>
       </ol>
     </div>
 
@@ -350,7 +349,10 @@
     <p>Steps 1 and 2 use a single reflector across a small patch of traces, built by convolving one
       reflection coefficient with a Ricker wavelet and shifting each trace by the bed dip. Steps 3 and 4 use
       a 160-trace section at 2 ms sampling containing a gently folded sequence with a regional dip, cut by
-      a normal fault of 20 ms throw dipping about 65 degrees. Because the fault plane is oblique to the
+      a normal fault of 20 ms throw dipping about 65 degrees. The reflectors are closely spaced, at 9
+      samples, for a reason: a fault is only visible where it cuts a reflector, so with widely spaced
+      beds its expression becomes a row of isolated offsets several traces apart, which reads as a
+      staircase rather than a plane. Because the fault plane is oblique to the
       reflectors it crosses each one at a different trace, which is why the coherence anomaly leans. Fault
       values quoted in the exercises are the darkest point found on each time row, which is what an
       interpreter or an autotracker responds to, rather than an average over a fixed band, and they assume
@@ -520,14 +522,23 @@
   /* ------------------------ the section, steps 3-4 --------------------- */
 
   // structural shift of a reflector whose un-faulted time index is t0
-  /* The throw is applied with a sub-trace transition rather than a hard
-     switch at a trace boundary. A hard switch quantises the fault plane to
-     whole traces and draws it as a staircase; this lets the plane pass
-     through a bin and keeps it straight. */
+  // the fold, without the fault
+  const foldShift = (ix) => msToP(REG) * (ix - NX / 2) +
+    msToP(FOLDA) * Math.sin(2 * Math.PI * ix / FOLDL);
+
+  /* Three things are needed to make the fault plane straight on screen. The
+     fault position is evaluated at the time the reflector actually arrives,
+     not at its un-shifted time, so the plane does not wobble with the fold.
+     The throw uses a sub-trace transition rather than a hard switch at a trace
+     boundary, so the plane passes through a bin instead of being quantised to
+     whole traces. And the reflectors are closely spaced, because a fault can
+     only express itself where it cuts one: with beds far apart the fault
+     appears as a row of isolated offsets, each several traces further along
+     than the last, which is what draws a staircase. */
   const shiftAt = (ix, t0) => {
-    const w = clamp(ix - faultTraceAt(t0) + 0.5, 0, 1);
-    return msToP(REG) * (ix - NX / 2) +
-      msToP(FOLDA) * Math.sin(2 * Math.PI * ix / FOLDL) + w * msToP(THROW);
+    const fold = foldShift(ix);
+    const w = clamp(ix - faultTraceAt(t0 + fold) + 0.5, 0, 1);
+    return fold + w * msToP(THROW);
   };
   const trueDipMs = (ix) => REG +
     FOLDA * (2 * Math.PI / FOLDL) * Math.cos(2 * Math.PI * ix / FOLDL);
@@ -537,8 +548,8 @@
     const wav = SEIS.makeWavelet({ type: 'ricker', f: S.f });
     const rnd = SEIS.mulberry32(7);
     const beds = [];
-    for (let t = -40; t < NT + 40; t += 26) {
-      beds.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.035 + rnd() * 0.075) });
+    for (let t = -40; t < NT + 40; t += 9) {
+      beds.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.030 + rnd() * 0.070) });
     }
     const f = new Float32Array(NX * NT);
     for (let ix = 0; ix < NX; ix++) {
