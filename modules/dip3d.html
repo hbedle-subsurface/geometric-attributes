@@ -244,6 +244,11 @@
       along a straight line. On one side of that line the slice sits above the reflector, on the other side
       below it, and along the line itself it is passing straight through the peak. So the reflector prints
       itself onto the map as a band, and the band runs along strike.</p>
+    <p class="lede">Switch the dome on and the same argument gives a different shape. A horizontal cut
+      through a domed reflector meets it along a <b>closed ring</b> rather than a straight line, and that is
+      exactly the ring you see on the slice. The diagram redraws itself to match, so you can check that the
+      picture on the left and the sketch above it are telling the same story — the band and the ring are the
+      same intersection, drawn on two different reflector shapes.</p>
 
     <canvas id="c5cube" aria-label="Diagram of a horizontal time slice cutting a dipping reflector"></canvas>
 
@@ -1289,8 +1294,21 @@
     // the reflector, clipped to the box so it does not float outside it
     const cor = [[0, 0], [1, 0], [1, 1], [0, 1]];
     const inside = cor.every((c) => tau(c[0], c[1]) > 0.02 && tau(c[0], c[1]) < 0.98);
-    poly(cor.map((c) => P(c[0], c[1], clamp(tau(c[0], c[1]), 0.02, 0.98))),
-      'rgba(132,22,23,.20)', CRIM);
+    if (S.dome) {
+      // a mesh, so the sketch shows the curvature the maps are responding to
+      const G = 7;
+      for (let a = 0; a < G; a++) {
+        for (let b = 0; b < G; b++) {
+          const u0 = a / G, u1 = (a + 1) / G, v0 = b / G, v1 = (b + 1) / G;
+          poly([[u0, v0], [u1, v0], [u1, v1], [u0, v1]].map(
+            (c) => P(c[0], c[1], clamp(tau(c[0], c[1]), 0.02, 0.98))),
+            'rgba(132,22,23,.16)', 'rgba(132,22,23,.55)');
+        }
+      }
+    } else {
+      poly(cor.map((c) => P(c[0], c[1], clamp(tau(c[0], c[1]), 0.02, 0.98))),
+        'rgba(132,22,23,.20)', CRIM);
+    }
 
     // the horizontal cut
     poly([P(0, 0, wSlice), P(1, 0, wSlice), P(1, 1, wSlice), P(0, 1, wSlice)],
@@ -1300,36 +1318,49 @@
        the reflector is planar or domed. */
     ctx.save();
     ctx.strokeStyle = '#16191C'; ctx.lineWidth = 3;
-    ctx.beginPath();
-    let started = false, any = false;
-    const N = 90;
+    let any = false;
+    const N = 110;
+    // a dome meets a horizontal cut in a closed loop, which crosses each column
+    // twice, so both branches are collected rather than only the first
+    const branch = [[], []];
     for (let i = 0; i <= N; i++) {
       const u = i / N;
-      let vHit = -1;
+      const hits = [];
       for (let j = 0; j < N; j++) {
         const v0 = j / N, v1 = (j + 1) / N;
         const a = tau(u, v0) - wSlice, b = tau(u, v1) - wSlice;
         if ((a <= 0 && b >= 0) || (a >= 0 && b <= 0)) {
-          vHit = v0 + (v1 - v0) * (Math.abs(a) / (Math.abs(a) + Math.abs(b) || 1));
-          break;
+          hits.push(v0 + (v1 - v0) * (Math.abs(a) / (Math.abs(a) + Math.abs(b) || 1)));
         }
       }
-      if (vHit < 0) { started = false; continue; }
-      const p = P(u, vHit, wSlice);
-      started ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y);
-      started = true; any = true;
+      hits.sort((x, y) => x - y);
+      branch[0].push(hits.length ? { u, v: hits[0] } : null);
+      branch[1].push(hits.length > 1 ? { u, v: hits[hits.length - 1] } : null);
+      if (hits.length) any = true;
     }
-    ctx.stroke(); ctx.restore();
+    branch.forEach((br) => {
+      ctx.beginPath();
+      let started = false;
+      br.forEach((q) => {
+        if (!q) { started = false; return; }
+        const p = P(q.u, q.v, wSlice);
+        started ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y);
+        started = true;
+      });
+      ctx.stroke();
+    });
+    ctx.restore();
 
     SEIS.tag(ctx, P(0.04, 0, 0.06).x, P(0.04, 0, 0.06).y - 26,
       'the horizontal cut \u2014 one travel time', TEAL);
     if (inside) {
       SEIS.tag(ctx, P(0.02, 0, tau(0.02, 0)).x, P(0.02, 0, tau(0.02, 0)).y + 16,
-        'the dipping reflector', CRIM);
+        S.dome ? 'the domed reflector' : 'the dipping reflector', CRIM);
     }
     if (any) {
       SEIS.tag(ctx, P(0.5, 0.5, wSlice).x - 46, P(0.5, 0.5, wSlice).y - 30,
-        'where they meet \u2014 this is the band on the map', INK);
+        S.dome ? 'where they meet \u2014 a closed ring on the map'
+               : 'where they meet \u2014 this is the band on the map', INK);
     } else {
       SEIS.tag(ctx, P(0.5, 0.5, wSlice).x - 60, P(0.5, 0.5, wSlice).y - 30,
         'the cut misses the reflector at this time', SLATE);
