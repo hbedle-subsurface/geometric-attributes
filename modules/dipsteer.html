@@ -188,8 +188,9 @@
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
       A section shows the fault as a line, which is a hard place to judge how much damage an unsteered
       window does. A map view is much clearer. These two panels are horizontal slices through a small 3D
-      volume containing a gentle dome cut by one planar fault. The fault is the same in both. Everything
-      else you see on the right is the bedding printing itself onto the attribute.</p>
+      volume: a sequence of reflectors carried over a monoclinal flexure, flat on both sides and steepening
+      through the middle, cut by one planar fault. The fault is identical in both panels. Everything else on
+      the right is the structure printing itself onto the attribute.</p>
 
     <div class="sec-row" id="rowSlice">
       <div class="panel-col">
@@ -205,11 +206,12 @@
     </div>
 
     <div class="legend">
-      <span>Inline runs across, crossline runs up. On the left the fault is the only feature. On the right
-        the concentric bands are contours of the dome: wherever the bed dips more steeply than the window
-        can tolerate, the attribute darkens, and the pattern it draws is the structure rather than any
-        discontinuity. That bleed-through is what gets picked as stratigraphy by people who have never seen
-        the steered version.</span>
+      <span>Inline runs across, crossline runs up. On the left the fault is the only feature worth picking.
+        On the right a broad dark band has appeared along the flexure, running at a different angle from the
+        fault: wherever the bed dips more steeply than the horizontal window tolerates, the attribute
+        darkens, and what it draws is the structure rather than a discontinuity. The band reaches about
+        0.55, nearly as dark as the fault itself at about 0.48, so no threshold separates them. That
+        bleed-through gets picked as stratigraphy by people who have never seen the steered version.</span>
     </div>
 
     <div class="ctl" style="margin-top:14px;max-width:520px">
@@ -307,12 +309,13 @@
             These are small errors by the standards of module 01 — 0.5 ms per trace is less than the cost of
             coarsening the dip search step to 2 ms — and they are already being spent.</span></li>
         <li><b>Read the two time slices.</b> In step 3, look at the map pair rather than the sections and
-          ask what the concentric rings on the right actually are.
-          <span class="ans">They are contours of the dome. Wherever the bed dips more steeply than a
-            three-trace horizontal window can tolerate, the attribute darkens, so the pattern it draws is
-            the structure itself — the background falls to about 0.68 on the steep flanks against a fault at
-            about 0.47. On the steered slice the background is a flat 0.999 and the fault is the only
-            feature on the map. This is the clearest view of the problem, because in map view the
+          ask what the broad dark band on the right is, and why it runs at a different angle from the fault.
+          <span class="ans">It is the flexure. Wherever the bed dips more steeply than a three-trace
+            horizontal window tolerates, the attribute darkens, so the feature it draws is the structure
+            itself. The band falls to about 0.55 against a fault at about 0.48, so the two anomalies are
+            comparable in strength and no threshold separates them. On the steered slice the background
+            sits near 0.95 across the whole map, flexure included, and the fault is the only linear feature
+            on it. This is the clearest view of the problem, because in map view the
             bleed-through has a shape, and that shape looks like stratigraphy to anyone who has not seen the
             steered version.</span></li>
         <li><b>Push the error past the structure itself.</b> Set the error to 2 ms per trace and compare it
@@ -358,8 +361,10 @@
       interpreter or an autotracker responds to, rather than an average over a fixed band, and they assume
       the noise slider at its default 12%. The throw is applied with a sub-trace transition so that the
       fault plane is straight rather than quantised into a staircase of whole traces.</p>
-    <p>The two map panels come from a separate small 3D volume, 100 traces square by a slab of 61 samples,
-      containing a dome cut by one planar fault. Steering there uses the analytic dip of the model rather
+    <p>The two map panels come from a separate small 3D volume, 100 traces square by a slab of 81 samples,
+      carrying a reflector sequence over a monoclinal flexure of 80 ms relief cut by one planar fault. The
+      flexure reaches about 4 ms per trace at its steepest, above what a three-trace horizontal window
+      tolerates at 30 Hz and below what a steered one minds at all. Steering there uses the analytic dip of the model rather
       than an estimate, because estimation error is the subject of step 4 and mixing the two would confuse
       which effect is which. The dip field is estimated with the discrete semblance search of
       module 01 rather than being supplied analytically, so the steered result carries whatever error that
@@ -576,32 +581,47 @@
      Steering uses the analytic dip of the model rather than an estimate,
      because step 4 is where estimation error is the subject. */
 
-  const VN = 100, VS = 61, VC = 30;                 // traces each way, slab, centre
-  const DOME_A = 36, DOME_LX = 78, DOME_LY = 62;    // ms, and wavelengths in traces
-  const F_NX = 0.62, F_NY = 0.78, F_D = 96;         // fault plane in map view
+  const VN = 100, VS = 81, VC = 40;                 // traces each way, slab, centre
+  /* A monoclinal flexure rather than a dome. An earlier version used a product
+     of two cosines, which repeats and drew a grid of bullseyes that had nothing
+     to do with the lesson; and it carried a single reflector with more relief
+     than the analysis window was tall, so much of what looked like low
+     coherence was really an empty window. This surface has one structural
+     feature, and the slab carries a full reflector sequence, so there is always
+     data inside the window. */
+  const FLEX_A = 80, FLEX_W = 20;                   // relief in ms, width in traces
+  const U_X = 0.86, U_Y = 0.51;                     // the direction it steepens in
+  const F_NX = 0.55, F_NY = -0.84, F_D = -12;       // fault plane, oblique to the flexure
   let SLAB = null, SLICED = null, SLICEF = null;
 
-  // reflector time at a bin, in samples, measured from the top of the slab
-  function domeT(ix, iy) {
-    const a = msToP(DOME_A);
+  // structural relief at a bin, in samples
+  function surfT(ix, iy) {
+    const u = U_X * (ix - VN / 2) + U_Y * (iy - VN / 2);
     const w = clamp(F_NX * ix + F_NY * iy - F_D + 0.5, 0, 1);
-    return VC + a * Math.cos(2 * Math.PI * (ix - VN / 2) / DOME_LX) *
-                    Math.cos(2 * Math.PI * (iy - VN / 2) / DOME_LY) + w * msToP(THROW);
+    return msToP(FLEX_A) * Math.tanh(u / FLEX_W) + w * msToP(THROW);
   }
-  const domePx = (ix, iy) => (domeT(ix + 0.5, iy) - domeT(ix - 0.5, iy));
-  const domePy = (ix, iy) => (domeT(ix, iy + 0.5) - domeT(ix, iy - 0.5));
+  const surfPx = (ix, iy) => (surfT(ix + 0.5, iy) - surfT(ix - 0.5, iy));
+  const surfPy = (ix, iy) => (surfT(ix, iy + 0.5) - surfT(ix, iy - 0.5));
 
   function buildSlab() {
     const wav = SEIS.makeWavelet({ type: 'ricker', f: S.f });
     const hl = wav.halfLength;
+    const rnd = SEIS.mulberry32(19);
+    const beds = [];
+    for (let t = -70; t < VS + 70; t += 9) {
+      beds.push({ d: t - VC, r: (rnd() < 0.5 ? -1 : 1) * (0.03 + rnd() * 0.07) });
+    }
     const v = new Float32Array(VN * VN * VS);
     for (let iy = 0; iy < VN; iy++) {
       for (let ix = 0; ix < VN; ix++) {
         const base = (iy * VN + ix) * VS;
-        const tr = domeT(ix, iy) * DT;
-        const i0 = Math.max(0, Math.ceil((tr - hl) / DT));
-        const i1 = Math.min(VS - 1, Math.floor((tr + hl) / DT));
-        for (let it = i0; it <= i1; it++) v[base + it] += 0.1 * wav.fn(it * DT - tr);
+        const sh = surfT(ix, iy);
+        for (let b = 0; b < beds.length; b++) {
+          const tr = (VC + beds[b].d + sh) * DT;
+          const i0 = Math.max(0, Math.ceil((tr - hl) / DT));
+          const i1 = Math.min(VS - 1, Math.floor((tr + hl) / DT));
+          for (let it = i0; it <= i1; it++) v[base + it] += beds[b].r * wav.fn(it * DT - tr);
+        }
       }
     }
     if (S.noise > 0) {
@@ -622,8 +642,8 @@
     const out = new Float32Array(VN * VN);
     for (let iy = 0; iy < VN; iy++) {
       for (let ix = 0; ix < VN; ix++) {
-        const px = steered ? domePx(ix, iy) : 0;
-        const py = steered ? domePy(ix, iy) : 0;
+        const px = steered ? surfPx(ix, iy) : 0;
+        const py = steered ? surfPy(ix, iy) : 0;
         let m = 0;
         for (let jy = -half; jy <= half; jy++) {
           const yy = clamp(iy + jy, 0, VN - 1);
