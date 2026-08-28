@@ -78,11 +78,11 @@
   <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
     Method and references are there when you want them.</p>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
-    <button role="tab" data-tab="p1" aria-selected="false">1 · Two numbers, recombined</button>
-    <button role="tab" data-tab="p2" aria-selected="false">2 · The shape scale</button>
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two numbers</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Shape scale</button>
     <button role="tab" data-tab="p3" aria-selected="false">3 · Curvedness</button>
-    <button role="tab" data-tab="p4" aria-selected="false">4 · Shape alone lies</button>
-    <button role="tab" data-tab="p5" aria-selected="false">5 · Shape components</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Flat ground</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Components</button>
     <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
@@ -645,7 +645,9 @@
   function mapPanel(canvasId, w, h, get, map, bar) {
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 52 : 0) };
+    const availW = w - M.l - M.r, availH = h - M.t - M.b - (bar ? 52 : 0);
+    const side = Math.max(40, Math.min(availW, availH));
+    const R = { x: M.l + (availW - side) / 2, y: M.t, w: side, h: side };
     const off = document.createElement('canvas');
     off.width = NG; off.height = NG;
     const octx = off.getContext('2d');
@@ -1051,8 +1053,8 @@
 
   const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
-    p1: 'Two numbers, recombined', p2: 'The shape scale', p3: 'Curvedness',
-    p4: 'Shape alone lies', p5: 'Shape components', pw: 'Why it matters',
+    p1: 'Two numbers', p2: 'Shape scale', p3: 'Curvedness',
+    p4: 'Flat ground', p5: 'Components', pw: 'Why it matters',
     pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };
 
