@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Structural curvature | How Geometric Attributes Actually Work</title>
+<meta name="description" content="Structural curvature: the derivative of the dip field. Sign convention, why there are two principal curvatures and not one, why most-positive curvature is not k1, and what long- and short-wavelength operators do.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="dip3d.html">Module 02</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 05 &nbsp;·&nbsp; Geometric attributes</p>
+    <h1>Curvature: how fast the dip is changing</h1>
+    <p class="sub">Modules 01 and 02 measured which way the reflector is going. Curvature asks the next
+      question: how fast is that direction changing as you move along the bed? Flat beds and uniformly
+      dipping beds both have zero curvature — it is only where the dip <em>changes</em> that anything
+      happens. That makes curvature a derivative of a derivative, which is where all of its power and all
+      of its trouble come from!</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The structure <span>&mdash; click the map to move the analysis point</span></p>
+        <canvas id="cMap" aria-label="Map of the modeled structure with the analysis point marked"></canvas>
+      </div>
+      <div>
+        <p class="cap">Build the structure <span>&mdash; every step updates as you drag</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>The folds</h2>
+            <div class="ctl">
+              <label for="amp">Fold relief <span class="val" id="ampV">60 m</span></label>
+              <input type="range" data-key="amp" id="amp" min="0" max="140" step="5" value="60">
+            </div>
+            <div class="ctl">
+              <label for="wave">Fold width <span class="val" id="waveV">900 m</span></label>
+              <input type="range" data-key="wave" id="wave" min="300" max="2000" step="50" value="900">
+            </div>
+            <div class="ctl">
+              <label for="reg">Regional dip <span class="val" id="regV">0°</span></label>
+              <input type="range" data-key="reg" id="reg" min="0" max="25" step="1" value="0">
+            </div>
+          </div>
+          <div class="ctl-col">
+            <h2>The data</h2>
+            <div class="ctl">
+              <label for="rough">Short-wavelength texture <span class="val" id="roughV">none</span></label>
+              <input type="range" data-key="rough" id="rough" min="0" max="30" step="1" value="0">
+            </div>
+            <div class="ctl">
+              <label for="noise">Noise in the dip field <span class="val" id="noiseV">none</span></label>
+              <input type="range" data-key="noise" id="noise" min="0" max="30" step="1" value="0">
+            </div>
+            <div class="ctl">
+              <label for="smooth">Operator length <span class="val" id="smoothV">3 traces</span></label>
+              <input type="range" data-key="smooth" id="smooth" min="1" max="15" step="2" value="3">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Dip to curvature</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Which direction?</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · k₁ and k₂</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Not the same as k_pos</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Wavelength</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>From dip to curvature</h3>
+      <span class="hint">One profile, differentiated twice</span>
+    </div>
+    <p class="lede">Here is a single profile cut through the structure, west to east. The top panel is the
+      reflector itself. The middle panel is its dip, which is what modules 01 to 03 spent their time
+      estimating. The bottom panel is curvature, which is simply how fast that dip is changing.</p>
+    <p class="lede">Watch what lines up. Where the reflector is steepest, dip is at its largest and curvature
+      passes through <b>zero</b>. Where the reflector crests or troughs, dip passes through zero and
+      curvature is at its largest. Curvature peaks where the dip is flat, which is exactly backwards from
+      most people's first guess.</p>
+
+    <canvas id="c1" aria-label="A structural profile with its dip and its curvature below it"></canvas>
+
+    <div class="stats">
+      <div class="stat key"><span>Curvature at the crest</span><b id="s1a">—</b></div>
+      <div class="stat"><span>Curvature at the trough</span><b id="s1b">—</b></div>
+      <div class="stat"><span>Steepest dip on the profile</span><b id="s1c">—</b></div>
+      <div class="stat wide"><span>The sign convention</span><b id="s1d">—</b></div>
+    </div>
+    <div class="legend prose">
+      <span>Curvature is quoted here in reciprocal kilometers, which is what you get when you fit a circle
+        to the reflector and take one over its radius. A curvature of 1 km⁻¹ means a fold you could fit
+        inside a circle of 1 km radius; 0.1 km⁻¹ is a gentle 10 km-radius warp. Anticlines are positive and
+        synclines negative, which is the usual convention but not a universal one.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Curvature depends on which way you cut</h3>
+      <span class="hint">The same problem apparent dip had, one derivative later</span>
+    </div>
+    <p class="lede">Module 02 showed that apparent dip belongs to the section, not the reflector. Curvature
+      has exactly the same problem, and it is worse, because a surface can curve one way in one direction
+      and the other way at ninety degrees to it — a saddle. Cut a profile through the marked point at any
+      azimuth and it has a curvature of its own.</p>
+    <p class="lede">Rotate the profile below and watch the number swing. It reaches a maximum in one
+      direction and a minimum ninety degrees away, and those two extremes are what get called the
+      <b>principal curvatures</b>, <span class="k">k₁</span> and <span class="k">k₂</span>.</p>
+    <p class="lede"><b>Click anywhere on the map</b> to move the analysis point. The plunging nose at the
+      end of a ridge is the interesting place to stand: try the northern end of the western anticline, near
+      the top of the map.</p>
+
+    <div class="ctl" style="max-width:520px;margin-bottom:14px">
+      <label for="az">Profile azimuth <span class="val" id="azV">0°</span></label>
+      <input type="range" id="az" min="0" max="179" step="1" value="0">
+    </div>
+
+    <div class="sec-row" id="row2">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Where the profile is cut
+          <span class="note">through the marked point</span></p>
+        <canvas id="c2map" aria-label="Map showing the azimuth of the profile being cut"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Curvature at every azimuth
+          <span class="note">the maximum and minimum are k₁ and k₂</span></p>
+        <canvas id="c2curve" aria-label="Curvature plotted against profile azimuth"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>This profile's curvature</span><b id="s2a">—</b></div>
+      <div class="stat key"><span>k₁, the most positive</span><b id="s2b">—</b></div>
+      <div class="stat key"><span>k₂, the most negative</span><b id="s2c">—</b></div>
+      <div class="stat"><span>Strike of k₂</span><b id="s2d">—</b></div>
+      <div class="stat wide"><span>What this point is doing</span><b id="s2e">—</b></div>
+    </div>
+    <div class="legend prose">
+      <span>The two extremes are always ninety degrees apart, which is not obvious but is a genuine result
+        about smooth surfaces. Euler's theorem then gives the curvature at any other azimuth from those two
+        alone: k(φ) = k₁cos²(φ − ψ) + k₂sin²(φ − ψ), where ψ is the direction k₁ points. So the whole curve
+        on the right is determined by two numbers and an angle.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>k₁ and k₂ across the whole map</h3>
+      <span class="hint">Two volumes, and the strike that goes with them</span>
+    </div>
+    <p class="lede">Now compute those two numbers at every point rather than one. Most-positive curvature
+      picks out anticlines, ridges and the upthrown edges of faults; most-negative picks out synclines,
+      valleys and the downthrown edges. Run them together and a fault shows as a paired bright and dark
+      lineament, which is the signature interpreters look for.</p>
+
+    <div class="sec-row" id="row3">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> k₁, most-positive
+          <span class="note">crests and ridges</span></p>
+        <canvas id="c3k1" aria-label="Map of most-positive principal curvature"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> k₂, most-negative
+          <span class="note">troughs and valleys</span></p>
+        <canvas id="c3k2" aria-label="Map of most-negative principal curvature"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>3</b> Strike of k₂
+          <span class="note">which way the lineaments run</span></p>
+        <canvas id="c3st" aria-label="Map of the strike of most-negative curvature"></canvas>
+      </div>
+    </div>
+
+    <div class="legend prose">
+      <span>The strike map uses a cyclic color scale, for the same reason dip azimuth did in module 02: an
+        orientation of +89° and one of −89° are almost the same direction, and a scale with different colors
+        at its ends would draw a boundary that is not in the ground. Strike is meaningless where the surface
+        is a dome, a bowl or a flat — there is no preferred direction — so in practice it is displayed
+        modulated by curvature so those areas stay pale.</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Largest k₁ on the map</span><b id="s3a">—</b></div>
+      <div class="stat"><span>Largest negative k₂</span><b id="s3b">—</b></div>
+      <div class="stat key"><span>At the marked point</span><b id="s3c">—</b></div>
+      <div class="stat wide"><span>Reading the pair</span><b id="s3d">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Most-positive curvature is not k₁</h3>
+      <span class="hint">Two attributes with confusingly similar names</span>
+    </div>
+    <p class="lede">Software offers both <span class="k">k₁</span> and something called
+      <span class="k">k_pos</span>, and they are not the same thing. The principal curvatures fit a circle
+      to the reflector, which means correcting for how steeply the reflector is already dipping. The
+      most-positive and most-negative curvatures skip that correction and are, in the words of the AASPI
+      documentation, better read as a second-derivative map of structure than as a curvature.</p>
+    <p class="lede">On flat-lying structure the two agree almost exactly. Add regional dip with the slider
+      in the header and watch them separate — <b>k_pos grows while k₁ does not</b>, because the uncorrected
+      version is partly measuring the regional tilt rather than the folding.</p>
+
+    <div class="sec-row" id="row4">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> k₁, dip corrected
+          <span class="note">a true principal curvature</span></p>
+        <canvas id="c4k1" aria-label="Map of most-positive principal curvature"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> k_pos, not corrected
+          <span class="note">the second derivative of structure</span></p>
+        <canvas id="c4kp" aria-label="Map of most-positive curvature without the dip correction"></canvas>
+      </div>
+    </div>
+
+    <canvas id="c4curve" aria-label="How the two measures diverge as regional dip increases"></canvas>
+
+    <div class="stats" style="margin-top:14px">
+      <div class="stat"><span>Regional dip now</span><b id="s4a">—</b></div>
+      <div class="stat key"><span>k₁ at the crest</span><b id="s4b">—</b></div>
+      <div class="stat key"><span>k_pos at the crest</span><b id="s4c">—</b></div>
+      <div class="stat"><span>k_pos as a multiple of k₁</span><b id="s4d">—</b></div>
+      <div class="stat wide"><span>Verdict</span><b id="s4e">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Long and short wavelength</h3>
+      <span class="hint">The one parameter that decides what you see</span>
+    </div>
+    <p class="lede">Differentiating twice does something unpleasant: it multiplies the high wavenumbers
+      twice over, so any short-wavelength wobble in the dip field — acquisition footprint, statics, migration
+      noise — comes out amplified. That is why curvature is computed with an operator length rather than a
+      bare difference, and why the same volume computed two ways looks like two different pieces of
+      geology.</p>
+    <p class="lede">Turn on the short-wavelength texture and the noise in the header, then move the operator
+      length. A short operator picks out the fine fabric; a long one shows only the broad fold. Neither is
+      the right answer — they are answers to different questions, and choosing between them is an
+      interpretation.</p>
+
+    <div class="sec-row" id="row5">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> k₁ at the operator length you chose
+          <span class="note">the header slider drives this</span></p>
+        <canvas id="c5a" aria-label="Most-positive curvature at the chosen operator length"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> k₁ with a long operator
+          <span class="note">fixed at 15 traces, for comparison</span></p>
+        <canvas id="c5b" aria-label="Most-positive curvature computed with a long operator"></canvas>
+      </div>
+    </div>
+
+    <canvas id="c5c" aria-label="How curvature amplitude grows as the operator gets shorter"></canvas>
+
+    <div class="stats" style="margin-top:14px">
+      <div class="stat"><span>Operator length</span><b id="s5a">—</b></div>
+      <div class="stat key"><span>Typical |k₁| at this length</span><b id="s5b">—</b></div>
+      <div class="stat"><span>Typical |k₁| at 15 traces</span><b id="s5c">—</b></div>
+      <div class="stat"><span>Amplification</span><b id="s5d">—</b></div>
+      <div class="stat wide"><span>What you are looking at</span><b id="s5e">—</b></div>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Find where curvature is zero on a steeply dipping bed.</b> In step 1, set the fold relief to
+          about 100 m and look at where the middle and bottom panels cross zero.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The dip curve
+            and the curvature curve cross zero in completely different places, a quarter of a wavelength
+            apart. Curvature is zero exactly where the bed is steepest, and largest where the bed is flat at
+            a crest or a trough. This is the single most common misreading of a curvature volume: a bright
+            curvature anomaly is not a steep place, it is a place where the dip is <em>changing</em>
+            quickly.</span></details></li>
+        <li><b>Find a saddle.</b> In step 2, click near the plunging nose at the north end of one of the
+          ridges, then rotate the profile through 180°.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The curve
+            crosses zero twice, and k₁ comes out positive while k₂ comes out negative at the same point —
+            around +0.15 and −0.12 km⁻¹ at the strongest saddle on this surface. The reflector arches up
+            along the ridge and falls away along its plunge, so it curves one way in one direction and the
+            other way at right angles. No single number describes that, which is the whole reason two
+            principal curvatures are reported instead of one average. A mean curvature here would be close
+            to zero and would tell you nothing at all. Saddles are common: over half this map is one.</span></details></li>
+        <li><b>Separate k_pos from k₁.</b> In step 4, start with the regional dip at 0° and raise it to 25°,
+          watching the ratio readout.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">At 0° the two
+            agree to within a percent. By 25° k_pos reads about 1.22 times k₁, and the excess is regional
+            dip leaking into an attribute that is meant to describe folding. Notice which one moves: k_pos
+            stays put while k₁ falls, because k_pos is the raw second derivative and adding a tilt does not
+            change a second derivative at all — it is k₁ that is correctly recognizing that some of the
+            apparent bend is just the regional. On a structurally dipping
+            survey that difference is systematic rather than random, so it does not average out — it biases
+            the whole map in the direction of steepest regional dip. If you are comparing curvature between
+            two areas of a survey that dip differently, this matters.</span></details></li>
+        <li><b>Watch the second derivative amplify noise.</b> Set the operator length to 1 in the header,
+          then put the dip-field noise up to about 15%.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The fold almost
+            disappears under speckle. Now take the operator length up to 15 and the fold returns while the
+            speckle goes. At an operator length of 1 the typical curvature reads about 16 times what the
+            same surface gives at 15 traces, and almost all of that is noise rather than geology. Noise in
+            a dip field is not a cosmetic problem for curvature — differentiating
+            twice multiplies short-wavelength content twice over, so a dip volume that looked acceptable in
+            module 01 can be unusable once it has been differentiated. This is the practical reason modules
+            01 to 03 spent so long on getting dip right.</span></details></li>
+        <li><b>Choose a wavelength on purpose.</b> Turn the short-wavelength texture up to about 20 and
+          compare the two panels in step 5.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The short
+            operator maps the fine fabric and loses the fold; the long operator maps the fold and loses the
+            fabric. Both are correct computations of curvature on the same surface. If the fine fabric is
+            fractures you want the short operator; if it is footprint you want the long one, and nothing in
+            the data tells you which it is. That decision is yours and should be stated when the volume is
+            handed on.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway" style="max-width:none">
+      <h3>The main points</h3>
+      <ul>
+        <li><b>Curvature is the rate of change of dip.</b> Flat beds and uniformly dipping beds both give
+          zero. Only changes in dip produce an anomaly.</li>
+        <li><b>Bright curvature does not mean steep.</b> Curvature peaks where the bed is flat at a crest or
+          a trough, and passes through zero where the bed is steepest.</li>
+        <li><b>One number is not enough.</b> A surface can curve up in one direction and down at right
+          angles to it, so two principal curvatures are reported, together with the direction they point
+          in.</li>
+        <li><b>k₁ and k_pos are different attributes.</b> The principal curvatures correct for the dip the
+          reflector already has; the most-positive and most-negative ones do not, and on dipping structure
+          they read systematically high.</li>
+        <li><b>Operator length is an interpretation.</b> Long-wavelength curvature maps folds,
+          short-wavelength curvature maps fabric, and the same surface gives both.</li>
+        <li><b>Everything the dip field got wrong arrives here doubled.</b> Curvature is a second
+          derivative, so short-wavelength error in dip is amplified twice over.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD ============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <details class="notes" id="notes" open>
+      <summary>Method, sources, and what has been simplified</summary>
+      <p>The structure is a grid of depths to a single reflector, built from a small number of analytic
+        features — two anticlines, a syncline, and a dome — on an optional regional tilt, with optional
+        short-wavelength texture and optional noise. Depth is used rather than time so that curvature has
+        its proper units of one over length. Working from a time-migrated volume instead requires
+        converting the dip components with a velocity, which AASPI does with a single constant and which
+        its documentation describes as crude; the resulting error carries into curvature magnitude but has
+        little effect on strike or azimuth.</p>
+      <p>Curvature is computed the way a volumetric attribute computes it, not analytically. The inline and
+        crossline dip components are found by differencing the depth grid, smoothed along the operator
+        length, and then differenced again to give the three second derivatives. From those, with p and q
+        the dip components:</p>
+      <p><span class="k">k_mean = [(1+q²)r − 2pqs + (1+p²)t] / 2(1+p²+q²)^{3/2}</span>, &nbsp;
+        <span class="k">k_gauss = (rt − s²) / (1+p²+q²)²</span>, and the principal curvatures are
+        <span class="k">k₁ = k_mean + √(k_mean² − k_gauss)</span> and
+        <span class="k">k₂ = k_mean − √(k_mean² − k_gauss)</span>, with k₁ ≥ k₂ by construction. The
+        uncorrected most-positive and most-negative curvatures are the eigenvalues of the same second
+        derivative matrix without the terms in p and q, which is exactly the dip correction the AASPI
+        documentation says they omit. Strike comes from the eigenvector direction, ψ = ½·atan2(2s, r − t).</p>
+      <p>Apparent curvature at an arbitrary azimuth uses Euler's theorem,
+        <span class="k">k(φ) = k₁cos²(φ − ψ) + k₂sin²(φ − ψ)</span>. That the two principal directions are
+        always perpendicular is a property of smooth surfaces, not an assumption made here.</p>
+      <p>A note on the source. The AASPI <span class="k">curvature3d</span> documentation gives curvedness
+        twice, once as √(k₁² + k₂²) and once as √((k₁² + k₂²)/2); the second matches Roberts (2001) and is
+        the one used in the next module. Its shape index likewise appears with two opposite sign
+        conventions. Neither affects this module, which does not use either quantity, but both are worth
+        knowing about before comparing numbers between packages.</p>
+      <p>Simplifications. This is a single surface rather than a volume, so there is no vertical derivative
+        and none of the attributes that need one: reflector convergence, rotation about the normal, and the
+        vertical smoothing that <span class="k">curvature3d</span> applies. The operator here is a simple
+        smoothing length rather than the fractional-derivative operator AASPI uses, which its documentation
+        describes as a first derivative followed by a low-pass filter; the effect demonstrated is the same
+        one. Curvedness, shape index and the shape components have a module of their own, as do amplitude
+        curvature and aberrancy.</p>
+      <ul>
+        <li>Roberts, A., 2001, Curvature attributes and their application to 3D interpreted horizons:
+          <em>First Break</em>, 19, 85–100.</li>
+        <li>al-Dossary, S., and K. J. Marfurt, 2006, 3D volumetric multispectral estimates of reflector
+          curvature and rotation: <em>Geophysics</em>, 71, P41–P51.</li>
+        <li>Bergbauer, S., T. Mukerji, and P. Hennings, 2003, Improving curvature analyses of deformed
+          horizons using scale-dependent filtering techniques: <em>AAPG Bulletin</em>, 87, 1255–1272.</li>
+        <li>Mai, H. T., K. J. Marfurt, and S. Chávez-Pérez, 2009, Coherence and volumetric curvatures and
+          their spatial relationship to faults and folds, an example from Chicontepec basin, Mexico:
+          <em>SEG Technical Program Expanded Abstracts</em>, 1063–1067.</li>
+        <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+          Reservoir Characterization</em>: SEG Geophysical Development Series, 11.</li>
+        <li>AASPI, <em>Geometric Attributes: Program curvature3d</em>, University of Oklahoma.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>06 · Curvedness and shape index</h3>
+    <p>Two principal curvatures at every point is a lot of numbers to look at. Combining them into a
+      magnitude and a shape lets you ask a different question: not how much is this bent, but what shape is
+      it bent into — dome, ridge, saddle, valley or bowl.</p>
+    <a class="btn ghost" href="../index.html">All modules</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="dipsteer.html">← Module 03: dip steering</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
+      <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
+        is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
+        If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
+      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/seismic.js"></script>
+<script src="../assets/attributes.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof SEIS === 'undefined' || typeof ATTR === 'undefined') {
+    const missing = [];
+    if (typeof SEIS === 'undefined') missing.push('assets/seismic.js');
+    if (typeof ATTR === 'undefined') missing.push('assets/attributes.js');
+    const el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load ' + missing.join(' and ') +
+      '. It expects them one directory up, at ../assets/, and file names are ' +
+      'case-sensitive on GitHub Pages.';
+    const w = document.querySelector('.wrap');
+    (w || document.body).insertBefore(el, w ? w.firstChild : null);
+    return;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const visible = (id) => { const el = $(id); return el && !el.hidden; };
+  const DEG = Math.PI / 180;
+  const CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  /* =====================================================================
+     THE STRUCTURE
+
+     A grid of depths to one reflector. Depth rather than time, so that
+     curvature comes out in its proper units of one over length.
+     ===================================================================== */
+
+  const NG = 121;            // samples each way
+  const BIN = 25;            // meters between them
+  const EDGE = 10;           // samples ignored at the rim, see below
+
+  const DEF = {
+    amp: 60, wave: 900, reg: 0, rough: 0, noise: 0, smooth: 3, az: 0,
+    px: 34, py: 46, tab: 'p1',
+  };
+  let S = SEIS.readState(DEF);
+
+  const CAN_LINK = location.protocol !== 'file:';
+  const saveState = () => {
+    if (!CAN_LINK) return;
+    try { SEIS.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  };
+
+  let Z = null;              // depth grid, metres
+  const at = (g, ix, iy) => g[clamp(iy, 0, NG - 1) * NG + clamp(ix, 0, NG - 1)];
+
+  function buildSurface() {
+    const z = new Float32Array(NG * NG);
+    const L = S.wave / BIN;                      // fold width in samples
+    const A = S.amp;
+    // two anticlines, a syncline between them, and a dome off to one side
+    /* Depth increases downward, so an anticline is a place where the reflector
+       is shallower and the feature subtracts from depth. Getting this the wrong
+       way round silently puts the positive curvature on the synclines. */
+    const feats = [
+      { cx: 34, cy: 46, sx: L * 0.34, sy: L * 1.15, a: -A },          // anticline
+      { cx: 74, cy: 62, sx: L * 0.34, sy: L * 1.15, a: -A * 0.85 },   // anticline
+      { cx: 54, cy: 54, sx: L * 0.30, sy: L * 1.05, a:  A * 0.9 },    // syncline
+      { cx: 92, cy: 26, sx: L * 0.45, sy: L * 0.45, a: -A * 0.8 },    // dome
+    ];
+    const rnd = SEIS.mulberry32(23);
+    const tex = new Float32Array(NG * NG);
+    if (S.rough > 0) {
+      for (let i = 0; i < tex.length; i++) tex[i] = rnd() * 2 - 1;
+      // a couple of smoothing passes give it a short but finite wavelength
+      for (let pass = 0; pass < 2; pass++) {
+        const c = Float32Array.from(tex);
+        for (let iy = 0; iy < NG; iy++) {
+          for (let ix = 0; ix < NG; ix++) {
+            tex[iy * NG + ix] = (at(c, ix - 1, iy) + at(c, ix + 1, iy)
+              + at(c, ix, iy - 1) + at(c, ix, iy + 1) + 2 * at(c, ix, iy)) / 6;
+          }
+        }
+      }
+    }
+    const slope = Math.tan(S.reg * DEG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let v = slope * (ix - NG / 2) * BIN;
+        for (let f = 0; f < feats.length; f++) {
+          const F = feats[f];
+          const u = (ix - F.cx) / F.sx, w = (iy - F.cy) / F.sy;
+          v += F.a * Math.exp(-0.5 * (u * u + w * w));
+        }
+        if (S.rough > 0) v += S.rough * 1.6 * tex[iy * NG + ix];
+        z[iy * NG + ix] = v;
+      }
+    }
+    Z = z;
+  }
+
+  /* --------------------- dip, then curvature from it -------------------- */
+
+  function smoothGrid(g, len) {
+    if (len <= 1) return g;
+    const half = Math.floor(len / 2);
+    const tmp = new Float32Array(NG * NG), out = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let s = 0, n = 0;
+        for (let k = -half; k <= half; k++) { s += at(g, ix + k, iy); n++; }
+        tmp[iy * NG + ix] = s / n;
+      }
+    }
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let s = 0, n = 0;
+        for (let k = -half; k <= half; k++) { s += at(tmp, ix, iy + k); n++; }
+        out[iy * NG + ix] = s / n;
+      }
+    }
+    return out;
+  }
+
+  let FIELD = null;   // { k1, k2, kpos, kneg, strike, p, q }
+
+  /* The volumetric route: difference the depth grid for the dip components,
+     smooth them along the operator length, then difference again. This is
+     what a curvature volume actually does, and it is why the operator length
+     changes the answer. */
+  function computeCurvature(opLen, noisePct) {
+    const p = new Float32Array(NG * NG), q = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        p[iy * NG + ix] = (at(Z, ix + 1, iy) - at(Z, ix - 1, iy)) / (2 * BIN);
+        q[iy * NG + ix] = (at(Z, ix, iy + 1) - at(Z, ix, iy - 1)) / (2 * BIN);
+      }
+    }
+    if (noisePct > 0) {
+      const rnd = SEIS.mulberry32(77);
+      let rms = 0;
+      for (let i = 0; i < p.length; i++) rms += p[i] * p[i] + q[i] * q[i];
+      rms = Math.sqrt(rms / (2 * p.length)) || 0.01;
+      const a = (noisePct / 100) * Math.max(rms, 0.02);
+      for (let i = 0; i < p.length; i++) {
+        p[i] += a * (rnd() * 2 - 1);
+        q[i] += a * (rnd() * 2 - 1);
+      }
+    }
+    const ps = smoothGrid(p, opLen), qs = smoothGrid(q, opLen);
+
+    const k1 = new Float32Array(NG * NG), k2 = new Float32Array(NG * NG);
+    const kpos = new Float32Array(NG * NG), kneg = new Float32Array(NG * NG);
+    const strike = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        const i = iy * NG + ix;
+        const r = (at(ps, ix + 1, iy) - at(ps, ix - 1, iy)) / (2 * BIN);
+        const t = (at(qs, ix, iy + 1) - at(qs, ix, iy - 1)) / (2 * BIN);
+        const s = 0.5 * ((at(ps, ix, iy + 1) - at(ps, ix, iy - 1)) / (2 * BIN)
+                       + (at(qs, ix + 1, iy) - at(qs, ix - 1, iy)) / (2 * BIN));
+        const P = ps[i], Q = qs[i];
+        const den = 1 + P * P + Q * Q;
+        const kmean = ((1 + Q * Q) * r - 2 * P * Q * s + (1 + P * P) * t)
+          / (2 * Math.pow(den, 1.5));
+        const kgauss = (r * t - s * s) / (den * den);
+        const root = Math.sqrt(Math.max(0, kmean * kmean - kgauss));
+        k1[i] = kmean + root;
+        k2[i] = kmean - root;
+        // the same second derivatives with the dip correction left out
+        const mid = (r + t) / 2, dev = Math.sqrt(Math.pow((r - t) / 2, 2) + s * s);
+        kpos[i] = mid + dev;
+        kneg[i] = mid - dev;
+        strike[i] = 0.5 * Math.atan2(2 * s, r - t) / DEG;
+      }
+    }
+    return { k1, k2, kpos, kneg, strike, p: ps, q: qs };
+  }
+
+  // Euler's theorem: curvature along any azimuth, from the two principals
+  function apparentK(i, azDeg) {
+    const psi = FIELD.strike[i];
+    const d = (azDeg - psi) * DEG;
+    return FIELD.k1[i] * Math.cos(d) * Math.cos(d)
+         + FIELD.k2[i] * Math.sin(d) * Math.sin(d);
+  }
+
+  const KM = 1000;                       // 1/m -> 1/km for display
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  const M = { l: 48, r: 14, t: 12, b: 34 };
+
+  function pw(el) {
+    const par = el && el.parentElement;
+    if (!par) return 900;
+    const cs = window.getComputedStyle(par);
+    const inner = par.clientWidth
+      - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+    return Math.max(240, Math.floor(inner));
+  }
+  function rowWidth(rowId, n) {
+    const row = $(rowId);
+    const total = row ? pw(row.firstElementChild || row) : 800;
+    const w = window.innerWidth <= 700
+      ? Math.max(240, total)
+      : Math.max(180, Math.floor((total - 10 * (n - 1)) / n));
+    if (row) {
+      row.querySelectorAll(':scope > .panel-col').forEach((el) => {
+        el.style.width = w + 'px'; el.style.maxWidth = w + 'px';
+      });
+    }
+    return w;
+  }
+
+  function imageInto(ctx, R, get, map) {
+    const off = document.createElement('canvas');
+    off.width = NG; off.height = NG;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(NG, NG);
+    for (let r = 0; r < NG; r++) {
+      const iy = NG - 1 - r;
+      for (let c = 0; c < NG; c++) {
+        const col = map(get(c, iy));
+        const k = (r * NG + c) * 4;
+        img.data[k] = col[0]; img.data[k + 1] = col[1];
+        img.data[k + 2] = col[2]; img.data[k + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(off, R.x, R.y, R.w, R.h);
+    ctx.restore();
+  }
+
+  function mapFrame(canvasId, w, h, body, extras) {
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    body(ctx, R);
+    const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
+    const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
+    if (extras) extras(ctx, R, X, Y);
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 0, (NG - 1) * BIN / 1000, 'east (km)',
+      (v) => v.toFixed(1), { ticks: 4 });
+    SEIS.axisLeft(ctx, R, 0, (NG - 1) * BIN / 1000, 'north (km)',
+      (v) => v.toFixed(1), { flip: true, ticks: 4 });
+    return R;
+  }
+
+  const markPoint = (ctx, R, X, Y) => {
+    ctx.save();
+    ctx.strokeStyle = INK; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(X(S.px), Y(S.py), 5.5, 0, 6.2832); ctx.stroke();
+    ctx.restore();
+  };
+
+  /* shaded relief, so the structure reads as structure */
+  function reliefMap(canvasId, w, h) {
+    let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i < Z.length; i++) { lo = Math.min(lo, Z[i]); hi = Math.max(hi, Z[i]); }
+    const rng = Math.max(hi - lo, 1e-6);
+    mapFrame(canvasId, w, h, (ctx, R) => {
+      imageInto(ctx, R, (ix, iy) => {
+        const i = iy * NG + ix;
+        const gx = (at(Z, ix + 1, iy) - at(Z, ix - 1, iy)) / (2 * BIN);
+        const gy = (at(Z, ix, iy + 1) - at(Z, ix, iy - 1)) / (2 * BIN);
+        // light from the north-west
+        const shade = clamp(0.5 + 2.2 * (0.7 * gx - 0.7 * gy), 0, 1);
+        const base = (Z[i] - lo) / rng;
+        return 0.55 * base + 0.45 * shade;
+      }, (u) => {
+        const c = ATTR.MAPS.coherence(clamp(u, 0, 1));
+        return c;
+      });
+    }, markPoint);
+  }
+
+  /* The difference stencil clamps at the edge of the grid, which invents a
+     large second derivative all round the rim. Those values are an artifact of
+     the model, not of curvature, so every statistic ignores a margin. */
+  const kRange = (arr) => {
+    let m = 1e-9;
+    for (let iy = EDGE; iy < NG - EDGE; iy++) {
+      for (let ix = EDGE; ix < NG - EDGE; ix++) m = Math.max(m, Math.abs(arr[iy * NG + ix]));
+    }
+    return m;
+  };
+  function curvMap(canvasId, arr, w, h, lim, extras) {
+    const L = lim || kRange(arr);
+    mapFrame(canvasId, w, h, (ctx, R) => {
+      imageInto(ctx, R, (ix, iy) => arr[iy * NG + ix] * KM / (L * KM),
+        (u) => ATTR.MAPS.dip(-clamp(u, -1, 1)));
+    }, extras || markPoint);
+    return L;
+  }
+
+  /* ------------------------------- step 1 ------------------------------ */
+
+  function drawStep1() {
+    const w = pw($('c1'));
+    const h = clamp(Math.round(w * 0.62), 380, 520);
+    const ctx = SEIS.fitCanvas($('c1'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const gap = 16, ph = (h - 2 * gap - M.t - M.b) / 3;
+    const rects = [0, 1, 2].map((i) => ({
+      x: M.l, y: M.t + i * (ph + gap), w: w - M.l - M.r, h: ph,
+    }));
+
+    const zs = [], ds = [], ks = [];
+    for (let ix = 0; ix < NG; ix++) {
+      const i = S.py * NG + ix;
+      zs.push(Z[i]);
+      ds.push(Math.atan(FIELD.p[i]) / DEG);
+      ks.push(FIELD.k1[i] * KM);
+    }
+    const span = (arr) => {
+      let lo = Infinity, hi = -Infinity;
+      arr.forEach((v) => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+      const pad = Math.max((hi - lo) * 0.12, 1e-6);
+      return [lo - pad, hi + pad];
+    };
+    const titles = ['the reflector (depth, m)', 'its dip (degrees)', 'its curvature (1/km)'];
+    const cols = [INK, TEAL, CRIM];
+    [zs, ds, ks].forEach((arr, n) => {
+      const R = rects[n];
+      const [lo, hi] = span(arr);
+      const X = (ix) => R.x + (ix / (NG - 1)) * R.w;
+      const Y = (v) => R.y + R.h - ((v - lo) / (hi - lo)) * R.h;
+      ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+      if (lo < 0 && hi > 0) {
+        SEIS.dashedLine(ctx, R.x, Y(0), R.x + R.w, Y(0), 'rgba(22,25,28,.3)', [4, 4], 1);
+      }
+      ctx.save();
+      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+      ctx.strokeStyle = cols[n]; ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      arr.forEach((v, ix) => { const x = X(ix), y = Y(v); ix ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+      ctx.stroke();
+      // the depth panel reads better with depth increasing downward
+      ctx.restore();
+      SEIS.frame(ctx, R);
+      SEIS.axisLeft(ctx, R, lo, hi, null, (v) => v.toFixed(n === 0 ? 0 : 2),
+        { flip: true, ticks: 3 });
+      SEIS.tag(ctx, R.x + 8, R.y + 12, titles[n], cols[n]);
+      if (n === 2) {
+        SEIS.axisBottom(ctx, R, 0, (NG - 1) * BIN / 1000, 'east (km)',
+          (v) => v.toFixed(1), { ticks: 5 });
+      }
+    });
+
+    // where the crest, the trough and the steepest point are
+    let iCrest = 0, iTrough = 0, iSteep = 0;
+    for (let ix = 2; ix < NG - 2; ix++) {
+      if (ks[ix] > ks[iCrest]) iCrest = ix;
+      if (ks[ix] < ks[iTrough]) iTrough = ix;
+      if (Math.abs(ds[ix]) > Math.abs(ds[iSteep])) iSteep = ix;
+    }
+    $('s1a').textContent = ks[iCrest].toFixed(3) + ' km⁻¹';
+    $('s1b').textContent = ks[iTrough].toFixed(3) + ' km⁻¹';
+    $('s1c').textContent = Math.abs(ds[iSteep]).toFixed(2) + '° at ' +
+      (iSteep * BIN / 1000).toFixed(2) + ' km';
+    $('s1d').textContent = S.amp === 0
+      ? 'A flat reflector has zero curvature everywhere, however you tilt it.'
+      : 'Curvature is ' + Math.abs(ks[iSteep]).toFixed(3) + ' km⁻¹ where the bed is steepest, and ' +
+        Math.abs(ks[iCrest]).toFixed(3) + ' km⁻¹ at the crest. Steep is not the same as curved.';
+  }
+
+  /* ------------------------------- step 2 ------------------------------ */
+
+  function drawStep2() {
+    const w = rowWidth('row2', 2);
+    const h = clamp(Math.round(w * 0.86), 260, 360);
+    reliefMap('c2map', w, h);
+    // draw the profile line on the map
+    const ctx = $('c2map').getContext('2d');
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
+    const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    const a = S.az * DEG, L = 400;
+    ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(X(S.px - L * Math.cos(a)), Y(S.py - L * Math.sin(a)));
+    ctx.lineTo(X(S.px + L * Math.cos(a)), Y(S.py + L * Math.sin(a)));
+    ctx.stroke();
+    ctx.restore();
+    markPoint(ctx, R, X, Y);
+
+    // curvature against azimuth
+    const i = S.py * NG + S.px;
+    const c2 = SEIS.fitCanvas($('c2curve'), w, h);
+    c2.clearRect(0, 0, w, h);
+    const R2 = { x: 58, y: 14, w: w - 72, h: h - 14 - 44 };
+    let lim = Math.max(Math.abs(FIELD.k1[i]), Math.abs(FIELD.k2[i])) * KM * 1.25;
+    lim = Math.max(lim, 1e-3);
+    const AX = (d) => R2.x + (d / 180) * R2.w;
+    const AY = (v) => R2.y + R2.h - ((v + lim) / (2 * lim)) * R2.h;
+    SEIS.axisLeft(c2, R2, -lim, lim, 'curvature (1/km)', (v) => v.toFixed(2),
+      { flip: true, grid: true, ticks: 5 });
+    SEIS.dashedLine(c2, R2.x, AY(0), R2.x + R2.w, AY(0), 'rgba(22,25,28,.35)', [4, 4], 1);
+    c2.save();
+    c2.beginPath(); c2.rect(R2.x, R2.y, R2.w, R2.h); c2.clip();
+    c2.strokeStyle = CRIM; c2.lineWidth = 2.2;
+    c2.beginPath();
+    for (let d = 0; d <= 180; d += 2) {
+      const y = AY(apparentK(i, d) * KM);
+      d === 0 ? c2.moveTo(AX(d), y) : c2.lineTo(AX(d), y);
+    }
+    c2.stroke();
+    c2.strokeStyle = INK; c2.lineWidth = 1.4;
+    c2.beginPath(); c2.moveTo(AX(S.az), R2.y); c2.lineTo(AX(S.az), R2.y + R2.h); c2.stroke();
+    c2.fillStyle = INK;
+    c2.beginPath(); c2.arc(AX(S.az), AY(apparentK(i, S.az) * KM), 4, 0, 6.2832); c2.fill();
+    c2.restore();
+    SEIS.frame(c2, R2);
+    SEIS.axisBottom(c2, R2, 0, 180, 'profile azimuth (degrees)', (v) => v.toFixed(0), { ticks: 7 });
+
+    const k1 = FIELD.k1[i] * KM, k2 = FIELD.k2[i] * KM;
+    $('s2a').textContent = (apparentK(i, S.az) * KM).toFixed(3) + ' km⁻¹';
+    $('s2b').textContent = k1.toFixed(3) + ' km⁻¹';
+    $('s2c').textContent = k2.toFixed(3) + ' km⁻¹';
+    $('s2d').textContent = ((FIELD.strike[i] + 90 + 180) % 180 - 90).toFixed(0) + '°';
+    $('s2e').textContent = (k1 > 0 && k2 < 0)
+      ? 'k₁ is positive and k₂ negative, so this point is a saddle: it curves up one way and down the other.'
+      : (k1 > 0 && k2 > 0)
+        ? 'Both principal curvatures are positive, so the surface is convex here — a dome or a ridge.'
+        : (k1 < 0 && k2 < 0)
+          ? 'Both are negative, so the surface is concave here — a bowl or a valley.'
+          : 'Both are close to zero, so this point is very nearly planar.';
+  }
+
+  /* ------------------------------- step 3 ------------------------------ */
+
+  function drawStep3() {
+    const w = rowWidth('row3', 3);
+    const h = clamp(Math.round(w * 0.94), 240, 330);
+    const lim = Math.max(kRange(FIELD.k1), kRange(FIELD.k2));
+    curvMap('c3k1', FIELD.k1, w, h, lim);
+    curvMap('c3k2', FIELD.k2, w, h, lim);
+    mapFrame('c3st', w, h, (ctx, R) => {
+      imageInto(ctx, R, (ix, iy) => {
+        const i = iy * NG + ix;
+        const mag = Math.min(1, Math.abs(FIELD.k2[i]) / (lim * 0.5));
+        return { s: (FIELD.strike[i] + 90) / 180, m: mag };
+      }, (v) => {
+        const col = (ATTR.MAPS.azimuth || ATTR.MAPS.dip)(v.s);
+        // pale where there is no curvature to give the strike meaning
+        return [Math.round(255 - (255 - col[0]) * v.m),
+                Math.round(255 - (255 - col[1]) * v.m),
+                Math.round(255 - (255 - col[2]) * v.m)];
+      });
+    }, markPoint);
+
+    const i = S.py * NG + S.px;
+    $('s3a').textContent = (kRange(FIELD.k1) * KM).toFixed(3) + ' km⁻¹';
+    $('s3b').textContent = (-kRange(FIELD.k2) * KM).toFixed(3) + ' km⁻¹';
+    $('s3c').textContent = 'k₁ ' + (FIELD.k1[i] * KM).toFixed(3) +
+      ' , k₂ ' + (FIELD.k2[i] * KM).toFixed(3) + ' km⁻¹';
+    $('s3d').textContent = 'Anticlines are bright on k₁ and quiet on k₂; synclines the other way round. ' +
+      'A feature bright on both is a saddle, and a feature bright on neither is planar however steeply it ' +
+      'dips.';
+  }
+
+  /* ------------------------------- step 4 ------------------------------ */
+
+  function drawStep4() {
+    const w = rowWidth('row4', 2);
+    const h = clamp(Math.round(w * 0.86), 250, 340);
+    const lim = Math.max(kRange(FIELD.k1), kRange(FIELD.kpos));
+    curvMap('c4k1', FIELD.k1, w, h, lim);
+    curvMap('c4kp', FIELD.kpos, w, h, lim);
+
+    // how the two separate as the regional dip grows
+    const wc = pw($('c4curve')), hc = 230;
+    const ctx = SEIS.fitCanvas($('c4curve'), wc, hc);
+    ctx.clearRect(0, 0, wc, hc);
+    const R = { x: 58, y: 14, w: wc - 72, h: hc - 14 - 44 };
+    const pts = RATIO;
+    let top = 1.05;
+    pts.forEach((d) => { top = Math.max(top, d.ratio * 1.1); });
+    const X = (d) => R.x + (d / 25) * R.w;
+    const Y = (v) => R.y + R.h - ((v - 0.9) / (top - 0.9)) * R.h;
+    SEIS.axisLeft(ctx, R, 0.9, top, 'k_pos ÷ k₁', (v) => v.toFixed(2),
+      { flip: true, grid: true, ticks: 4 });
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    pts.forEach((d, n) => { const x = X(d.reg), y = Y(d.ratio); n ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.stroke();
+    ctx.fillStyle = CRIM;
+    pts.forEach((d) => { ctx.beginPath(); ctx.arc(X(d.reg), Y(d.ratio), 2.8, 0, 6.2832); ctx.fill(); });
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(X(S.reg), R.y); ctx.lineTo(X(S.reg), R.y + R.h); ctx.stroke();
+    ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 0, 25, 'regional dip (degrees)', (v) => v.toFixed(0), { ticks: 6 });
+
+    const a = crestValues();
+    $('s4a').textContent = S.reg + '°';
+    $('s4b').textContent = (a.k1 * KM).toFixed(3) + ' km⁻¹';
+    $('s4c').textContent = (a.kpos * KM).toFixed(3) + ' km⁻¹';
+    $('s4d').textContent = (a.kpos / Math.max(a.k1, 1e-9)).toFixed(2) + ' ×';
+    $('s4e').textContent = S.reg < 2
+      ? 'With the structure nearly flat the two agree, which is why the difference goes unnoticed on gentle surveys.'
+      : 'k_pos now reads ' + ((a.kpos / Math.max(a.k1, 1e-9) - 1) * 100).toFixed(0) +
+        '% high, and the excess is regional dip rather than folding.';
+  }
+
+  // the strongest anticline on the map, measured both ways
+  function crestOf(f) {
+    let best = -Infinity, bi = 0;
+    for (let iy = EDGE; iy < NG - EDGE; iy++) {
+      for (let ix = EDGE; ix < NG - EDGE; ix++) {
+        const i = iy * NG + ix;
+        if (f.k1[i] > best) { best = f.k1[i]; bi = i; }
+      }
+    }
+    return { k1: f.k1[bi], kpos: f.kpos[bi], i: bi };
+  }
+  const crestValues = () => crestOf(FIELD);
+
+  let RATIO = [];
+  function buildRatioCurve() {
+    const keep = S.reg;
+    RATIO = [];
+    for (let d = 0; d <= 25; d += 2.5) {
+      S.reg = d; buildSurface();
+      const c = crestOf(computeCurvature(S.smooth, 0));
+      RATIO.push({ reg: d, ratio: c.kpos / Math.max(c.k1, 1e-9) });
+    }
+    S.reg = keep; buildSurface();
+  }
+
+  /* ------------------------------- step 5 ------------------------------ */
+
+  let LONG = null;
+  function drawStep5() {
+    const w = rowWidth('row5', 2);
+    const h = clamp(Math.round(w * 0.86), 250, 340);
+    const lim = Math.max(kRange(FIELD.k1), kRange(LONG.k1));
+    curvMap('c5a', FIELD.k1, w, h, lim);
+    curvMap('c5b', LONG.k1, w, h, lim);
+
+    const wc = pw($('c5c')), hc = 230;
+    const ctx = SEIS.fitCanvas($('c5c'), wc, hc);
+    ctx.clearRect(0, 0, wc, hc);
+    const R = { x: 58, y: 14, w: wc - 72, h: hc - 14 - 44 };
+    let top = 1e-6;
+    OPCURVE.forEach((d) => { top = Math.max(top, d.rms * KM); });
+    top *= 1.15;
+    const X = (L) => R.x + ((L - 1) / 14) * R.w;
+    const Y = (v) => R.y + R.h - (v / top) * R.h;
+    SEIS.axisLeft(ctx, R, 0, top, 'typical |k₁| (1/km)', (v) => v.toFixed(2),
+      { flip: true, grid: true, ticks: 4 });
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    OPCURVE.forEach((d, n) => { const x = X(d.len), y = Y(d.rms * KM); n ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.stroke();
+    ctx.fillStyle = CRIM;
+    OPCURVE.forEach((d) => { ctx.beginPath(); ctx.arc(X(d.len), Y(d.rms * KM), 2.8, 0, 6.2832); ctx.fill(); });
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(X(S.smooth), R.y); ctx.lineTo(X(S.smooth), R.y + R.h); ctx.stroke();
+    ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 1, 15, 'operator length (traces)', (v) => v.toFixed(0), { ticks: 8 });
+
+    const now = rms(FIELD.k1) * KM, lng = rms(LONG.k1) * KM;
+    $('s5a').textContent = S.smooth + ' traces  (' + (S.smooth * BIN) + ' m)';
+    $('s5b').textContent = now.toFixed(3) + ' km⁻¹';
+    $('s5c').textContent = lng.toFixed(3) + ' km⁻¹';
+    $('s5d').textContent = (now / Math.max(lng, 1e-9)).toFixed(1) + ' ×';
+    $('s5e').textContent = S.rough === 0 && S.noise === 0
+      ? 'With a smooth surface and no noise the operator length changes little. Add texture or noise in the header to see it bite.'
+      : S.smooth <= 3
+        ? 'A short operator: you are seeing the fine fabric, and whatever noise came with it.'
+        : 'A long operator: the fine detail has gone and what is left is the broad structure.';
+  }
+
+  const rms = (arr) => {
+    let s = 0, n = 0;
+    for (let iy = EDGE; iy < NG - EDGE; iy++) {
+      for (let ix = EDGE; ix < NG - EDGE; ix++) {
+        const v = arr[iy * NG + ix]; s += v * v; n++;
+      }
+    }
+    return Math.sqrt(s / Math.max(n, 1));
+  };
+
+  let OPCURVE = [];
+  function buildOpCurve() {
+    OPCURVE = [];
+    for (let L = 1; L <= 15; L += 2) {
+      OPCURVE.push({ len: L, rms: rms(computeCurvature(L, S.noise).k1) });
+    }
+  }
+
+  /* =====================================================================
+     PLUMBING
+     ===================================================================== */
+
+  function recompute() {
+    buildSurface();
+    FIELD = computeCurvature(S.smooth, S.noise);
+    LONG = computeCurvature(15, S.noise);
+  }
+
+  function syncLabels() {
+    $('ampV').textContent = S.amp === 0 ? 'flat' : S.amp + ' m';
+    $('waveV').textContent = S.wave + ' m';
+    $('regV').textContent = S.reg + '°';
+    $('roughV').textContent = S.rough === 0 ? 'none' : S.rough + '%';
+    $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
+    $('smoothV').textContent = S.smooth + (S.smooth === 1 ? ' trace' : ' traces');
+    $('azV').textContent = S.az + '°';
+    ['amp', 'wave', 'reg', 'rough', 'noise', 'smooth'].forEach((k) => {
+      const el = $(k);
+      if (el && parseFloat(el.value) !== S[k]) el.value = S[k];
+    });
+    if ($('az') && parseFloat($('az').value) !== S.az) $('az').value = S.az;
+  }
+
+  function drawHeader() {
+    const el = $('cMap');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el);
+    reliefMap('cMap', w, clamp(Math.round(w * 0.78), 200, 280));
+  }
+
+  function drawAll() {
+    syncLabels();
+    if (!$('p1').hidden || !$('p2').hidden || !$('p3').hidden
+        || !$('p4').hidden || !$('p5').hidden) drawHeader();
+    if (visible('p1')) drawStep1();
+    if (visible('p2')) drawStep2();
+    if (visible('p3')) drawStep3();
+    if (visible('p4')) drawStep4();
+    if (visible('p5')) drawStep5();
+  }
+
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pe', 'pk', 'pm'];
+  const STEPNAMES = {
+    p1: 'Dip to curvature', p2: 'Which direction?', p3: 'k₁ and k₂',
+    p4: 'Not the same as k_pos', p5: 'Wavelength',
+    pe: 'Exercises', pk: 'Key points', pm: 'Method',
+  };
+
+  function buildStepNav() {
+    PANES.forEach((id, i) => {
+      const pane = $(id);
+      if (!pane || pane.querySelector('.stepnav')) return;
+      const prev = PANES[i - 1], next = PANES[i + 1];
+      const nav = document.createElement('div');
+      nav.className = 'stepnav';
+      const mk = (target, text, ghost) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (ghost ? ' ghost' : '') + ' small';
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          showTab(target);
+          const t = document.querySelector('.tabhint');
+          if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return b;
+      };
+      nav.appendChild(prev ? mk(prev, '\u2190 ' + STEPNAMES[prev], true)
+                           : document.createElement('span'));
+      const where = document.createElement('span');
+      where.className = 'where';
+      where.textContent = i < 5 ? 'step ' + (i + 1) + ' of 5' : STEPNAMES[id];
+      nav.appendChild(where);
+      nav.appendChild(next ? mk(next, STEPNAMES[next] + ' \u2192')
+                           : document.createElement('span'));
+      pane.appendChild(nav);
+    });
+  }
+
+  function showTab(id) {
+    PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach((b) => {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    const lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    const last = (id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !last;
+    if ($('pager')) $('pager').hidden = !last;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  let heavy = null;
+  document.addEventListener('input', (ev) => {
+    const key = ev.target && ev.target.dataset && ev.target.dataset.key;
+    if (!key) return;
+    S[key] = parseFloat(ev.target.value);
+    recompute();
+    syncLabels(); drawAll(); saveState();
+    clearTimeout(heavy);
+    heavy = setTimeout(() => {
+      if (key === 'reg' || key === 'amp' || key === 'wave') buildRatioCurve();
+      if (key !== 'reg') buildOpCurve();
+      recompute();
+      if (visible('p4')) drawStep4();
+      if (visible('p5')) drawStep5();
+    }, 140);
+  });
+  $('az').addEventListener('input', () => {
+    S.az = parseFloat($('az').value);
+    syncLabels();
+    if (visible('p2')) drawStep2();
+    saveState();
+  });
+
+  /* Both maps accept a click, because the interesting question in step 2 is
+     what a saddle looks like, and you have to be able to stand on one. */
+  function attachProbe(canvasId) {
+    const c = $(canvasId);
+    if (!c) return;
+    let down = false;
+    const go = (ev) => {
+      const r = c.getBoundingClientRect();
+      const R = { x: M.l, y: M.t, w: r.width - M.l - M.r, h: r.height - M.t - M.b };
+      const fx = (ev.clientX - r.left - R.x) / R.w;
+      const fy = 1 - (ev.clientY - r.top - R.y) / R.h;
+      S.px = clamp(Math.round(fx * NG), EDGE, NG - 1 - EDGE);
+      S.py = clamp(Math.round(fy * NG), EDGE, NG - 1 - EDGE);
+      drawAll(); saveState();
+    };
+    c.addEventListener('pointerdown', (e) => {
+      down = true; if (c.setPointerCapture) c.setPointerCapture(e.pointerId);
+      e.preventDefault(); go(e);
+    });
+    c.addEventListener('pointermove', (e) => { if (down) go(e); });
+    c.addEventListener('pointerup', () => { down = false; });
+    c.addEventListener('pointercancel', () => { down = false; });
+  }
+  attachProbe('cMap');
+  attachProbe('c2map');
+
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
+
+  recompute();
+  buildRatioCurve();
+  buildOpCurve();
+  buildStepNav();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+  document.fonts && document.fonts.ready.then(drawAll);
+})();
+</script>
+</body>
+</html>
