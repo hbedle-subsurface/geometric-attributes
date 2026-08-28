@@ -42,7 +42,7 @@
       <div>
         <p class="cap">Set the two curvatures <span>&mdash; everything follows from these</span></p>
         <div class="controls" id="winControls">
-          <div class="ctl-col">
+          <div class="ctl-col" id="kWrap">
             <h2>The principal curvatures</h2>
             <div class="ctl">
               <label for="k1">k₁, the more positive <span class="val" id="k1V">+0.60</span></label>
@@ -54,8 +54,8 @@
             </div>
           </div>
           <div class="ctl-col">
-            <h2>Jump to a shape</h2>
-            <div class="ctl">
+            <h2 id="rightHead">Jump to a shape</h2>
+            <div class="ctl" id="presetWrap">
               <div class="seg" role="group" aria-label="Preset shapes" style="flex-wrap:wrap">
                 <button type="button" data-shape="dome">Dome</button>
                 <button type="button" data-shape="ridge">Ridge</button>
@@ -556,7 +556,7 @@
      DRAWING
      ===================================================================== */
 
-  const M = { l: 46, r: 14, t: 12, b: 34 };
+  const M = { l: 60, r: 16, t: 12, b: 36 };
   function pw(el) {
     const par = el && el.parentElement;
     if (!par) return 900;
@@ -633,6 +633,32 @@
     return m;
   };
 
+  /* Depth gets a spectral ramp rather than a gray one, because a structure map
+     is far easier to read that way: shallow is red, deep runs through green and
+     blue to purple. */
+  function depthColor(u) {
+    const t = clamp(u, 0, 1);
+    const stops = [
+      [0.00, [178, 24, 43]],    // shallow: deep red
+      [0.18, [226, 106, 60]],
+      [0.36, [246, 190, 100]],
+      [0.52, [235, 235, 170]],
+      [0.68, [120, 190, 140]],
+      [0.84, [60, 125, 185]],
+      [1.00, [72, 40, 120]],    // deep: purple
+    ];
+    for (let i = 1; i < stops.length; i++) {
+      if (t <= stops[i][0]) {
+        const a = stops[i - 1], b = stops[i];
+        const f = (t - a[0]) / (b[0] - a[0]);
+        return [Math.round(a[1][0] + f * (b[1][0] - a[1][0])),
+                Math.round(a[1][1] + f * (b[1][1] - a[1][1])),
+                Math.round(a[1][2] + f * (b[1][2] - a[1][2]))];
+      }
+    }
+    return stops[stops.length - 1][1];
+  }
+
   // the shape index color scale: bowl through saddle to dome
   function shapeColor(s) {
     const u = clamp((s + 1) / 2, 0, 1);
@@ -645,16 +671,19 @@
   function drawSurf() {
     const el = $('cSurf');
     if (!el || el.hidden || !el.parentElement || !el.parentElement.clientWidth) return;
-    const w = pw(el), h = clamp(Math.round(w * 0.62), 190, 260);
+    const w = pw(el), h = clamp(Math.round(w * 0.56), 175, 235);
     let zl = Infinity, zh = -Infinity;
     for (let i = 0; i < Z.length; i++) { zl = Math.min(zl, Z[i]); zh = Math.max(zh, Z[i]); }
-    const R = mapPanel('cSurf', w, h, (ix, iy) => (Z[iy * NG + ix] - zl) / Math.max(zh - zl, 1e-6),
-      (u) => ATTR.MAPS.coherence(clamp(u, 0, 1)));
+    const R = mapPanel('cSurf', w, h + 52,
+      (ix, iy) => (Z[iy * NG + ix] - zl) / Math.max(zh - zl, 1e-6),
+      (u) => depthColor(u),
+      (ctx2, R2) => colorbar(ctx2, R2, (u) => depthColor(u),
+        'shallow  ' + zl.toFixed(0) + ' m', zh.toFixed(0) + ' m  deep', 'depth'));
     const ctx = el.getContext('2d');
     const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
     const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
     [[28, 80, 'dome'], [30, 34, 'ridge'], [78, 78, 'bowl'], [80, 32, 'syncline']].forEach((f) => {
-      SEIS.tag(ctx, clamp(X(f[0]) - 20, R.x + 2, R.x + R.w - 58), Y(f[1]) - 8, f[2], INK);
+      SEIS.tag(ctx, clamp(X(f[0]) - 20, R.x + 2, R.x + R.w - 58), Y(f[1]) - 8, f[2], '#fff');
     });
   }
 
@@ -1032,6 +1061,11 @@
         : '&mdash; a patch of reflector, seen obliquely';
     }
     if ($('opWrap')) $('opWrap').style.display = onMaps ? '' : 'none';
+    // k₁ and k₂ set one point; they have no effect on the mapped surface, so
+    // they come off the panel rather than sitting there doing nothing
+    if ($('kWrap')) $('kWrap').style.display = onMaps ? 'none' : '';
+    if ($('presetWrap')) $('presetWrap').style.display = onMaps ? 'none' : '';
+    if ($('rightHead')) $('rightHead').textContent = onMaps ? 'The maps' : 'Jump to a shape';
     const last = (id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !last;
     if ($('pager')) $('pager').hidden = !last;
