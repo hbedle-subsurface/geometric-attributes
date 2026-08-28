@@ -83,6 +83,7 @@
     <button role="tab" data-tab="p3" aria-selected="false">3 · Curvedness</button>
     <button role="tab" data-tab="p4" aria-selected="false">4 · Shape alone lies</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · Shape components</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
@@ -164,9 +165,9 @@
     </div>
     <p class="lede"><b>From one point to a whole map.</b> Steps 1 and 2 worked on a single point whose two
       curvatures you set by hand. From here on the same arithmetic runs at every sample of a modeled
-      surface, shown in the header: a <b>dome</b> in the south-west, a north–south <b>ridge</b> above it, a
-      <b>syncline</b> and a <b>bowl</b> on the eastern side, and a broad gentle swell underneath the lot
-      which makes <b>saddles</b> wherever it meets the sharper features. One of every shape, so every
+      surface, shown in the header: a <b>bowl</b> in the north-west and a <b>dome</b> in the south-east, a
+      north–south <b>ridge</b> below the bowl and a <b>syncline</b> above the dome, and a broad gentle swell
+      underneath the lot which makes <b>saddles</b> wherever it meets the sharper features. One of every shape, so every
       component in step 5 has something to find.</p>
     <p class="lede">Curvedness is the other half of the pair, and it throws the shape away completely. A
       sharp dome and an equally sharp bowl have identical curvedness, because both are bent just as hard —
@@ -274,6 +275,49 @@
     </div>
   </section>
 
+  <!-- ============================ WHY IT MATTERS ========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">?</span>Why anyone bothers</h3>
+      <span class="hint">What the shape is actually telling you about the rock</span>
+    </div>
+    <p class="lede">Everything so far has been geometry. Here is why an interpreter reaches for these two
+      attributes rather than staying with k₁ and k₂.</p>
+    <p class="lede"><b>Shape carries a process.</b> The five shapes are not just descriptions — different
+      geological processes make different shapes, so the shape index is a first, cheap guess at
+      <em>mechanism</em>:</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Bowls</b> are collapse features. Karst sinkholes, dissolution of evaporites, collapsed reef
+        cores, and the tops of chimneys all give closed circular lows. A bowl component map is one of the
+        fastest ways to spot them, and they are worth spotting whether you are drilling through them or
+        avoiding them.</li>
+      <li><b>Domes</b> close in every direction, so they are the classic four-way structural trap, and also
+        the signature of a buried mound, a reef, or a shallow gas pocket pushing a reflector up.</li>
+      <li><b>Ridges and valleys</b> are elongated, so they follow a structural or depositional grain: fold
+        hinges, fault-drag rollovers, differential compaction over a channel or a bar. A ridge over a
+        channel is compaction, not structure, and knowing which shape you are looking at is the clue.</li>
+      <li><b>Saddles</b> mark where two trends interfere. They are where fold axes cross, where a structure
+        plunges between two culminations, and where the strain is most complicated — which is often where
+        the fracturing is.</li>
+    </ul>
+    <p class="lede"><b>Curvedness carries intensity, and intensity relates to strain.</b> Bending a brittle
+      layer puts its outer arc into extension, so strongly curved zones are where open fractures are most
+      likely to have formed. Curvedness is the attribute that answers "how hard has this rock been bent",
+      independently of which way, which makes it a common input to fracture-density prediction and to
+      picking where a horizontal well should be landed. Treat that as a correlation to be tested against
+      well data, not a law — curvature is geometry, and fractures depend on lithology, burial history and
+      the stress field as well.</p>
+    <p class="lede"><b>And two numbers are easier to work with than two curvatures.</b> Co-rendering k₁ and
+      k₂ means reading two signed volumes at once. Curvedness modulated by shape index puts intensity in the
+      brightness and mechanism in the color, which is one image instead of two, and the shape components
+      turn it into a set of yes-or-no maps that can be handed to someone else without a tutorial.</p>
+    <div class="legend prose">
+      <span>The honest caveat: all of this is geometry computed from a dip field. A shape index map does not
+        know about lithology, and a bowl in the attribute might be a sinkhole, a processing artifact, or a
+        patch of bad velocities. The shape narrows the list of explanations; it does not close it.</span>
+    </div>
+  </section>
+
   <!-- ============================== EXERCISES ============================= -->
   <section class="tabpane" id="pe" role="tabpanel" hidden>
     <div class="tryit" style="max-width:none">
@@ -281,14 +325,14 @@
       <ol>
         <li><b>Check that shape index ignores size.</b> Set k₁ to +0.30 and k₂ to +0.10, note the shape
           index, then double both to +0.60 and +0.20.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The shape index
+          <details class="reveal"><summary>Hint</summary><span class="ans">The shape index
             does not move — it stays at +0.70 — while curvedness doubles from 0.22 to 0.45. Shape index is built from the
             ratio of the two curvatures, so any uniform scaling cancels out of it entirely. This is exactly
             what you want from a shape descriptor: a small gentle dome and a huge sharp dome are both domes,
             and one number should say so while a different number carries the difference in
             intensity.</span></details></li>
         <li><b>Walk the five landmarks.</b> Click each preset in turn and write down the shape index.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Dome +1.00,
+          <details class="reveal"><summary>Hint</summary><span class="ans">Dome +1.00,
             ridge +0.50, saddle 0.00, valley −0.50, bowl −1.00, evenly spaced across the scale. The pattern
             is worth internalizing: positive means convex-up somewhere, negative means concave-up, and zero
             means the two curvatures are equal and opposite so the surface goes up one way and down the
@@ -296,7 +340,7 @@
             blends.</span></details></li>
         <li><b>Break it on a flat surface.</b> Set both k₁ and k₂ close to zero and read the shape index,
           then look at step 4.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The shape index
+          <details class="reveal"><summary>Hint</summary><span class="ans">The shape index
             still reports a value, and it will swing wildly for tiny changes in either curvature, because it
             is a ratio of two numbers that are both nearly zero. Look at the raw panel in step 4: it is
             fully saturated from corner to corner, including the broad quiet ground between the features
@@ -305,7 +349,7 @@
             misleads people, and it is why the modulated version is the one worth
             trusting.</span></details></li>
         <li><b>Find a saddle you would not have guessed at.</b> In step 5, select the saddle component.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Saddles turn up
+          <details class="reveal"><summary>Hint</summary><span class="ans">Saddles turn up
             between adjacent highs, on the plunging noses of ridges, and around the rims of bowls — places
             you would not naturally call a saddle by eye, but which genuinely curve up one way and down the
             other. Saddles are far more common on real surfaces than the textbook diagram suggests, which is
@@ -313,7 +357,7 @@
             this surface it claims 18% of the map, against 2.9% for the dome and 2.3% for the
             bowl.</span></details></li>
         <li><b>Compare curvedness with k₁.</b> In step 3, find the bowl on both panels.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">On the k₁ panel
+          <details class="reveal"><summary>Hint</summary><span class="ans">On the k₁ panel
             the bowl is dark, because k₁ is negative there. On the curvedness panel it is just as bright as
             the dome, because curvedness has thrown the sign away and only reports how hard the surface is
             bending. If you want deformation intensity, curvedness is the right choice. If you need to know
@@ -473,6 +517,7 @@
   /* ------------------------- the modeled surface ------------------------ */
 
   const NG = 111, BIN = 25, EDGE = 8;
+  const DATUM = 400;         // meters, so depths read as an interpreter expects
   let Z = null, FIELD = null;
   const at = (g, ix, iy) => g[clamp(iy, 0, NG - 1) * NG + clamp(ix, 0, NG - 1)];
 
@@ -480,10 +525,10 @@
     const z = new Float32Array(NG * NG);
     // one of each shape, so every component has something to find
     const feats = [
-      { cx: 28, cy: 80, sx: 11, sy: 11, a: -70 },   // dome
-      { cx: 30, cy: 34, sx: 9,  sy: 30, a: -60 },   // ridge
-      { cx: 78, cy: 78, sx: 10, sy: 10, a:  70 },   // bowl
-      { cx: 80, cy: 32, sx: 9,  sy: 30, a:  60 },   // syncline / valley
+      { cx: 28, cy: 80, sx: 10, sy: 10, a:  70 },   // bowl, upper left
+      { cx: 30, cy: 34, sx: 9,  sy: 30, a: -60 },   // ridge, lower left
+      { cx: 80, cy: 78, sx: 9,  sy: 30, a:  60 },   // syncline, upper right
+      { cx: 78, cy: 32, sx: 11, sy: 11, a: -70 },   // dome, lower right
       { cx: 55, cy: 56, sx: 26, sy: 26, a: -22 },   // broad swell, makes saddles
     ];
     for (let iy = 0; iy < NG; iy++) {
@@ -678,12 +723,14 @@
       (ix, iy) => (Z[iy * NG + ix] - zl) / Math.max(zh - zl, 1e-6),
       (u) => depthColor(u),
       (ctx2, R2) => colorbar(ctx2, R2, (u) => depthColor(u),
-        'shallow  ' + zl.toFixed(0) + ' m', zh.toFixed(0) + ' m  deep', 'depth'));
+        'shallow  \u2212' + (DATUM + zl).toFixed(0) + ' m',
+        '\u2212' + (DATUM + zh).toFixed(0) + ' m  deep', 'depth'));
     const ctx = el.getContext('2d');
     const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
     const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
-    [[28, 80, 'dome'], [30, 34, 'ridge'], [78, 78, 'bowl'], [80, 32, 'syncline']].forEach((f) => {
-      SEIS.tag(ctx, clamp(X(f[0]) - 20, R.x + 2, R.x + R.w - 58), Y(f[1]) - 8, f[2], '#fff');
+    [[28, 80, 'bowl'], [30, 34, 'ridge'], [80, 78, 'syncline'], [78, 32, 'dome']].forEach((f) => {
+      SEIS.tag(ctx, clamp(X(f[0]) - 22, R.x + 2, R.x + R.w - 62), Y(f[1]) - 9, f[2],
+        'rgba(22,25,28,.82)');
     });
   }
 
@@ -893,7 +940,7 @@
       (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.dip(-(2 * u - 1)),
         '\u2212' + kl.toFixed(2), '+' + kl.toFixed(2), 'k\u2081, 1/km \u00b7 0'));
 
-    const domeI = 80 * NG + 28, bowlI = 78 * NG + 78;
+    const domeI = 32 * NG + 78, bowlI = 80 * NG + 28;
     $('s3a').textContent = cl.toFixed(3) + ' km\u207b\u00b9';
     $('s3b').textContent = FIELD.C[domeI].toFixed(3) + ' km\u207b\u00b9';
     $('s3c').textContent = FIELD.C[bowlI].toFixed(3) + ' km\u207b\u00b9';
@@ -993,7 +1040,7 @@
 
   function drawAll() {
     syncLabels();
-    if (!$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
+    if (!$('pw').hidden || !$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
     drawShape(); drawSurf();
     if (visible('p1')) drawStep1();
     if (visible('p2')) drawStep2();
@@ -1002,10 +1049,10 @@
     if (visible('p5')) drawStep5();
   }
 
-  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pe', 'pk', 'pm'];
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
     p1: 'Two numbers, recombined', p2: 'The shape scale', p3: 'Curvedness',
-    p4: 'Shape alone lies', p5: 'Shape components',
+    p4: 'Shape alone lies', p5: 'Shape components', pw: 'Why it matters',
     pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };
 
@@ -1046,7 +1093,7 @@
       b.setAttribute('aria-selected', b.dataset.tab === id);
     });
     const lab = document.querySelector('.labhead');
-    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    if (lab) lab.hidden = (id === 'pw' || id === 'pe' || id === 'pk' || id === 'pm');
     // steps 1 and 2 are about one point; 3 to 5 are about the whole surface
     const onMaps = (id === 'p3' || id === 'p4' || id === 'p5');
     if ($('cShape')) $('cShape').hidden = onMaps;
