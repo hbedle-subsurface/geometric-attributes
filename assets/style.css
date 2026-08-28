@@ -521,7 +521,10 @@ footer p { margin: 0 0 6px; max-width: 62ch; }
   font-family: var(--display); font-size: 1rem; font-weight: 700;
   margin: 0; letter-spacing: -0.008em;
 }
-.plot-head .hint { font-family: var(--mono); font-size: 10.5px; color: var(--slate); }
+.plot-head .hint {
+  font-family: var(--mono); font-size: 10.5px; color: var(--slate);
+  text-align: right; flex: 0 1 auto; min-width: 0;
+}
 .plot canvas { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }
 
 /* section and its trace panel, side by side and sharing a time axis */
@@ -669,15 +672,51 @@ details.notes p, details.notes li { font-size: 14px; color: var(--ink-soft); max
 
 .tabpane {
   background: var(--panel); border: 1px solid var(--rule); border-top: 0;
-  padding: 22px 24px 24px; animation: fade .18s ease-out;
+  padding: 22px 26px 24px; animation: fade .18s ease-out;
+}
+
+/* Body copy inside a pane. One rule rather than a width pinned onto every
+   paragraph, which is what left the text stopping short at different places. */
+.tabpane .lede {
+  font-size: 15.5px; color: var(--ink-soft); margin: 0 0 13px;
+  max-width: 108ch; overflow-wrap: break-word;
+}
+.tabpane .lede:last-of-type { margin-bottom: 16px; }
+.tabpane .lede b { color: var(--ink); }
+.tabpane > .plot-head { margin-bottom: 14px; }
+.tabpane .legend { max-width: 108ch; }
+
+/* a numbered badge, so you always know where you are in the sequence */
+.tabpane .plot-head h3 {
+  font-size: 1.16rem; display: flex; align-items: center; gap: 10px;
+}
+.stepno {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; flex: none;
+  background: var(--crimson); color: #fff;
+  font-family: var(--mono); font-size: 12.5px; font-weight: 600;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.stepno.ref { background: var(--slate); font-size: 11px; }
+
+/* keep the tab fills when the page is printed or saved as a PDF, otherwise
+   the selected tab loses the only thing marking it as selected */
+.tabs button, .tabs button[aria-selected="true"], .tabpane, .labhead, .btn {
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
 /* forward and back inside the module, so the way on is never the way out */
 .stepnav {
-  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   margin: 26px 0 0; padding-top: 16px; border-top: 1px solid var(--rule);
 }
+/* three equal cells, so the middle label really is in the middle and the
+   forward button sits flush right even on the first step where there is no
+   back button to balance it */
+.stepnav > * { flex: 1 1 0; min-width: 0; }
+.stepnav > *:first-child { text-align: left; }
+.stepnav > *:last-child { text-align: right; }
 .stepnav .btn { margin: 0; }
 .stepnav .where {
   font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
