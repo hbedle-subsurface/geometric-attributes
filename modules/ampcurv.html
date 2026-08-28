@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amplitude curvature | How Geometric Attributes Actually Work</title>
+<meta name="description" content="Amplitude curvature: the second derivative of amplitude along the reflector rather than of the reflector itself. Why it finds channel edges a structural attribute cannot see, and why there is no circle to fit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="curvature.html">Module 05</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 07 &nbsp;·&nbsp; Geometric attributes</p>
+    <h1>Amplitude curvature: bending in brightness, not in structure</h1>
+    <p class="sub">Module 05 differentiated the <em>shape</em> of the reflector twice. This one differentiates
+      something else entirely: how bright the reflector is as you walk along it. A channel can be perfectly
+      flat and still have edges, and no amount of structural curvature will ever find them — but the
+      amplitude changes sharply right there, and that is a bend you can measure!</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The seismic line <span>&mdash; click it to move the analysis point</span></p>
+        <canvas id="cSec" aria-label="Vertical seismic section through the modeled channel"></canvas>
+      </div>
+      <div>
+        <p class="cap">Build the model <span>&mdash; results update as you drag</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>The channel</h2>
+            <div class="ctl">
+              <label for="dim">Channel dimming <span class="val" id="dimV">65%</span></label>
+              <input type="range" data-key="dim" id="dim" min="0" max="90" step="5" value="65">
+            </div>
+            <div class="ctl">
+              <label for="cwid">Channel width <span class="val" id="cwidV">14 traces</span></label>
+              <input type="range" data-key="cwid" id="cwid" min="4" max="30" step="2" value="14">
+            </div>
+            <div class="ctl">
+              <label for="edge">Edge sharpness <span class="val" id="edgeV">2 traces</span></label>
+              <input type="range" data-key="edge" id="edge" min="1" max="10" step="1" value="2">
+            </div>
+          </div>
+          <div class="ctl-col">
+            <h2>The structure &amp; the data</h2>
+            <div class="ctl">
+              <label for="fold">Fold relief <span class="val" id="foldV">50 m</span></label>
+              <input type="range" data-key="fold" id="fold" min="0" max="140" step="5" value="50">
+            </div>
+            <div class="ctl">
+              <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
+              <input type="range" data-key="noise" id="noise" min="0" max="30" step="2" value="0">
+            </div>
+            <div class="ctl">
+              <label for="smooth">Operator length <span class="val" id="smoothV">3 traces</span></label>
+              <input type="range" data-key="smooth" id="smooth" min="1" max="15" step="2" value="3">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two kinds of bend</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Amplitude on the horizon</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · e_pos and e_neg</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · No circle to fit</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Side by side</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Two completely different kinds of bend</h3>
+      <span class="hint">Same reflector, two things that can vary along it</span>
+    </div>
+    <p class="lede">Walk along a reflector and two separate things can change. The reflector can go
+      <b>up and down</b> — that is structure, and its second derivative is the structural curvature of
+      module 05. Or the reflector can get <b>brighter and dimmer</b> while staying at exactly the same
+      depth, and the second derivative of <em>that</em> is amplitude curvature.</p>
+    <p class="lede">The line in the header has both. There is a gentle fold, and there is a channel cut
+      across it whose fill is dimmer than the surrounding rock. Notice that the channel has no structural
+      expression at all — the reflector does not step or bend where the channel edge is, it simply goes
+      quiet. A structural attribute is blind to it by construction.</p>
+
+    <canvas id="c1" aria-label="Structure and amplitude along the reflector, plotted separately"></canvas>
+
+    <p class="lede" style="margin-top:12px">The two curves are independent. Drag the fold relief to zero and
+      the structure curve flattens while the amplitude curve is untouched. Drag the channel dimming to zero
+      and the reverse happens. Real data has both at once, and the two families of attribute exist because
+      no single measurement sees both.</p>
+
+    <div class="stats">
+      <div class="stat key"><span>Structural relief across the line</span><b id="s1a">—</b></div>
+      <div class="stat key"><span>Amplitude change across the channel edge</span><b id="s1b">—</b></div>
+      <div class="stat"><span>Structural expression of the channel</span><b id="s1c">—</b></div>
+      <div class="stat wide"><span>What this means</span><b id="s1d">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Amplitude extracted along the horizon</h3>
+      <span class="hint">The surface the attribute is actually computed on</span>
+    </div>
+    <p class="lede">Structural curvature is computed on a surface of <em>depth</em>. Amplitude curvature is
+      computed on a surface of <em>amplitude</em>: at every trace, follow the reflector to wherever it sits
+      and record how strong it is there. That gives a map with the same footprint as the structure map but
+      an entirely different quantity in it.</p>
+    <p class="lede">This is the step where the channel appears. On the structure map it is invisible. On the
+      amplitude map it is the most obvious thing there.</p>
+
+    <div class="sec-row" id="row2">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Structure on the horizon
+          <span class="note">depth, in meters</span></p>
+        <canvas id="c2z" aria-label="Map of depth to the horizon"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Amplitude on the horizon
+          <span class="note">the same surface, a different measurement</span></p>
+        <canvas id="c2a" aria-label="Map of amplitude extracted along the horizon"></canvas>
+      </div>
+    </div>
+
+    <div class="legend prose">
+      <span>Both maps look down on the same patch of ground. The left one knows where the reflector is; the
+        right one knows how loud it is. Everything in this module is the second derivative of the map on the
+        right, in the same way that module 05 worked on the map on the left.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Differentiate it twice: e_pos and e_neg</h3>
+      <span class="hint">Crests and troughs of brightness, not of structure</span>
+    </div>
+    <p class="lede">Take the amplitude map, find its gradient in the inline and crossline directions, then
+      differentiate again. The two eigenvalues of that second derivative are the most-positive and
+      most-negative amplitude curvatures, written <span class="k">e_pos</span> and
+      <span class="k">e_neg</span>.</p>
+    <p class="lede">Look at where they land. The channel <em>interior</em> is dim but flat, so its second
+      derivative is near zero and it comes out quiet. What lights up is the pair of <b>edges</b>, where the
+      amplitude turns a corner. One edge is a crest of the amplitude surface and the other is a trough, so a
+      channel prints as one bright lineament on e_pos beside one on e_neg — the same paired signature a
+      fault gives in structural curvature, for exactly the same reason.</p>
+
+    <div class="sec-row" id="row3">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Amplitude
+          <span class="note">what we are differentiating</span></p>
+        <canvas id="c3a" aria-label="Amplitude on the horizon"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> e_pos
+          <span class="note">most-positive amplitude curvature</span></p>
+        <canvas id="c3p" aria-label="Most-positive amplitude curvature"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>3</b> e_neg
+          <span class="note">most-negative amplitude curvature</span></p>
+        <canvas id="c3n" aria-label="Most-negative amplitude curvature"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Largest e_pos on the map</span><b id="s3a">—</b></div>
+      <div class="stat"><span>Largest negative e_neg</span><b id="s3b">—</b></div>
+      <div class="stat key"><span>Edge response versus channel interior</span><b id="s3c">—</b></div>
+      <div class="stat wide"><span>Reading the pair</span><b id="s3d">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Why there is no circle, and no k₁</h3>
+      <span class="hint">The units will not allow it</span>
+    </div>
+    <p class="lede">Module 05 made a point of fitting a circle to the reflector: curvature was one over its
+      radius, and the principal curvatures k₁ and k₂ were corrected for the dip the reflector already had.
+      None of that survives here, and the reason is units.</p>
+    <p class="lede">A structural surface is <b>length against length</b> — meters of depth against meters of
+      distance — so a circle drawn on it is a real circle with a radius in meters. An amplitude surface is
+      <b>amplitude against length</b>. There is no meaningful circle to fit to something whose two axes are
+      not the same kind of quantity, and there is no dip to correct for, because the vertical axis is not a
+      direction in the ground at all. The AASPI documentation says exactly this and draws the same
+      conclusion: revert to the simpler most-positive and most-negative curvature.</p>
+
+    <canvas id="c4cart" aria-label="Schematic contrasting a structural surface with an amplitude surface"></canvas>
+
+    <p class="lede" style="margin-top:12px">So the family of attributes is smaller. You get
+      <span class="k">e_pos</span>, <span class="k">e_neg</span> and their strike, and from those the
+      curvedness and shape index of module 06. You do <em>not</em> get k₁ and k₂ in any meaningful sense,
+      and two structural attributes disappear entirely: reflector convergence and rotation about the normal
+      both describe how a surface in the ground is oriented, and an amplitude surface is not in the ground.</p>
+
+    <div class="stats">
+      <div class="stat"><span>Structural curvature units</span><b id="s4a">—</b></div>
+      <div class="stat"><span>Amplitude curvature units</span><b id="s4b">—</b></div>
+      <div class="stat wide"><span>What follows from that</span><b id="s4c">—</b></div>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>The two attributes side by side</h3>
+      <span class="hint">Each one sees what the other cannot</span>
+    </div>
+    <p class="lede">Here is the whole argument in two panels. Structural curvature is computed on the depth
+      map; amplitude curvature on the amplitude map. Same survey, same horizon, same operator length.</p>
+    <p class="lede">The fold appears on the left and not the right. The channel appears on the right and not
+      the left. Turn the fold relief up and down, and the channel dimming up and down, and watch each panel
+      respond to its own quantity and ignore the other one completely.</p>
+
+    <div class="sec-row" id="row5">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> Structural curvature k₁
+          <span class="note">from the depth map</span></p>
+        <canvas id="c5s" aria-label="Structural curvature computed from the depth map"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Amplitude curvature e_pos
+          <span class="note">from the amplitude map</span></p>
+        <canvas id="c5a" aria-label="Amplitude curvature computed from the amplitude map"></canvas>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Structural response at the channel edge</span><b id="s5a">—</b></div>
+      <div class="stat"><span>Amplitude response at the channel edge</span><b id="s5b">—</b></div>
+      <div class="stat"><span>Structural response on the fold</span><b id="s5c">—</b></div>
+      <div class="stat"><span>Amplitude response on the fold</span><b id="s5d">—</b></div>
+      <div class="stat wide"><span>Verdict</span><b id="s5e">—</b></div>
+    </div>
+    <div class="legend prose">
+      <span>This is why the two are run together and co-rendered rather than one being chosen over the
+        other. A stratigraphic feature with no structural relief and a structural feature with no amplitude
+        contrast are both perfectly ordinary, and either one is invisible to half of this pair.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Flatten the structure completely.</b> Set the fold relief to 0 and look at step 5.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Structural
+            curvature goes blank — there is nothing left to bend — while amplitude curvature is entirely
+            unaffected and still maps both channel edges. This is the case that matters in practice: a
+            channel or a fan on a flat-lying horizon is common, and a structural attribute has nothing to
+            say about it. The reverse test works too: put the relief back and take the channel dimming to 0,
+            and now the amplitude panel is the blank one.</span></details></li>
+        <li><b>Find out what actually lights up at a channel.</b> In step 3, compare the value at the
+          channel edge with the value in the middle of the channel.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The middle of
+            the channel reads about 4 against 65 at the edge, even though it is much dimmer than its surroundings. Amplitude curvature is
+            a second derivative, so it responds to where the amplitude <em>changes</em>, not to where it is
+            low. A broad dim area is flat in the second derivative and produces almost nothing. If you want
+            to map the body of a channel you want an amplitude or envelope attribute; amplitude curvature
+            maps its outline.</span></details></li>
+        <li><b>Sharpen and soften the edge.</b> Move the edge-sharpness slider from 1 to 10 traces and watch
+          the e_pos value at the edge.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">At 1 trace the
+            edge reads about 124 against 0.1 in the middle of the channel — a thousand to one, and the two
+            edges are razor sharp. At 2 traces it is 65 against 4. By 4 traces it is 23 against 22, and the
+            distinction has collapsed: the channel no longer has a flat floor and two sharp walls, it is one
+            broad smooth low, so its second derivative is spread right across it instead of concentrated at
+            the boundaries. The lesson is not simply that the anomaly gets weaker. It is that amplitude
+            curvature stops mapping an <em>outline</em> and starts mapping a <em>blur</em>, and a
+            gradational facies boundary will never give you the crisp lineament a scoured edge
+            does.</span></details></li>
+        <li><b>Narrow the channel until it disappears.</b> Take the channel width down toward 4 traces with
+          the operator length at 7 or more.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The two edges
+            move close enough together that the operator smooths across both at once and they begin to
+            cancel, and the two clean lineaments merge into one weak smear. Compare it against the amplitude
+            map in step 2, where the channel is still perfectly obvious. Operator length sets the smallest
+            feature you can resolve, so a long operator chosen to suppress noise will also quietly erase the
+            narrow features you may have been looking for — and nothing in the attribute warns you that it
+            has.</span></details></li>
+        <li><b>Add noise and differentiate it twice.</b> Put the noise up to about 20% with the operator
+          length at 1.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The edges
+            disappear into speckle. Amplitude curvature is a second derivative of a quantity that is
+            already noisier than structure — dip is a smoothed, fitted estimate, whereas amplitude is read
+            straight off the trace — so it is more sensitive to noise than structural curvature is, not
+            less. Raising the operator length recovers the edges, at the cost of the narrow
+            features.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway" style="max-width:none">
+      <h3>The main points</h3>
+      <ul>
+        <li><b>It is the same arithmetic on a different surface.</b> Structural curvature differentiates
+          depth twice; amplitude curvature differentiates amplitude twice. Everything else about the
+          calculation is the same.</li>
+        <li><b>It finds features with no structural expression.</b> A flat-lying channel, a fan edge, a
+          diagenetic boundary — all invisible to structural curvature, all visible here.</li>
+        <li><b>It maps edges, not bodies.</b> The dim interior of a channel is quiet because it is flat. The
+          anomaly is at the boundary, where the amplitude turns a corner.</li>
+        <li><b>There is no circle and no k₁.</b> The two axes are not the same kind of quantity, so a
+          radius is meaningless and there is no dip to correct for. You get e_pos, e_neg and their strike,
+          and nothing that depends on fitting a circle.</li>
+        <li><b>Convergence and rotation do not exist here.</b> They describe the orientation of a surface in
+          the ground, and an amplitude surface is not in the ground.</li>
+        <li><b>Run it alongside structural curvature, not instead of it.</b> Each is blind to what the other
+          measures.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD ============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <details class="notes" id="notes" open>
+      <summary>Method, sources, and what has been simplified</summary>
+      <p>The model is one reflector carrying a gentle fold, cut by a channel whose fill is dimmer than the
+        surrounding rock. The channel has no structural expression whatever — the reflector runs through it
+        at exactly the depth it would have had otherwise — so any response to it in a structural attribute
+        would be an artifact. Depth and reflection strength are stored as two independent maps and the
+        seismic line is built by convolving the second with a 30 Hz Ricker wavelet and shifting it by the
+        first.</p>
+      <p>Amplitude curvature is computed exactly as structural curvature was in module 05, on a different
+        input. The amplitude extracted along the horizon is differenced in the inline and crossline
+        directions to give two gradients, those are smoothed along the operator length, and differenced
+        again to give the three second derivatives. <span class="k">e_pos</span> and
+        <span class="k">e_neg</span> are the two eigenvalues of that second-derivative matrix, and the
+        strike is its eigenvector direction. There is no term in the dip components anywhere, which is the
+        whole point of step 4.</p>
+      <p><b>Where this departs from AASPI, and why.</b> Program <span class="k">curvature3d</span> takes as
+        input the inline and crossline components of the <em>coherent energy gradients</em> computed by
+        program <span class="k">similarity3d</span>, not amplitude read off a picked horizon. Coherent
+        energy is the energy retained by the Karhunen–Loève filter of module 04, so it is a smoothed,
+        dip-steered measure of reflection strength rather than a raw sample value, and using it makes the
+        result markedly more stable. Amplitude along a horizon is used here because it is the version a
+        beginner can see the whole of, and because the second-derivative behavior being taught is identical.
+        AASPI also allows envelope or impedance as the input quantity.</p>
+      <p>The documentation is explicit about the two consequences drawn in step 4. Because the amplitude
+        gradients carry units of amplitude per unit distance rather than length per unit length, it makes no
+        sense to fit a circle tangent to the surface, so the computation reverts to most-positive and
+        most-negative curvature, which highlight crests and troughs of amplitude without including the
+        effects of structural dip. And reflector convergence and reflector rotation lose their meaning for
+        amplitude curvature. There is also no vertical derivative, because the vertical axis is time or
+        depth while the input derivatives are amplitude gradients.</p>
+      <p>Simplifications. This is one horizon rather than a volume. The operator is a smoothing length
+        rather than the fractional-derivative operator AASPI uses, which its documentation describes as a
+        first derivative followed by a low-pass filter; the wavelength behavior demonstrated is the same.
+        Curvedness, shape index and the shape components are computed from e_pos and e_neg in exactly the
+        way module 06 computes them from k₁ and k₂, and are covered there rather than repeated here.</p>
+      <ul>
+        <li>AASPI, <em>Geometric Attributes: Program curvature3d</em>, University of Oklahoma — the
+          amplitude curvature workflow, its inputs, and the reasoning about units.</li>
+        <li>al-Dossary, S., and K. J. Marfurt, 2006, 3D volumetric multispectral estimates of reflector
+          curvature and rotation: <em>Geophysics</em>, 71, P41–P51.</li>
+        <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+          Reservoir Characterization</em>: SEG Geophysical Development Series, 11.</li>
+        <li>Roberts, A., 2001, Curvature attributes and their application to 3D interpreted horizons:
+          <em>First Break</em>, 19, 85–100.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>08 · Aberrancy</h3>
+    <p>One derivative further again. Where coherence needs a break and curvature needs a bend, aberrancy
+      responds to the asymmetry of a flexure, and picks up faults whose offset is too small for either.</p>
+    <a class="btn ghost" href="../index.html">All modules</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="curvature.html">← Module 05: structural curvature</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
+      <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
+        is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
+        If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
+      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/seismic.js"></script>
+<script src="../assets/attributes.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof SEIS === 'undefined' || typeof ATTR === 'undefined') {
+    const missing = [];
+    if (typeof SEIS === 'undefined') missing.push('assets/seismic.js');
+    if (typeof ATTR === 'undefined') missing.push('assets/attributes.js');
+    const el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load ' + missing.join(' and ') +
+      '. It expects them one directory up, at ../assets/, and file names are ' +
+      'case-sensitive on GitHub Pages.';
+    const w = document.querySelector('.wrap');
+    (w || document.body).insertBefore(el, w ? w.firstChild : null);
+    return;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const visible = (id) => { const el = $(id); return el && !el.hidden; };
+  const CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  const NG = 121, BIN = 25, EDGE = 8;
+  const CHX = 62;                       // the channel runs north-south, here
+  const SN = NG, ST = 180, SDT = 0.002, SVEL = 3000;
+
+  const DEF = {
+    dim: 65, cwid: 14, edge: 2, fold: 50, noise: 0, smooth: 3,
+    px: 40, py: 60, tab: 'p1',
+  };
+  let S = SEIS.readState(DEF);
+
+  const CAN_LINK = location.protocol !== 'file:';
+  const saveState = () => {
+    if (!CAN_LINK) return;
+    try { SEIS.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  };
+
+  let Z = null, AMP = null;
+  const at = (g, ix, iy) => g[clamp(iy, 0, NG - 1) * NG + clamp(ix, 0, NG - 1)];
+
+  /* Two independent maps. Depth carries the fold; amplitude carries the
+     channel. The channel deliberately has no structural expression, so any
+     response to it in a structural attribute would be an artifact. */
+  function buildModel() {
+    const z = new Float32Array(NG * NG), a = new Float32Array(NG * NG);
+    const rnd = SEIS.mulberry32(17);
+    const half = S.cwid / 2, soft = Math.max(0.6, S.edge);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        // a broad fold, shallower at its crest
+        const u = (ix - 44) / 26, w = (iy - 58) / 44;
+        z[iy * NG + ix] = -S.fold * Math.exp(-0.5 * (u * u + w * w));
+        // the channel: a band of reduced reflection strength, edges tapered
+        const cx = CHX + 9 * Math.sin(2 * Math.PI * iy / 150);
+        const d = Math.abs(ix - cx);
+        const inside = 1 / (1 + Math.exp((d - half) / (soft * 0.5)));
+        a[iy * NG + ix] = 1 - (S.dim / 100) * inside;
+      }
+    }
+    if (S.noise > 0) {
+      for (let i = 0; i < a.length; i++) a[i] += (S.noise / 100) * 0.4 * (rnd() * 2 - 1);
+    }
+    Z = z; AMP = a;
+  }
+
+  function smoothGrid(g, len) {
+    if (len <= 1) return g;
+    const h = Math.floor(len / 2);
+    const t = new Float32Array(NG * NG), o = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let s = 0, n = 0;
+        for (let k = -h; k <= h; k++) { s += at(g, ix + k, iy); n++; }
+        t[iy * NG + ix] = s / n;
+      }
+    }
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        let s = 0, n = 0;
+        for (let k = -h; k <= h; k++) { s += at(t, ix, iy + k); n++; }
+        o[iy * NG + ix] = s / n;
+      }
+    }
+    return o;
+  }
+
+  /* Gradients, smoothed, then differenced again. With dipCorrect the result is
+     the principal curvatures of module 05; without it, the plain eigenvalues of
+     the second-derivative matrix, which is what e_pos and e_neg are. */
+  function secondDerivs(G, opLen, dipCorrect, scale) {
+    const sc = scale || 1;
+    const p = new Float32Array(NG * NG), q = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        p[iy * NG + ix] = (at(G, ix + 1, iy) - at(G, ix - 1, iy)) / (2 * BIN) * sc;
+        q[iy * NG + ix] = (at(G, ix, iy + 1) - at(G, ix, iy - 1)) / (2 * BIN) * sc;
+      }
+    }
+    const ps = smoothGrid(p, opLen), qs = smoothGrid(q, opLen);
+    const hi = new Float32Array(NG * NG), lo = new Float32Array(NG * NG);
+    const st = new Float32Array(NG * NG);
+    for (let iy = 0; iy < NG; iy++) {
+      for (let ix = 0; ix < NG; ix++) {
+        const i = iy * NG + ix;
+        const r = (at(ps, ix + 1, iy) - at(ps, ix - 1, iy)) / (2 * BIN);
+        const t = (at(qs, ix, iy + 1) - at(qs, ix, iy - 1)) / (2 * BIN);
+        const s = 0.5 * ((at(ps, ix, iy + 1) - at(ps, ix, iy - 1)) / (2 * BIN)
+                       + (at(qs, ix + 1, iy) - at(qs, ix - 1, iy)) / (2 * BIN));
+        if (dipCorrect) {
+          const P = ps[i], Q = qs[i], den = 1 + P * P + Q * Q;
+          const km = ((1 + Q * Q) * r - 2 * P * Q * s + (1 + P * P) * t) / (2 * Math.pow(den, 1.5));
+          const kg = (r * t - s * s) / (den * den);
+          const rt = Math.sqrt(Math.max(0, km * km - kg));
+          hi[i] = km + rt; lo[i] = km - rt;
+        } else {
+          const mid = (r + t) / 2, dev = Math.sqrt(Math.pow((r - t) / 2, 2) + s * s);
+          hi[i] = mid + dev; lo[i] = mid - dev;
+        }
+        st[i] = 0.5 * Math.atan2(2 * s, r - t) * 180 / Math.PI;
+      }
+    }
+    return { hi, lo, st };
+  }
+
+  let ECURV = null, KCURV = null;
+  function recompute() {
+    buildModel();
+    ECURV = secondDerivs(AMP, S.smooth, false);      // amplitude curvature
+    KCURV = secondDerivs(Z, S.smooth, true);          // structural, for step 5
+  }
+
+  /* ------------------------------ the seismic --------------------------- */
+
+  function buildLine() {
+    const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
+    const f = new Float32Array(SN * ST);
+    for (let ix = 0; ix < SN; ix++) {
+      const i = S.py * NG + ix;
+      const t0 = 78 + (Z[i] * 2 / SVEL) * 1000 / (SDT * 1000);
+      const a = AMP[i];
+      f.set(SEIS.traceFromSpikes([
+        { t: (t0 - 26) * SDT, r: 0.06 },
+        { t: t0 * SDT, r: 0.1 * a },
+        { t: (t0 + 30) * SDT, r: -0.07 },
+      ], 0, SDT, ST, wav), ix * ST);
+    }
+    let pk = 1e-6;
+    for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
+    return { f, pk };
+  }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  const M = { l: 48, r: 14, t: 12, b: 34 };
+  function pw(el) {
+    const par = el && el.parentElement;
+    if (!par) return 900;
+    const cs = window.getComputedStyle(par);
+    return Math.max(240, Math.floor(par.clientWidth
+      - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0)));
+  }
+  function rowWidth(rowId, n) {
+    const row = $(rowId);
+    const total = row ? pw(row.firstElementChild || row) : 800;
+    const w = window.innerWidth <= 700
+      ? Math.max(240, total)
+      : Math.max(180, Math.floor((total - 10 * (n - 1)) / n));
+    if (row) {
+      row.querySelectorAll(':scope > .panel-col').forEach((el) => {
+        el.style.width = w + 'px'; el.style.maxWidth = w + 'px';
+      });
+    }
+    return w;
+  }
+
+  function imageInto(ctx, R, get, map) {
+    const off = document.createElement('canvas');
+    off.width = NG; off.height = NG;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(NG, NG);
+    for (let r = 0; r < NG; r++) {
+      const iy = NG - 1 - r;
+      for (let c = 0; c < NG; c++) {
+        const col = map(get(c, iy));
+        const k = (r * NG + c) * 4;
+        img.data[k] = col[0]; img.data[k + 1] = col[1];
+        img.data[k + 2] = col[2]; img.data[k + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(off, R.x, R.y, R.w, R.h);
+    ctx.restore();
+  }
+
+  function colorbar(ctx, R, map, loLabel, hiLabel, midLabel) {
+    const B = { x: R.x, y: R.y + R.h + 40, w: R.w, h: 9 };
+    const n = Math.max(2, Math.round(B.w));
+    for (let i = 0; i < n; i++) {
+      const col = map(i / (n - 1));
+      ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      ctx.fillRect(B.x + i * (B.w / n), B.y, B.w / n + 1, B.h);
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.4)'; ctx.lineWidth = 1;
+    ctx.strokeRect(B.x + 0.5, B.y + 0.5, B.w, B.h);
+    ctx.font = '9.5px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left'; ctx.fillText(loLabel, B.x, B.y + B.h + 3);
+    ctx.textAlign = 'right'; ctx.fillText(hiLabel, B.x + B.w, B.y + B.h + 3);
+    if (midLabel) { ctx.textAlign = 'center'; ctx.fillText(midLabel, B.x + B.w / 2, B.y + B.h + 3); }
+    ctx.restore();
+  }
+
+  function mapPanel(canvasId, w, h, get, map, bar, mark) {
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 52 : 0) };
+    imageInto(ctx, R, get, map);
+    if (mark !== false) {
+      const X = R.x + ((S.px + 0.5) / NG) * R.w;
+      const Y = R.y + R.h - ((S.py + 0.5) / NG) * R.h;
+      ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(X, Y, 5.5, 0, 6.2832); ctx.stroke(); ctx.restore();
+    }
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 0, (NG - 1) * BIN / 1000, 'east (km)', (v) => v.toFixed(1), { ticks: 4 });
+    SEIS.axisLeft(ctx, R, 0, (NG - 1) * BIN / 1000, 'north (km)', (v) => v.toFixed(1),
+      { flip: true, ticks: 4 });
+    if (bar) bar(ctx, R);
+    return R;
+  }
+
+  const rangeOf = (arr) => {
+    let m = 1e-12;
+    for (let iy = EDGE; iy < NG - EDGE; iy++) {
+      for (let ix = EDGE; ix < NG - EDGE; ix++) m = Math.max(m, Math.abs(arr[iy * NG + ix]));
+    }
+    return m;
+  };
+  const ESC = 1e6;    // amplitude curvature is a small number; show it scaled
+
+  function divMap(canvasId, arr, w, h, lim, unit) {
+    const L = lim || rangeOf(arr);
+    mapPanel(canvasId, w, h, (ix, iy) => arr[iy * NG + ix] / L,
+      (u) => ATTR.MAPS.dip(-clamp(u, -1, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.dip(-(2 * u - 1)),
+        '\u2212' + (L * ESC).toFixed(1), '+' + (L * ESC).toFixed(1), unit + ' \u00b7 0'));
+    return L;
+  }
+
+  /* ------------------------------- header ------------------------------ */
+
+  function drawHeader() {
+    const el = $('cSec');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el), h = clamp(Math.round(w * 0.42), 180, 250);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    const L = buildLine();
+    ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+    SEIS.drawVarDensity(ctx, L.f, SN, ST, R, { cmap: SEIS.COLORMAPS.gray, clip: L.pk * 0.8 });
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    const cx = CHX + 9 * Math.sin(2 * Math.PI * S.py / 150);
+    [cx - S.cwid / 2, cx + S.cwid / 2].forEach((e) => {
+      const x = R.x + (e / (SN - 1)) * R.w;
+      SEIS.dashedLine(ctx, x, R.y, x, R.y + R.h, 'rgba(132,22,23,.8)', [5, 4], 1.5);
+    });
+    const px = R.x + (S.px / (SN - 1)) * R.w;
+    ctx.strokeStyle = TEAL; ctx.lineWidth = 1.8; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(px, R.y); ctx.lineTo(px, R.y + R.h); ctx.stroke();
+    ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisLeft(ctx, R, 0, (ST - 1) * SDT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 3 });
+    SEIS.axisBottom(ctx, R, 0, (SN - 1) * BIN / 1000, 'east (km)', (v) => v.toFixed(1), { ticks: 5 });
+    if (S.dim > 0) {
+      SEIS.tag(ctx, clamp(R.x + (cx / (SN - 1)) * R.w - 28, R.x, R.x + R.w - 66),
+        R.y + R.h - 16, 'channel', CRIM);
+    }
+  }
+
+  /* ------------------------------- step 1 ------------------------------ */
+
+  function drawStep1() {
+    const w = pw($('c1')), h = clamp(Math.round(w * 0.40), 300, 400);
+    const ctx = SEIS.fitCanvas($('c1'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const gap = 18, ph = (h - M.t - M.b - gap) / 2;
+    const zs = [], as = [];
+    for (let ix = 0; ix < NG; ix++) { zs.push(Z[S.py * NG + ix]); as.push(AMP[S.py * NG + ix]); }
+    const sets = [
+      { arr: zs, col: INK, title: 'structure \u2014 depth to the reflector (m)' },
+      { arr: as, col: CRIM, title: 'amplitude \u2014 how bright it is (relative)' },
+    ];
+    sets.forEach((set, n) => {
+      const R = { x: M.l, y: M.t + n * (ph + gap), w: w - M.l - M.r, h: ph };
+      let lo = Infinity, hi = -Infinity;
+      set.arr.forEach((v) => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+      const pad = Math.max((hi - lo) * 0.15, 1e-3);
+      lo -= pad; hi += pad;
+      const X = (ix) => R.x + (ix / (NG - 1)) * R.w;
+      const Y = (v) => R.y + R.h - ((v - lo) / (hi - lo)) * R.h;
+      ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+      ctx.save();
+      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+      const cx = CHX + 9 * Math.sin(2 * Math.PI * S.py / 150);
+      [cx - S.cwid / 2, cx + S.cwid / 2].forEach((e) => {
+        SEIS.dashedLine(ctx, X(e), R.y, X(e), R.y + R.h, 'rgba(132,22,23,.45)', [4, 4], 1.2);
+      });
+      ctx.strokeStyle = set.col; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      set.arr.forEach((v, ix) => { const x = X(ix), y = Y(v); ix ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+      ctx.stroke(); ctx.restore();
+      SEIS.frame(ctx, R);
+      SEIS.axisLeft(ctx, R, lo, hi, null, (v) => v.toFixed(n === 0 ? 0 : 2), { flip: true, ticks: 3 });
+      SEIS.tag(ctx, R.x + 8, R.y + 12, set.title, set.col);
+      if (n === 1) {
+        SEIS.axisBottom(ctx, R, 0, (NG - 1) * BIN / 1000, 'east (km)', (v) => v.toFixed(1), { ticks: 5 });
+      }
+    });
+
+    let zlo = Infinity, zhi = -Infinity;
+    zs.forEach((v) => { zlo = Math.min(zlo, v); zhi = Math.max(zhi, v); });
+    const cxi = Math.round(CHX + 9 * Math.sin(2 * Math.PI * S.py / 150));
+    const inCh = AMP[S.py * NG + clamp(cxi, 0, NG - 1)];
+    const outCh = AMP[S.py * NG + clamp(cxi - S.cwid - 12, 0, NG - 1)];
+    const zEdge = Math.abs(Z[S.py * NG + clamp(cxi - Math.round(S.cwid / 2), 0, NG - 1)]
+      - Z[S.py * NG + clamp(cxi - Math.round(S.cwid / 2) - 3, 0, NG - 1)]);
+    $('s1a').textContent = (zhi - zlo).toFixed(0) + ' m';
+    $('s1b').textContent = ((outCh - inCh) * 100).toFixed(0) + '% dimmer inside';
+    $('s1c').textContent = zEdge < 0.5 ? 'none at all' : zEdge.toFixed(1) + ' m';
+    $('s1d').textContent = S.dim === 0
+      ? 'With the channel dimming at zero there is nothing for an amplitude attribute to find.'
+      : S.fold === 0
+        ? 'The reflector is flat, so structural curvature has nothing to report, while the channel edges are as sharp as ever.'
+        : 'The fold is only in the top curve and the channel only in the bottom one. Neither attribute can see the other quantity.';
+  }
+
+  /* ---------------------------- steps 2 and 3 -------------------------- */
+
+  function drawStep2() {
+    const w = rowWidth('row2', 2), h = clamp(Math.round(w * 0.94), 250, 340) + 52;
+    let zl = Infinity, zh = -Infinity;
+    for (let i = 0; i < Z.length; i++) { zl = Math.min(zl, Z[i]); zh = Math.max(zh, Z[i]); }
+    const zr = Math.max(zh - zl, 1e-6);
+    mapPanel('c2z', w, h, (ix, iy) => (Z[iy * NG + ix] - zl) / zr,
+      (u) => ATTR.MAPS.coherence(clamp(u, 0, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.coherence(u),
+        zh.toFixed(0) + ' m  deep', 'shallow  ' + zl.toFixed(0) + ' m', 'depth'));
+    mapPanel('c2a', w, h, (ix, iy) => AMP[iy * NG + ix],
+      (u) => ATTR.MAPS.coherence(clamp(u, 0, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.coherence(u), '0  dim', 'bright  1', 'amplitude'));
+  }
+
+  function drawStep3() {
+    const w = rowWidth('row3', 3), h = clamp(Math.round(w * 0.94), 230, 320) + 52;
+    mapPanel('c3a', w, h, (ix, iy) => AMP[iy * NG + ix],
+      (u) => ATTR.MAPS.coherence(clamp(u, 0, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.coherence(u), '0  dim', 'bright  1', 'amplitude'));
+    const lim = Math.max(rangeOf(ECURV.hi), rangeOf(ECURV.lo));
+    divMap('c3p', ECURV.hi, w, h, lim, 'e_pos');
+    divMap('c3n', ECURV.lo, w, h, lim, 'e_neg');
+
+    // edge versus interior, which is the point of the step
+    const iy = S.py;
+    const cxi = Math.round(CHX + 9 * Math.sin(2 * Math.PI * iy / 150));
+    let edge = 0;
+    for (let d = -S.cwid; d <= S.cwid; d++) {
+      const ix = clamp(cxi + d, EDGE, NG - EDGE - 1);
+      edge = Math.max(edge, Math.abs(ECURV.hi[iy * NG + ix]), Math.abs(ECURV.lo[iy * NG + ix]));
+    }
+    const mid = Math.abs(ECURV.hi[iy * NG + clamp(cxi, EDGE, NG - EDGE - 1)]);
+    $('s3a').textContent = (rangeOf(ECURV.hi) * ESC).toFixed(2);
+    $('s3b').textContent = (-rangeOf(ECURV.lo) * ESC).toFixed(2);
+    $('s3c').textContent = edge > 1e-12
+      ? (edge * ESC).toFixed(2) + ' at the edge vs ' + (mid * ESC).toFixed(2) + ' in the middle'
+      : 'nothing to measure';
+    $('s3d').textContent = 'A channel prints as two lineaments, one on each attribute, because one edge is '
+      + 'a crest of the amplitude surface and the other is a trough. The dim interior is quiet because it '
+      + 'is flat.';
+  }
+
+  /* ------------------------------- step 4 ------------------------------ */
+
+  function drawStep4() {
+    const el = $('c4cart');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el), h = clamp(Math.round(w * 0.30), 200, 260);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const halfW = (w - 66) / 2;
+    [0, 1].forEach((side) => {
+      const R = { x: 28 + side * (halfW + 14), y: 42, w: halfW, h: h - 92 };
+      const A = R.h * 0.3, L = R.w * 0.9, mid = R.y + R.h * 0.55;
+      const yOf = (x) => mid - A * Math.sin(Math.PI * (x - R.x) / L);
+      ctx.save();
+      ctx.strokeStyle = side ? CRIM : INK; ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      for (let x = R.x; x <= R.x + R.w; x += 2) {
+        const y = yOf(x); x === R.x ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      if (!side) {
+        // a real circle, because both axes are lengths
+        const xc = R.x + L / 2, yc = yOf(xc);
+        const rad = L * L / (Math.PI * Math.PI * A) / 4;
+        ctx.setLineDash([4, 3]); ctx.strokeStyle = TEAL; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(xc, yc + rad, rad, 0, 6.2832); ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        const xc = R.x + L / 2, yc = yOf(xc);
+        ctx.strokeStyle = 'rgba(92,102,112,.65)'; ctx.lineWidth = 1.4;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.arc(xc, yc + R.h * 0.5, R.h * 0.5, 0, 6.2832); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.strokeStyle = CRIM; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xc - 16, yc - 16); ctx.lineTo(xc + 16, yc + 16);
+        ctx.moveTo(xc + 16, yc - 16); ctx.lineTo(xc - 16, yc + 16);
+        ctx.stroke();
+      }
+      ctx.restore();
+      SEIS.tag(ctx, R.x, R.y - 26,
+        side ? 'amplitude surface' : 'structural surface', side ? CRIM : INK);
+      SEIS.tag(ctx, R.x, R.y + R.h + 12,
+        side ? 'y is amplitude, x is meters' : 'y is meters, x is meters', SLATE);
+      SEIS.tag(ctx, R.x, R.y + R.h + 30,
+        side ? 'no radius means anything' : 'a circle of radius r, so k = 1/r',
+        side ? CRIM : TEAL);
+    });
+
+    $('s4a').textContent = 'meters per meter \u2192 curvature in 1/meters';
+    $('s4b').textContent = 'amplitude per meter \u2192 no length to invert';
+    $('s4c').textContent = 'You get e_pos, e_neg and their strike, and the curvedness and shape index built '
+      + 'from them. You do not get k\u2081 and k\u2082, a radius of curvature, reflector convergence, or '
+      + 'rotation about the normal.';
+  }
+
+  /* ------------------------------- step 5 ------------------------------ */
+
+  function drawStep5() {
+    const w = rowWidth('row5', 2), h = clamp(Math.round(w * 0.94), 250, 340) + 52;
+    const kl = rangeOf(KCURV.hi);
+    mapPanel('c5s', w, h, (ix, iy) => KCURV.hi[iy * NG + ix] / Math.max(kl, 1e-12),
+      (u) => ATTR.MAPS.dip(-clamp(u, -1, 1)),
+      (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.dip(-(2 * u - 1)),
+        '\u2212' + (kl * 1000).toFixed(2), '+' + (kl * 1000).toFixed(2), 'k\u2081 in 1/km \u00b7 0'));
+    divMap('c5a', ECURV.hi, w, h, null, 'e_pos');
+
+    const iy = S.py;
+    const cxi = Math.round(CHX + 9 * Math.sin(2 * Math.PI * iy / 150));
+    const ex = clamp(cxi - Math.round(S.cwid / 2), EDGE, NG - EDGE - 1);
+    const foldIx = clamp(44, EDGE, NG - EDGE - 1);
+    const kAtEdge = Math.abs(KCURV.hi[iy * NG + ex]) * 1000;
+    const eAtEdge = Math.abs(ECURV.hi[iy * NG + ex]) * ESC;
+    const kAtFold = Math.abs(KCURV.hi[58 * NG + foldIx]) * 1000;
+    const eAtFold = Math.abs(ECURV.hi[58 * NG + foldIx]) * ESC;
+    $('s5a').textContent = kAtEdge.toFixed(3) + ' km⁻¹';
+    $('s5b').textContent = eAtEdge.toFixed(2);
+    $('s5c').textContent = kAtFold.toFixed(3) + ' km⁻¹';
+    $('s5d').textContent = eAtFold.toFixed(2);
+    $('s5e').textContent = 'Each attribute answers to its own quantity. The channel edge is an amplitude '
+      + 'feature and the fold is a structural one, and neither attribute has any way of seeing the other.';
+  }
+
+  /* =====================================================================
+     PLUMBING
+     ===================================================================== */
+
+  function syncLabels() {
+    $('dimV').textContent = S.dim === 0 ? 'none' : S.dim + '%';
+    $('cwidV').textContent = S.cwid + ' traces  (' + (S.cwid * BIN) + ' m)';
+    $('edgeV').textContent = S.edge + (S.edge === 1 ? ' trace' : ' traces');
+    $('foldV').textContent = S.fold === 0 ? 'flat' : S.fold + ' m';
+    $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
+    $('smoothV').textContent = S.smooth + (S.smooth === 1 ? ' trace' : ' traces');
+    ['dim', 'cwid', 'edge', 'fold', 'noise', 'smooth'].forEach((k) => {
+      const el = $(k);
+      if (el && parseFloat(el.value) !== S[k]) el.value = S[k];
+    });
+  }
+
+  function drawAll() {
+    syncLabels();
+    if (!$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
+    drawHeader();
+    if (visible('p1')) drawStep1();
+    if (visible('p2')) drawStep2();
+    if (visible('p3')) drawStep3();
+    if (visible('p4')) drawStep4();
+    if (visible('p5')) drawStep5();
+  }
+
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pe', 'pk', 'pm'];
+  const STEPNAMES = {
+    p1: 'Two kinds of bend', p2: 'Amplitude on the horizon', p3: 'e_pos and e_neg',
+    p4: 'No circle to fit', p5: 'Side by side',
+    pe: 'Exercises', pk: 'Key points', pm: 'Method',
+  };
+
+  function buildStepNav() {
+    PANES.forEach((id, i) => {
+      const pane = $(id);
+      if (!pane || pane.querySelector('.stepnav')) return;
+      const prev = PANES[i - 1], next = PANES[i + 1];
+      const nav = document.createElement('div');
+      nav.className = 'stepnav';
+      const mk = (target, text, ghost) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (ghost ? ' ghost' : '') + ' small';
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          showTab(target);
+          const t = document.querySelector('.tabhint');
+          if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return b;
+      };
+      nav.appendChild(prev ? mk(prev, '\u2190 ' + STEPNAMES[prev], true)
+                           : document.createElement('span'));
+      const where = document.createElement('span');
+      where.className = 'where';
+      where.textContent = i < 5 ? 'step ' + (i + 1) + ' of 5' : STEPNAMES[id];
+      nav.appendChild(where);
+      nav.appendChild(next ? mk(next, STEPNAMES[next] + ' \u2192')
+                           : document.createElement('span'));
+      pane.appendChild(nav);
+    });
+  }
+
+  function showTab(id) {
+    PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach((b) => {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    const lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    const last = (id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !last;
+    if ($('pager')) $('pager').hidden = !last;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  document.addEventListener('input', (ev) => {
+    const key = ev.target && ev.target.dataset && ev.target.dataset.key;
+    if (!key) return;
+    S[key] = parseFloat(ev.target.value);
+    recompute(); drawAll(); saveState();
+  });
+
+  function attachProbe(canvasId, xOnly) {
+    const c = $(canvasId);
+    if (!c) return;
+    let down = false;
+    const go = (ev) => {
+      const r = c.getBoundingClientRect();
+      const R = { x: M.l, y: M.t, w: r.width - M.l - M.r, h: r.height - M.t - M.b };
+      S.px = clamp(Math.round(((ev.clientX - r.left - R.x) / R.w) * NG), EDGE, NG - 1 - EDGE);
+      if (!xOnly) {
+        S.py = clamp(Math.round((1 - (ev.clientY - r.top - R.y) / R.h) * NG), EDGE, NG - 1 - EDGE);
+      }
+      drawAll(); saveState();
+    };
+    c.addEventListener('pointerdown', (e) => {
+      down = true; if (c.setPointerCapture) c.setPointerCapture(e.pointerId);
+      e.preventDefault(); go(e);
+    });
+    c.addEventListener('pointermove', (e) => { if (down) go(e); });
+    c.addEventListener('pointerup', () => { down = false; });
+    c.addEventListener('pointercancel', () => { down = false; });
+  }
+  attachProbe('cSec', true);
+  attachProbe('c2a');
+
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
+
+  recompute();
+  buildStepNav();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+  document.fonts && document.fonts.ready.then(drawAll);
+})();
+</script>
+</body>
+</html>
