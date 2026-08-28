@@ -32,6 +32,46 @@
       attribute ends up imaging.</p>
   </div>
 
+  <section class="controls" style="margin-top:6px;margin-bottom:0">
+<div class="ctl-col">
+        <h2>The wavelet</h2>
+        <div class="ctl">
+          <label for="freq">Peak frequency <span class="val" id="freqV">30 Hz</span></label>
+          <input type="range" id="freq" min="10" max="60" step="1" value="30">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">A higher frequency means a shorter period, so less time
+          shift is needed before the traces stop matching.</p>
+      </div>
+      <div class="ctl-col">
+        <h2>The window</h2>
+        <div class="ctl">
+          <label for="half">Traces used <span class="val" id="halfV">5 traces</span></label>
+          <input type="range" id="half" min="1" max="5" step="1" value="2">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 14px">A wider aperture accumulates more time shift from
+          end to end, so it fails at a gentler dip.</p>
+        <div class="ctl">
+          <label for="kHalf">Window height <span class="val" id="kHalfV">± 20 ms</span></label>
+          <input type="range" id="kHalf" min="3" max="25" step="1" value="10">
+        </div>
+        <p class="hint-line" style="margin:-8px 0 0">Height matters much less here. The problem is lateral
+          misalignment, and a taller window does not fix it.</p>
+      </div>
+      <div class="ctl-col">
+        <h2>Display</h2>
+        <div class="ctl">
+          <label>Show traces as</label>
+          <div class="seg" role="group" aria-label="Display style">
+            <button type="button" id="dWig" aria-pressed="true">Wiggle</button>
+            <button type="button" id="dCol" aria-pressed="false">Color</button>
+          </div>
+        </div>
+        <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
+      </div>
+      </section>
+  <p class="hint-line" style="margin:6px 0 0;max-width:84ch">These settings apply to every step on the
+    page. Steps 1 and 2 use them on a single reflector; steps 3 and 4 use them on a whole section.</p>
+
   <!-- ============================== STEP ONE ============================== -->
   <section class="plot" style="margin-top:6px">
     <div class="plot-head">
@@ -48,7 +88,7 @@
 
     <div class="ctl" style="margin-top:14px;max-width:520px">
       <label for="dip">Dip of the bed <span class="val" id="dipV">2.00 ms per trace</span></label>
-      <input type="range" id="dip" min="-12" max="12" step="0.1" value="2">
+      <input type="range" id="dip" min="-12" max="12" step="0.1" value="6">
     </div>
     <p class="hint-line" style="margin:-8px 0 16px;max-width:84ch">At zero the two windows are the same
       window. Move the dip either way and they separate; a negative dip simply tilts the bed the other way,
@@ -104,43 +144,6 @@
 
     <canvas id="c2" aria-label="Similarity plotted against bed dip for a horizontal and a dip-steered window"></canvas>
 
-    <div class="controls" style="margin-top:14px">
-      <div class="ctl-col">
-        <h2>The wavelet</h2>
-        <div class="ctl">
-          <label for="freq">Peak frequency <span class="val" id="freqV">30 Hz</span></label>
-          <input type="range" id="freq" min="10" max="60" step="1" value="30">
-        </div>
-        <p class="hint-line" style="margin:-8px 0 0">A higher frequency means a shorter period, so less time
-          shift is needed before the traces stop matching.</p>
-      </div>
-      <div class="ctl-col">
-        <h2>The window</h2>
-        <div class="ctl">
-          <label for="half">Traces used <span class="val" id="halfV">5 traces</span></label>
-          <input type="range" id="half" min="1" max="5" step="1" value="2">
-        </div>
-        <p class="hint-line" style="margin:-8px 0 14px">A wider aperture accumulates more time shift from
-          end to end, so it fails at a gentler dip.</p>
-        <div class="ctl">
-          <label for="kHalf">Window height <span class="val" id="kHalfV">± 20 ms</span></label>
-          <input type="range" id="kHalf" min="3" max="25" step="1" value="10">
-        </div>
-        <p class="hint-line" style="margin:-8px 0 0">Height matters much less here. The problem is lateral
-          misalignment, and a taller window does not fix it.</p>
-      </div>
-      <div class="ctl-col">
-        <h2>Display</h2>
-        <div class="ctl">
-          <label>Show traces as</label>
-          <div class="seg" role="group" aria-label="Display style">
-            <button type="button" id="dWig" aria-pressed="true">Wiggle</button>
-            <button type="button" id="dCol" aria-pressed="false">Color</button>
-          </div>
-        </div>
-        <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
-      </div>
-    </div>
 
     <div class="stats">
       <div class="stat"><span>Period of the wavelet</span><b id="s2a">—</b></div>
@@ -180,9 +183,38 @@
         directly. The fault cuts obliquely across the reflectors, which is what makes the dark stripe lean.</span>
     </div>
 
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:26px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      The same comparison on a time slice</h2>
+    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      A section shows the fault as a line, which is a hard place to judge how much damage an unsteered
+      window does. A map view is much clearer. These two panels are horizontal slices through a small 3D
+      volume containing a gentle dome cut by one planar fault. The fault is the same in both. Everything
+      else you see on the right is the bedding printing itself onto the attribute.</p>
+
+    <div class="sec-row" id="rowSlice">
+      <div class="panel-col">
+        <p class="sublabel"><b>4</b> Time slice, dip-steered
+          <span class="note">the fault, and nothing else</span></p>
+        <canvas id="c3sd" aria-label="Time slice of coherence computed with a dip-steered window"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>5</b> Time slice, horizontal window
+          <span class="note">the fault, plus the structure</span></p>
+        <canvas id="c3sf" aria-label="Time slice of coherence computed with a horizontal window"></canvas>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span>Inline runs across, crossline runs up. On the left the fault is the only feature. On the right
+        the concentric bands are contours of the dome: wherever the bed dips more steeply than the window
+        can tolerate, the attribute darkens, and the pattern it draws is the structure rather than any
+        discontinuity. That bleed-through is what gets picked as stratigraphy by people who have never seen
+        the steered version.</span>
+    </div>
+
     <div class="ctl" style="margin-top:14px;max-width:520px">
       <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
-      <input type="range" id="noise" min="0" max="50" step="2" value="0">
+      <input type="range" id="noise" min="0" max="50" step="2" value="12">
     </div>
     <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">Both panels degrade, but not in the same
       way. The unsteered one was already dark on the flanks before any noise was added.</p>
@@ -213,11 +245,19 @@
       <input type="range" id="bias" min="-4" max="4" step="0.25" value="0">
     </div>
 
-    <p class="sublabel"><b>1</b> Coherence, steered by the wrong dip
+    <p class="sublabel"><b>1</b> What the error does to the window
+      <span class="note">a bed dipping 2 ms per trace, with both windows on it</span></p>
+    <canvas id="c4zoom" aria-label="A dipping bed with a correctly steered window and a wrongly steered one"></canvas>
+    <p class="hint-line" style="margin:8px 0 16px;max-width:84ch">The teal window is steered by the correct
+      dip and lies along the bed. The crimson one is steered by the dip plus your error, so it still tilts
+      but cuts across. At a large enough error it is no better aligned than a horizontal window would have
+      been, which is the point of the last exercise.</p>
+
+    <p class="sublabel"><b>2</b> Coherence, steered by the wrong dip
       <span class="note">same grey scale as step 3</span></p>
     <canvas id="c4map" aria-label="Coherence computed with a deliberately incorrect dip"></canvas>
 
-    <p class="sublabel" style="margin-top:16px"><b>2</b> What the error costs
+    <p class="sublabel" style="margin-top:16px"><b>3</b> What the error costs
       <span class="note">bedding and fault coherence against the size of the error</span></p>
     <canvas id="c4curve" aria-label="Coherence on bedding and at the fault plotted against dip error"></canvas>
 
@@ -252,28 +292,38 @@
             shift accumulated across it stays under about a fifth of a period.</span></li>
         <li><b>Compare the two volumes as an interpreter would.</b> In step 3, look at the steered and
           unsteered panels and ask which anomalies you would pick as faults.
-          <span class="ans">On the steered panel the bedding is a flat 1.000 everywhere against a fault at
-            0.55, so the darkest point on a row is the fault 99% of the time and any threshold in between
-            works. On the unsteered panel the bedding averages 0.86 but falls to 0.69 on the steepest
-            flanks, against a fault at 0.45. The darkest point is still the fault 72% of the time, but on
-            the other 28% of rows a fold flank is darker than the fault, and no single threshold captures
-            the fault everywhere without also capturing bedding. The fault has not become weaker; it has
-            acquired competition.</span></li>
+          <span class="ans">With the noise slider at its default 12%, the steered panel has bedding at
+            0.939 against a fault at 0.53, and the darkest point on a row is the fault 88% of the time. The
+            unsteered panel has bedding averaging 0.81 and falling to 0.56 on the steepest flanks, and the
+            darkest point is the fault only 44% of the time. So on more than half the rows of the unsteered
+            volume, the darkest thing you could pick is a fold flank. Turn the noise off and the steered
+            background goes to a flat 1.000 while the unsteered one still bands; the flanks are not a noise
+            problem.</span></li>
         <li><b>Give the steering a small, plausible error.</b> In step 4, step the error through 0.25, 0.5
           and 1 ms per trace and watch the bedding value.
-          <span class="ans">Bedding coherence falls 1.000, 0.994, 0.977, 0.913 as the error goes 0, 0.25,
-            0.5, 1 ms per trace, while the fault barely moves from 0.55 — the whole cost comes out of the
-            background rather than out of the anomaly. By 1 ms per trace the separation has dropped from
-            0.450 to 0.396. These are small errors by the standards of module 01, and they are already
-            being spent. Steering is not a switch that is either on or off.</span></li>
+          <span class="ans">Bedding coherence falls 0.939, 0.934, 0.919, 0.861 as the error goes 0, 0.25,
+            0.5, 1 ms per trace, while the fault only moves from 0.527 to 0.489. The whole cost comes out
+            of the background rather than out of the anomaly, and the separation drops from 0.412 to 0.372.
+            These are small errors by the standards of module 01 — 0.5 ms per trace is less than the cost of
+            coarsening the dip search step to 2 ms — and they are already being spent. Steering is not a
+            switch that is either on or off.</span></li>
+        <li><b>Read the two time slices.</b> In step 3, look at the map pair rather than the sections and
+          ask what the concentric rings on the right actually are.
+          <span class="ans">They are contours of the dome. Wherever the bed dips more steeply than a
+            three-trace horizontal window can tolerate, the attribute darkens, so the pattern it draws is
+            the structure itself — the background falls to about 0.68 on the steep flanks against a fault at
+            about 0.47. On the steered slice the background is a flat 0.999 and the fault is the only
+            feature on the map. This is the clearest view of the problem, because in map view the
+            bleed-through has a shape, and that shape looks like stratigraphy to anyone who has not seen the
+            steered version.</span></li>
         <li><b>Push the error past the structure itself.</b> Set the error to 2 ms per trace and compare it
           with the steepest dip in the section, shown in the readout.
           <span class="ans">The steepest true dip is 1.96 ms per trace, so an error of 2 is a hundred
-            percent error, and bedding coherence collapses to 0.703 — almost exactly the 0.694 the
-            unsteered window gave on its worst flanks. Steering by a badly wrong dip has landed in the same
-            place as not steering at all, and it is more dangerous, because the volume is labelled as
-            dip-steered. Push on to 4 ms per trace and the darkest point on a row is the fault only 12% of
-            the time: the attribute is now imaging the error.</span></li>
+            percent error. Bedding coherence collapses to 0.670, which is below the 0.812 the unsteered
+            window managed, and the darkest point on a row is the fault only 68% of the time rather than
+            88%. Badly wrong steering is therefore worse than no steering at all, and more dangerous,
+            because the volume is labelled as dip-steered. Push on to 4 ms per trace and the fault is found
+            on 9% of rows: the attribute is imaging the error.</span></li>
       </ol>
     </div>
 
@@ -303,7 +353,13 @@
       a normal fault of 20 ms throw dipping about 65 degrees. Because the fault plane is oblique to the
       reflectors it crosses each one at a different trace, which is why the coherence anomaly leans. Fault
       values quoted in the exercises are the darkest point found on each time row, which is what an
-      interpreter or an autotracker responds to, rather than an average over a fixed band. The dip field is estimated with the discrete semblance search of
+      interpreter or an autotracker responds to, rather than an average over a fixed band, and they assume
+      the noise slider at its default 12%. The throw is applied with a sub-trace transition so that the
+      fault plane is straight rather than quantised into a staircase of whole traces.</p>
+    <p>The two map panels come from a separate small 3D volume, 100 traces square by a slab of 61 samples,
+      containing a dome cut by one planar fault. Steering there uses the analytic dip of the model rather
+      than an estimate, because estimation error is the subject of step 4 and mixing the two would confuse
+      which effect is which. The dip field is estimated with the discrete semblance search of
       module 01 rather than being supplied analytically, so the steered result carries whatever error that
       search makes.</p>
     <p>The similarity measure used throughout is semblance, computed on the real trace over a window of
@@ -422,8 +478,8 @@
   const faultTraceAt = (t0) => FAULT_X0 + FAULT_SLOPE * t0;
 
   const DEF = {
-    dip: 2, f: 30, half: 2, kHalf: 10,
-    noise: 0, bias: 0, disp: 'wiggle',
+    dip: 6, f: 30, half: 2, kHalf: 10,
+    noise: 12, bias: 0, disp: 'wiggle',
   };
   let S = SEIS.readState(DEF);
 
@@ -444,6 +500,11 @@
     }
     let pk = 1e-6;
     for (let i = 0; i < a.length; i++) pk = Math.max(pk, Math.abs(a[i]));
+    // a little noise, so the reflector looks like something you were handed
+    const nz = SEIS.bandLimitedNoise(PN, PT, DT, wav, 41, 1);
+    for (let i = 0; i < a.length; i++) a[i] += 0.10 * pk * nz[i];
+    pk = 1e-6;
+    for (let i = 0; i < a.length; i++) pk = Math.max(pk, Math.abs(a[i]));
     return { a, pk };
   }
   let PATCH = buildPatch(DEF.dip, DEF.f);
@@ -459,9 +520,15 @@
   /* ------------------------ the section, steps 3-4 --------------------- */
 
   // structural shift of a reflector whose un-faulted time index is t0
-  const shiftAt = (ix, t0) => msToP(REG) * (ix - NX / 2) +
-    msToP(FOLDA) * Math.sin(2 * Math.PI * ix / FOLDL) +
-    (ix > faultTraceAt(t0) ? msToP(THROW) : 0);
+  /* The throw is applied with a sub-trace transition rather than a hard
+     switch at a trace boundary. A hard switch quantises the fault plane to
+     whole traces and draws it as a staircase; this lets the plane pass
+     through a bin and keeps it straight. */
+  const shiftAt = (ix, t0) => {
+    const w = clamp(ix - faultTraceAt(t0) + 0.5, 0, 1);
+    return msToP(REG) * (ix - NX / 2) +
+      msToP(FOLDA) * Math.sin(2 * Math.PI * ix / FOLDL) + w * msToP(THROW);
+  };
   const trueDipMs = (ix) => REG +
     FOLDA * (2 * Math.PI / FOLDL) * Math.cos(2 * Math.PI * ix / FOLDL);
 
@@ -492,6 +559,89 @@
   }
 
   let GRID = null, COHD = null, COHF = null, COHB = null, BIASCURVE = null;
+
+  /* ------------------------- a small 3D volume ------------------------- */
+  /* Only a slab around the slice is built, which is all the window needs.
+     Steering uses the analytic dip of the model rather than an estimate,
+     because step 4 is where estimation error is the subject. */
+
+  const VN = 100, VS = 61, VC = 30;                 // traces each way, slab, centre
+  const DOME_A = 36, DOME_LX = 78, DOME_LY = 62;    // ms, and wavelengths in traces
+  const F_NX = 0.62, F_NY = 0.78, F_D = 96;         // fault plane in map view
+  let SLAB = null, SLICED = null, SLICEF = null;
+
+  // reflector time at a bin, in samples, measured from the top of the slab
+  function domeT(ix, iy) {
+    const a = msToP(DOME_A);
+    const w = clamp(F_NX * ix + F_NY * iy - F_D + 0.5, 0, 1);
+    return VC + a * Math.cos(2 * Math.PI * (ix - VN / 2) / DOME_LX) *
+                    Math.cos(2 * Math.PI * (iy - VN / 2) / DOME_LY) + w * msToP(THROW);
+  }
+  const domePx = (ix, iy) => (domeT(ix + 0.5, iy) - domeT(ix - 0.5, iy));
+  const domePy = (ix, iy) => (domeT(ix, iy + 0.5) - domeT(ix, iy - 0.5));
+
+  function buildSlab() {
+    const wav = SEIS.makeWavelet({ type: 'ricker', f: S.f });
+    const hl = wav.halfLength;
+    const v = new Float32Array(VN * VN * VS);
+    for (let iy = 0; iy < VN; iy++) {
+      for (let ix = 0; ix < VN; ix++) {
+        const base = (iy * VN + ix) * VS;
+        const tr = domeT(ix, iy) * DT;
+        const i0 = Math.max(0, Math.ceil((tr - hl) / DT));
+        const i1 = Math.min(VS - 1, Math.floor((tr + hl) / DT));
+        for (let it = i0; it <= i1; it++) v[base + it] += 0.1 * wav.fn(it * DT - tr);
+      }
+    }
+    if (S.noise > 0) {
+      let pk = 1e-6;
+      for (let i = 0; i < v.length; i++) pk = Math.max(pk, Math.abs(v[i]));
+      const nz = SEIS.bandLimitedNoise(VN * VN, VS, DT, wav, 33, 1);
+      const amp = (S.noise / 100) * pk;
+      for (let i = 0; i < v.length; i++) v[i] += amp * nz[i];
+    }
+    SLAB = v;
+  }
+
+  /* semblance on the slice, over a 3-by-3 patch of traces, steered or not */
+  function sliceCoherence(steered) {
+    const half = 1, kHalf = Math.min(S.kHalf, 18);
+    const J = 9, K = 2 * kHalf + 1;
+    const buf = new Float64Array(J * K);
+    const out = new Float32Array(VN * VN);
+    for (let iy = 0; iy < VN; iy++) {
+      for (let ix = 0; ix < VN; ix++) {
+        const px = steered ? domePx(ix, iy) : 0;
+        const py = steered ? domePy(ix, iy) : 0;
+        let m = 0;
+        for (let jy = -half; jy <= half; jy++) {
+          const yy = clamp(iy + jy, 0, VN - 1);
+          for (let jx = -half; jx <= half; jx++) {
+            const xx = clamp(ix + jx, 0, VN - 1);
+            const base = (yy * VN + xx) * VS;
+            const sh = px * jx + py * jy;
+            for (let k = -kHalf; k <= kHalf; k++) {
+              const pos = VC + k + sh;
+              const i0 = Math.floor(pos), f = pos - i0;
+              let val = 0;
+              if (i0 >= 0 && i0 < VS - 1) val = SLAB[base + i0] * (1 - f) + SLAB[base + i0 + 1] * f;
+              else if (i0 >= 0 && i0 < VS) val = SLAB[base + i0];
+              buf[m * K + (k + kHalf)] = val;
+            }
+            m++;
+          }
+        }
+        out[iy * VN + ix] = ATTR.semblance(buf, J, K);
+      }
+    }
+    return out;
+  }
+
+  function computeSlices() {
+    buildSlab();
+    SLICED = sliceCoherence(true);
+    SLICEF = sliceCoherence(false);
+  }
 
   const winOpts = () => ({ half: S.half, kHalf: S.kHalf, decX: 1, decT: 2 });
 
@@ -805,10 +955,73 @@
     SEIS.axisBottom(ctx, R, 1, NX, 'trace', (v) => v.toFixed(0), { ticks: 6 });
     cohPanel('c3dip', COHD, w, h);
     cohPanel('c3flat', COHF, w, h);
+    drawSlices();
+  }
+
+  function slicePanel(canvasId, arr, w, h) {
+    const ctx = SEIS.fitCanvas($(canvasId), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    const off = document.createElement('canvas');
+    off.width = VN; off.height = VN;
+    const octx = off.getContext('2d');
+    const img = octx.createImageData(VN, VN);
+    for (let r = 0; r < VN; r++) {
+      const iy = VN - 1 - r;
+      for (let c = 0; c < VN; c++) {
+        const col = ATTR.MAPS.coherence(clamp((arr[iy * VN + c] - 0.5) / 0.5, 0, 1));
+        const q = (r * VN + c) * 4;
+        img.data[q] = col[0]; img.data[q + 1] = col[1];
+        img.data[q + 2] = col[2]; img.data[q + 3] = 255;
+      }
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.save();
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(off, R.x, R.y, R.w, R.h); ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 1, VN, 'inline \u2192', (v) => v.toFixed(0), { ticks: 5 });
+    SEIS.axisLeft(ctx, R, 1, VN, 'crossline \u2192', (v) => v.toFixed(0), { flip: true, ticks: 5 });
+  }
+
+  function drawSlices() {
+    if (!SLICED) return;
+    const w = rowWidth('rowSlice', 2);
+    const h = clamp(Math.round(w * 0.92), 260, 360);
+    slicePanel('c3sd', SLICED, w, h);
+    slicePanel('c3sf', SLICEF, w, h);
+  }
+
+  const REF_DIP = 2;                               // representative bed dip, ms/trace
+
+  function drawStep4Zoom() {
+    const w = pw($('c4zoom'));
+    const h = clamp(Math.round(w * 0.26), 200, 260);
+    const P = buildPatch(REF_DIP, S.f);
+    const half = S.half, kk = S.kHalf;
+    tracePanel('c4zoom', P.a, PN, PT, P.pk, w, h, {
+      extras: (ctx, R, X, Y) => {
+        const mid = PCT * DT * 1000;
+        const box = (dipMs, colour, dash) => {
+          ctx.save();
+          ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+          ctx.strokeStyle = colour; ctx.lineWidth = 1.9; ctx.setLineDash(dash);
+          ctx.beginPath();
+          ctx.moveTo(X(PCX - half) - 6, Y(mid - dipMs * half - kk * 2));
+          ctx.lineTo(X(PCX + half) + 6, Y(mid + dipMs * half - kk * 2));
+          ctx.lineTo(X(PCX + half) + 6, Y(mid + dipMs * half + kk * 2));
+          ctx.lineTo(X(PCX - half) - 6, Y(mid - dipMs * half + kk * 2));
+          ctx.closePath(); ctx.stroke();
+          ctx.restore();
+        };
+        box(REF_DIP, TEAL, [1, 0]);
+        box(REF_DIP + S.bias, CRIM, [4, 3]);
+      },
+    });
   }
 
   function drawStep4() {
     if (!COHB || !BIASCURVE) return;
+    drawStep4Zoom();
     const w = pw($('c4map'));
     const h = clamp(Math.round(w * 0.30), 200, 280);
     cohPanel('c4map', COHB, w, h);
@@ -946,6 +1159,7 @@
     heavy = setTimeout(() => {
       if (rebuild) buildSection();
       computeSection();
+      computeSlices();
       drawStep3(); drawStep4(); updateStats();
     }, 80);
   }
@@ -986,7 +1200,7 @@
   $('resetBtn').addEventListener('click', () => {
     S = Object.assign({}, DEF);
     PATCH = buildPatch(S.dip, S.f); CURVE = null;
-    pushToInputs(); buildSection(); computeSection(); drawAll(); saveState();
+    pushToInputs(); buildSection(); computeSection(); computeSlices(); drawAll(); saveState();
   });
 
   let rt;
@@ -994,6 +1208,7 @@
 
   buildSection();
   computeSection();
+  computeSlices();
   pushToInputs();
   drawAll();
   document.fonts && document.fonts.ready.then(drawAll);
