@@ -80,6 +80,7 @@
     <button role="tab" data-tab="p2" aria-selected="false">2 · When it fails</button>
     <button role="tab" data-tab="p3" aria-selected="false">3 · A whole section</button>
     <button role="tab" data-tab="p4" aria-selected="false">4 · A wrong dip</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
@@ -151,19 +152,22 @@
       agree. That is the whole mechanism, and it explains why the failure point depends on the
       <em>wavelet</em> rather than on anything geological.</p>
     <p class="lede">
-      The curve sweeps the bed dip and plots both scores. The steered window holds at 1.0 the whole way,
-      because a continuous reflector is continuous no matter how steeply it sits. Watch where the gray curve
-      crosses the dashed line, and watch the box below that reports the shift as a fraction of a period at
-      that crossing.</p>
+      Below are five snapshots of the same five traces, read <b>straight across</b> at five different bed
+      dips. The reflector is perfectly continuous in every one of them — nothing is broken and nothing has
+      changed but the dip. Watch the traces slide out of line, and watch the score fall as they do. A
+      dip-steered window would show you the first picture every single time, whatever the dip.</p>
+    <p class="lede">Under each snapshot is the number that explains it: how much time shift has built up
+      across the window, as a fraction of one period of the wavelet. That single quantity decides
+      everything here.</p>
 
-    <canvas id="c2" aria-label="Similarity plotted against bed dip for a horizontal and a dip-steered window"></canvas>
+    <canvas id="c2" aria-label="What the horizontal window reads as the bed dip increases"></canvas>
 
 
     <div class="stats">
       <div class="stat"><span>Period of the wavelet</span><b id="s2a">—</b></div>
       <div class="stat"><span>Time shift across the aperture</span><b id="s2b">—</b></div>
       <div class="stat key"><span>Shift as a fraction of one period</span><b id="s2c">—</b></div>
-      <div class="stat"><span>Dip at which the flat window drops below 0.8</span><b id="s2d">—</b></div>
+      <div class="stat key"><span>Dip at which the flat window drops below 0.8</span><b id="s2d">—</b></div>
       <div class="stat wide"><span>The rule this gives you</span><b id="s2e">—</b></div>
     </div>
     </section>
@@ -273,9 +277,7 @@
       <span class="note">same gray scale as step 3</span></p>
     <canvas id="c4map" aria-label="Coherence computed with a deliberately incorrect dip"></canvas>
 
-    <p class="sublabel" style="margin-top:16px"><b>3</b> What the error costs
-      <span class="note">bedding and fault coherence against the size of the error</span></p>
-    <canvas id="c4curve" aria-label="Coherence on bedding and at the fault plotted against dip error"></canvas>
+
 
     <div class="stats" style="margin-top:14px">
       <div class="stat"><span>Coherence on the bedding</span><b id="s4a">—</b></div>
@@ -286,6 +288,51 @@
     </div>
     </section>
 
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">?</span>Why steering is not optional</h3>
+      <span class="hint">The difference between imaging geology and imaging the display</span>
+    </div>
+    <p class="lede">An unsteered attribute does not fail loudly. It produces a volume that looks entirely
+      plausible, full of lineaments and fabric, and the lineaments are contours of the structure rather than
+      anything broken. That is the danger: there is no error message, no obvious artifact, just a confident
+      picture of the wrong thing.</p>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      What it changes in practice</h2>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Fault picking.</b> On the unsteered volume in step 3, the darkest thing on a row is the fault
+        only 45% of the time. Anyone auto-tracking it extracts fold flanks as faults for more than half its
+        length, and those picks look like perfectly good faults until someone checks them against the
+        seismic.</li>
+      <li><b>Stratigraphic work.</b> Bleed-through in map view follows the structural grain, which is
+        exactly what makes it convincing as stratigraphy. The time slice in step 3 shows a broad band along
+        the flexure that reads like a depositional feature and is nothing of the kind.</li>
+      <li><b>Every attribute above coherence.</b> Curvature, shape index, amplitude curvature and aberrancy
+        are all computed in the steered frame. The dip volume is not just an input to them; it is the
+        coordinate system they are expressed in.</li>
+      <li><b>Structure-oriented filtering.</b> Steered, it smooths along bedding and sharpens faults. Wrongly
+        steered, it smooths across bedding, removing the discontinuities you were about to go looking for,
+        and the output looks cleaner rather than worse.</li>
+    </ul>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      And why the dip volume deserves real effort</h2>
+    <p class="lede">Steering is not a switch that is either on or off. Step 4 shows a 0.5 ms per trace error
+      — smaller than the cost of coarsening the dip search step in module 01 — already eating into the fault
+      contrast, and a 2 ms per trace error landing in the same place as not steering at all. Since the
+      volume is still labelled dip-steered, that failure is harder to spot than the honest unsteered
+      version.</p>
+    <p class="lede">Which is the practical argument for the order of this course. Modules 01 and 02 spend a
+      long time on getting dip right, and this is the module that says why: the quality of the dip field is
+      carried, undiminished, into everything computed from it.</p>
+    <div class="legend prose">
+      <span>One rule of thumb worth taking away: a horizontal window survives only while the time shift
+        accumulated across it stays under about a fifth of a period. At ordinary frequencies that is a few
+        degrees of dip, which almost no real survey manages.</span>
+    </div>
+  </section>
+
   <section class="tabpane" id="pe" role="tabpanel" hidden>
 <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
@@ -293,52 +340,52 @@
         <li><b>Find the tolerance of an unsteered window.</b> In step 2, leave the frequency at 30 Hz and
           five traces, and read the dip at which the flat window drops below 0.8. Then double the frequency
           and read it again.
-          <span class="ans">1.69 ms per trace at 30 Hz and 0.94 at 60 Hz, so doubling the frequency roughly
+          <details class="reveal"><summary>Hint</summary><span class="ans">1.69 ms per trace at 30 Hz and 0.94 at 60 Hz, so doubling the frequency roughly
             halves the tolerance. At 25 m bins and 3000 m/s those are geological dips of 5.8 and 3.2
             degrees. An unsteered coherence volume is therefore usable on almost nothing: gentle regional
-            dip is already enough to break it, and better data makes it worse rather than better.</span></li>
+            dip is already enough to break it, and better data makes it worse rather than better.</span></details></li>
         <li><b>Check that the failure is about the wavelet, not the dip.</b> Try several combinations of
           frequency and aperture in step 2, and each time read the "shift as a fraction of one period"
           box at the dip where the flat curve crosses 0.8.
-          <span class="ans">It lands between about 15 and 22 percent every time. Nine combinations of
+          <details class="reveal"><summary>Hint</summary><span class="ans">It lands between about 15 and 22 percent every time. Nine combinations of
             frequency and aperture give crossings ranging from 5.06 ms per trace down to 0.56, a spread of
             nine to one, and every one of them corresponds to the same fraction of a period. That is the
             actual rule, and it is worth carrying around: a horizontal window survives only while the time
-            shift accumulated across it stays under about a fifth of a period.</span></li>
+            shift accumulated across it stays under about a fifth of a period.</span></details></li>
         <li><b>Compare the two volumes as an interpreter would.</b> In step 3, look at the steered and
           unsteered panels and ask which anomalies you would pick as faults.
-          <span class="ans">With the noise slider at its default 12%, the steered panel has bedding at
+          <details class="reveal"><summary>Hint</summary><span class="ans">With the noise slider at its default 12%, the steered panel has bedding at
             0.924 against a fault at 0.49, and the darkest point on a row is the fault 90% of the time. The
             unsteered panel has bedding averaging 0.78 and falling to 0.47 on the steepest flanks, and the
             darkest point is the fault only 45% of the time. So on more than half the rows of the unsteered
             volume the darkest thing available to pick is a fold flank, not the fault. Turn the noise off
             and the steered background climbs to a flat 1.0 while the unsteered one still bands: the flanks
-            are not a noise problem, they are a steering problem.</span></li>
+            are not a noise problem, they are a steering problem.</span></details></li>
         <li><b>Give the steering a small, plausible error.</b> In step 4, step the error through 0.25, 0.5
           and 1 ms per trace and watch the bedding value.
-          <span class="ans">Bedding coherence falls 0.924, 0.918, 0.899, 0.831 as the error goes 0, 0.25,
+          <details class="reveal"><summary>Hint</summary><span class="ans">Bedding coherence falls 0.924, 0.918, 0.899, 0.831 as the error goes 0, 0.25,
             0.5, 1 ms per trace, while the fault only moves from 0.488 to 0.442. The cost comes out of the
             background rather than out of the anomaly, and the separation narrows from 0.435 to 0.389.
             These are small errors by the standards of module 01 — 0.5 ms per trace is less than the cost of
-            coarsening the dip search step to 2 ms — and they are already being spent.</span></li>
+            coarsening the dip search step to 2 ms — and they are already being spent.</span></details></li>
         <li><b>Read the two time slices.</b> In step 3, look at the map pair rather than the sections and
           ask what the broad dark band on the right is, and why it runs at a different angle from the fault.
-          <span class="ans">It is the flexure. Wherever the bed dips more steeply than a three-trace
+          <details class="reveal"><summary>Hint</summary><span class="ans">It is the flexure. Wherever the bed dips more steeply than a three-trace
             horizontal window tolerates, the attribute darkens, so the feature it draws is the structure
             itself. The band falls to about 0.55 against a fault at about 0.48, so the two anomalies are
             comparable in strength and no threshold separates them. On the steered slice the background
             sits near 0.95 across the whole map, flexure included, and the fault is the only linear feature
             on it. This is the clearest view of the problem, because in map view the
             bleed-through has a shape, and that shape looks like stratigraphy to anyone who has not seen the
-            steered version.</span></li>
+            steered version.</span></details></li>
         <li><b>Push the error past the structure itself.</b> Set the error to 2 ms per trace and compare it
           with the steepest dip in the section, shown in the readout.
-          <span class="ans">The steepest true dip is 1.96 ms per trace, so an error of 2 is a hundred
+          <details class="reveal"><summary>Hint</summary><span class="ans">The steepest true dip is 1.96 ms per trace, so an error of 2 is a hundred
             percent error. Bedding coherence collapses to 0.614, well below the 0.78 the unsteered window
             managed, and the darkest point on a row is the fault only 41% of the time rather than 90%.
             Steering by a badly wrong dip is therefore worse than not steering at all, and more dangerous,
             because the volume is labeled as dip-steered. Push on to 4 ms per trace and the fault is found
-            on 10% of rows: the attribute is imaging the error.</span></li>
+            on 10% of rows: the attribute is imaging the error.</span></details></li>
       </ol>
     </div>
   </section>
@@ -593,7 +640,7 @@
     SECT = f; SPEAK = pk;
   }
 
-  let GRID = null, COHD = null, COHF = null, COHB = null, BIASCURVE = null;
+  let GRID = null, COHD = null, COHF = null, COHB = null;
 
   /* ------------------------- a small 3D volume ------------------------- */
   /* Only a slab around the slice is built, which is all the window needs.
@@ -741,11 +788,6 @@
   }
   function computeBias() {
     COHB = cohField(SECT, NX, NT, Object.assign(winOpts(), { grid: biasedGrid(S.bias) }));
-    const xs = [-4, -3, -2, -1, -0.5, 0, 0.5, 1, 2, 3, 4];
-    BIASCURVE = xs.map((b) => {
-      const st = split(cohField(SECT, NX, NT, Object.assign(winOpts(), { grid: biasedGrid(b) })));
-      return { b, bed: st.bedMean, flt: st.darkest };
-    });
   }
 
   /* =====================================================================
@@ -926,47 +968,72 @@
   }
   let CURVE = null;
 
+  /* Five snapshots of the same window at increasing dip, so you can watch the
+     traces slide out of line rather than read it off a curve. */
   function drawStep2() {
     if (!CURVE) CURVE = curveData();
-    const w = pw($('c2')), h = 280;
+    const w = pw($('c2'));
+    const N = 5;
+    const cellW = Math.floor((w - 30 - 10 * (N - 1)) / N);
+    const cellH = clamp(Math.round(cellW * 1.15), 130, 190);
+    const h = cellH + 96;
     const ctx = SEIS.fitCanvas($('c2'), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: 58, y: 14, w: w - 72, h: h - 14 - 44 };
-    const X = (d) => R.x + (d / DIPMAX) * R.w;
-    const Y = (v) => R.y + R.h - clamp(v, 0, 1) * R.h;
 
-    SEIS.axisLeft(ctx, R, 0, 1, 'similarity', (v) => v.toFixed(1),
-      { flip: true, grid: true, ticks: 5 });
-    ctx.save();
-    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-    SEIS.dashedLine(ctx, R.x, Y(0.8), R.x + R.w, Y(0.8), 'rgba(22,25,28,.3)', [4, 4], 1);
-    const plot = (arr, col, wd) => {
-      ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.beginPath();
-      for (let i = 0; i < CURVE.n; i++) {
-        const x = X((DIPMAX * i) / (CURVE.n - 1)), y = Y(arr[i]);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    // step across the dips that matter: flat, up to and past the failure point
+    const crit = CURVE.crit === null ? DIPMAX * 0.6 : CURVE.crit;
+    const dips = [0, crit * 0.5, crit, crit * 1.7, crit * 3];
+    const J = 2 * S.half + 1, K = 2 * S.kHalf + 1;
+
+    for (let n = 0; n < N; n++) {
+      const P = buildPatch(dips[n], S.f);
+      const g = patchScore(P.a, 0, S.half, S.kHalf);   // the horizontal window
+      const x0 = 15 + n * (cellW + 10);
+      const R = { x: x0, y: 34, w: cellW, h: cellH };
+      const arr = new Float32Array(J * K);
+      for (let q = 0; q < arr.length; q++) arr[q] = g.buf[q];
+      ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+      if (S.disp === 'color') {
+        SEIS.drawVarDensity(ctx, arr, J, K, R, { cmap: SEIS.COLORMAPS.gray, clip: P.pk * 0.9 });
+      } else {
+        SEIS.drawWiggle(ctx, arr, J, K, R, { clip: P.pk, excursion: EXC, lineWidth: 1 });
       }
-      ctx.stroke();
-    };
-    plot(CURVE.steer, CRIM, 2.4);
-    plot(CURVE.flat, SLATE, 2.4);
-    if (CURVE.crit !== null) {
-      SEIS.dashedLine(ctx, X(CURVE.crit), R.y, X(CURVE.crit), R.y + R.h, TEAL, [5, 4], 1.6);
+      SEIS.dashedLine(ctx, R.x, R.y + R.h / 2, R.x + R.w, R.y + R.h / 2,
+        'rgba(132,22,23,.4)', [4, 3], 1.1);
+      SEIS.frame(ctx, R);
+
+      // the score, as a small bar under each snapshot
+      const B = { x: R.x, y: R.y + R.h + 10, w: R.w, h: 13 };
+      ctx.save();
+      ctx.fillStyle = '#F1F2EE'; ctx.fillRect(B.x, B.y, B.w, B.h);
+      const fw = clamp(g.s, 0, 1) * B.w, m = Math.max(2, Math.round(fw));
+      for (let q = 0; q < m; q++) {
+        const col = ATTR.MAPS.scan((q / m) * clamp(g.s, 0, 1));
+        ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+        ctx.fillRect(B.x + q * (fw / m), B.y, fw / m + 1, B.h);
+      }
+      ctx.strokeStyle = 'rgba(22,25,28,.35)'; ctx.lineWidth = 1;
+      ctx.strokeRect(B.x + 0.5, B.y + 0.5, B.w, B.h);
+      ctx.font = '600 11px "IBM Plex Mono", monospace';
+      ctx.fillStyle = g.s > 0.8 ? TEAL : CRIM;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(g.s.toFixed(2), B.x + B.w / 2, B.y + B.h + 5);
+      // how much time shift has built up across the window, against one period
+      const shift = dips[n] * 2 * S.half, period = 1000 / S.f;
+      ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+      ctx.fillText((100 * shift / period).toFixed(0) + '% of a period',
+        B.x + B.w / 2, B.y + B.h + 22);
+      ctx.restore();
+      SEIS.tag(ctx, R.x, 20, dips[n].toFixed(1) + ' ms/trace', n === 0 ? SLATE : INK);
     }
-    ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.moveTo(X(S.dip), R.y); ctx.lineTo(X(S.dip), R.y + R.h); ctx.stroke();
+    ctx.save();
+    ctx.font = '11px "IBM Plex Sans", sans-serif'; ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText('the same five traces, read straight across at increasing bed dip \u2014 '
+      + 'a dip-steered window would show the first picture every time', 15, h - 20);
     ctx.restore();
-    SEIS.tag(ctx, R.x + 10, Y(1) + 10, 'dip-steered \u2014 always 1.0', CRIM);
-    SEIS.tag(ctx, clamp(X(DIPMAX * 0.52), R.x + 10, R.x + R.w - 130), Y(0.30),
-      'horizontal window', SLATE);
-    if (CURVE.crit !== null) {
-      SEIS.tag(ctx, clamp(X(CURVE.crit) + 8, R.x + 10, R.x + R.w - 120), Y(0.80) - 10,
-        'crosses 0.8 here', TEAL);
-    }
-    SEIS.frame(ctx, R);
-    SEIS.axisBottom(ctx, R, 0, DIPMAX, 'dip of the bed (ms per trace)',
-      (v) => v.toFixed(0), { ticks: 5 });
   }
+
 
   /* --------------------------- steps 3 and 4 --------------------------- */
 
@@ -1079,44 +1146,12 @@
   }
 
   function drawStep4() {
-    if (!COHB || !BIASCURVE) return;
+    if (!COHB) return;
     drawStep4Zoom();
     const w = pw($('c4map'));
     const h = clamp(Math.round(w * 0.30), 200, 280);
     cohPanel('c4map', COHB, w, h);
 
-    const hc = 250;
-    const ctx = SEIS.fitCanvas($('c4curve'), w, hc);
-    ctx.clearRect(0, 0, w, hc);
-    const R = { x: 58, y: 14, w: w - 72, h: hc - 14 - 44 };
-    const X = (b) => R.x + ((b + 4) / 8) * R.w;
-    const Y = (v) => R.y + R.h - clamp(v, 0, 1) * R.h;
-    SEIS.axisLeft(ctx, R, 0, 1, 'coherence', (v) => v.toFixed(1),
-      { flip: true, grid: true, ticks: 5 });
-    ctx.save();
-    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-    const plot = (key, col) => {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath();
-      BIASCURVE.forEach((d, i) => {
-        const x = X(d.b), y = Y(d[key]);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      ctx.fillStyle = col;
-      BIASCURVE.forEach((d) => {
-        ctx.beginPath(); ctx.arc(X(d.b), Y(d[key]), 2.6, 0, 6.2832); ctx.fill();
-      });
-    };
-    plot('bed', TEAL);
-    plot('flt', CRIM);
-    ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.moveTo(X(S.bias), R.y); ctx.lineTo(X(S.bias), R.y + R.h); ctx.stroke();
-    ctx.restore();
-    SEIS.tag(ctx, R.x + 8, Y(0.99) + 6, 'bedding', TEAL);
-    SEIS.tag(ctx, R.x + 8, Y(0.62) - 14, 'at the fault', CRIM);
-    SEIS.frame(ctx, R);
-    SEIS.axisBottom(ctx, R, -4, 4, 'error added to the dip (ms per trace)',
-      (v) => v.toFixed(0), { ticks: 5 });
   }
 
   /* =====================================================================
@@ -1268,10 +1303,10 @@
     pushToInputs(); buildSection(); computeSection(); computeSlices(); drawAll(); saveState();
   });
 
-  const PANES = ['p1', 'p2', 'p3', 'p4', 'pe', 'pk', 'pm'];
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
     p1: 'Two windows', p2: 'When it fails', p3: 'A whole section', p4: 'A wrong dip',
-    pe: 'Exercises', pk: 'Key points', pm: 'Method',
+    pw: 'Why it matters', pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };
 
   function buildStepNav() {
@@ -1313,7 +1348,7 @@
     // the wavelet and window settings matter on every step, so the header
     // stays up and only steps aside for the reference tabs
     const lab = document.querySelector('.labhead');
-    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    if (lab) lab.hidden = (id === 'pw' || id === 'pe' || id === 'pk' || id === 'pm');
     const last = (id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !last;
     if ($('pager')) $('pager').hidden = !last;
