@@ -127,6 +127,8 @@
       follows the shape — <b>anticlines positive, synclines negative</b>, and zero on any plane, however
       steeply that plane dips.</p>
 
+    <canvas id="cCart" aria-label="Schematic of a folded bed showing where curvature is positive, negative and zero"></canvas>
+
     <canvas id="c1" aria-label="A seismic line with coherence, dip and curvature curves beneath it"></canvas>
 
     <p class="lede" style="margin-top:12px">Now try the fault-throw slider in the header. Bring it down to
@@ -266,6 +268,10 @@
       in the header and watch them separate — <b>k_pos grows while k₁ does not</b>, because the uncorrected
       version is partly measuring the regional tilt rather than the folding.</p>
 
+    <canvas id="cCart4" aria-label="Schematic showing why the two measures differ once the structure dips"></canvas>
+    <p class="hint-line" style="margin:8px 0 16px">The fold is identical on both sides. All that has changed
+      is that the right-hand one sits on a tilt.</p>
+
     <div class="sec-row" id="row4">
       <div class="panel-col">
         <p class="sublabel"><b>1</b> k₁, dip corrected
@@ -277,9 +283,19 @@
           <span class="note">the second derivative of structure</span></p>
         <canvas id="c4kp" aria-label="Map of most-positive curvature without the dip correction"></canvas>
       </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>3</b> k_pos &minus; k₁
+          <span class="note">blank until the structure dips</span></p>
+        <canvas id="c4df" aria-label="The difference between the two measures"></canvas>
+      </div>
     </div>
 
+    <p class="sublabel" style="margin-top:16px"><b>4</b> How far apart they drift
+      <span class="note">k_pos divided by k₁ at the strongest anticline, against regional dip</span></p>
     <canvas id="c4curve" aria-label="How the two measures diverge as regional dip increases"></canvas>
+    <p class="hint-line" style="margin:8px 0 0">Each point is one setting of the regional dip slider. At 1.0
+      the two attributes agree exactly. The vertical line marks where the slider is now, so you can see how
+      much of the disagreement you have dialed in.</p>
 
     <div class="stats" style="margin-top:14px">
       <div class="stat"><span>Regional dip now</span><b id="s4a">—</b></div>
@@ -743,10 +759,10 @@
     ctx.restore();
   }
 
-  function mapFrame(canvasId, w, h, body, extras) {
+  function mapFrame(canvasId, w, h, body, extras, bar) {
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 52 : 0) };
     body(ctx, R);
     const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
     const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
@@ -756,7 +772,32 @@
       (v) => v.toFixed(1), { ticks: 4 });
     SEIS.axisLeft(ctx, R, 0, (NG - 1) * BIN / 1000, 'north (km)',
       (v) => v.toFixed(1), { flip: true, ticks: 4 });
+    if (bar) bar(ctx, R);
     return R;
+  }
+
+  /* Every attribute map needs to say what its colors mean. Without this the
+     reader has to guess whether blue is high or low, which is not a guess
+     anyone should have to make. */
+  function colorbar(ctx, R, map, loLabel, hiLabel, midLabel) {
+    const B = { x: R.x, y: R.y + R.h + 40, w: R.w, h: 9 };
+    const n = Math.max(2, Math.round(B.w));
+    for (let i = 0; i < n; i++) {
+      const col = map(i / (n - 1));
+      ctx.fillStyle = 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')';
+      ctx.fillRect(B.x + i * (B.w / n), B.y, B.w / n + 1, B.h);
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.4)'; ctx.lineWidth = 1;
+    ctx.strokeRect(B.x + 0.5, B.y + 0.5, B.w, B.h);
+    ctx.font = '9.5px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left'; ctx.fillText(loLabel, B.x, B.y + B.h + 3);
+    ctx.textAlign = 'right'; ctx.fillText(hiLabel, B.x + B.w, B.y + B.h + 3);
+    if (midLabel) {
+      ctx.textAlign = 'center'; ctx.fillText(midLabel, B.x + B.w / 2, B.y + B.h + 3);
+    }
+    ctx.restore();
   }
 
   const markPoint = (ctx, R, X, Y) => {
@@ -797,16 +838,69 @@
     }
     return m;
   };
-  function curvMap(canvasId, arr, w, h, lim, extras) {
+  function curvMap(canvasId, arr, w, h, lim, extras, label) {
     const L = lim || kRange(arr);
     mapFrame(canvasId, w, h, (ctx, R) => {
       imageInto(ctx, R, (ix, iy) => arr[iy * NG + ix] * KM / (L * KM),
         (u) => ATTR.MAPS.dip(-clamp(u, -1, 1)));
-    }, extras || markPoint);
+    }, extras || markPoint, (ctx, R) => {
+      colorbar(ctx, R, (u) => ATTR.MAPS.dip(-(2 * u - 1)),
+        '\u2212' + (L * KM).toFixed(2) + '  syncline',
+        'anticline  +' + (L * KM).toFixed(2), (label || '1/km') + ' \u00b7 0');
+    });
     return L;
   }
 
   /* ------------------------------- step 1 ------------------------------ */
+
+  /* The textbook picture, drawn rather than described: a folded bed with the
+     surface normal along it, the fitted circle at the crest, and the three
+     places curvature takes its characteristic values. */
+  function drawCartoon() {
+    const el = $('cCart');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el);
+    const h = clamp(Math.round(w * 0.34), 210, 280);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 30, y: 34, w: w - 60, h: h - 76 };
+    const A = R.h * 0.26, mid = R.y + R.h * 0.52, L = R.w / 2.15;
+    const yOf = (x) => mid - A * Math.sin(2 * Math.PI * (x - R.x) / L);
+    const slope = (x) => -A * (2 * Math.PI / L) * Math.cos(2 * Math.PI * (x - R.x) / L);
+
+    ctx.save();
+    ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath();
+    for (let x = R.x; x <= R.x + R.w; x += 2) {
+      const y = yOf(x); x === R.x ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(22,25,28,.55)'; ctx.lineWidth = 1.4;
+    for (let x = R.x + 6; x <= R.x + R.w - 6; x += 22) {
+      const y = yOf(x), m = slope(x), hyp = Math.hypot(1, m);
+      const nx = -m / hyp, ny = -1 / hyp;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + nx * 20, y + ny * 20); ctx.stroke();
+    }
+    const xc = R.x + L / 4, yc = yOf(xc);
+    const rad = L * L / (4 * Math.PI * Math.PI * A);
+    ctx.setLineDash([4, 3]); ctx.strokeStyle = CRIM; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(xc, yc + rad, rad, 0, 6.2832); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(xc, yc); ctx.lineTo(xc, yc + rad); ctx.stroke();
+    ctx.fillStyle = CRIM;
+    ctx.beginPath(); ctx.arc(xc, yc + rad, 3, 0, 6.2832); ctx.fill();
+    ctx.restore();
+
+    SEIS.tag(ctx, xc + 8, yc + rad / 2, 'r', CRIM);
+    SEIS.tag(ctx, clamp(xc - 40, R.x, R.x + R.w - 152), R.y - 24, 'curvature k = 1 / r', CRIM);
+    SEIS.tag(ctx, clamp(xc - 34, R.x, R.x + R.w - 156), yc - 46, 'anticline \u00b7 k positive', TEAL);
+    const xt = R.x + 3 * L / 4;
+    SEIS.tag(ctx, clamp(xt - 32, R.x, R.x + R.w - 156), yOf(xt) + 30,
+      'syncline \u00b7 k negative', TEAL);
+    const xz = R.x + L / 2;
+    SEIS.tag(ctx, clamp(xz - 36, R.x, R.x + R.w - 150), yOf(xz) + 26,
+      'steepest \u00b7 k = 0', SLATE);
+    SEIS.tag(ctx, R.x, R.y + R.h + 16, 'a plane has k = 0 however steeply it dips', SLATE);
+  }
 
   /* A synthetic seismic line down the profile, so the module starts from
      something a beginner recognizes rather than from a depth curve. */
@@ -860,8 +954,8 @@
     const zs = [], ds = [], ks = [];
     for (let ix = 0; ix < NG; ix++) {
       const i = S.py * NG + ix;
-      zs.push(coh[ix]);
       ds.push(Math.atan(FIELD.p[i]) / DEG);
+      zs.push(coh[ix]);
       ks.push(FIELD.k1[i] * KM);
     }
     const span = (arr) => {
@@ -870,11 +964,11 @@
       const pad = Math.max((hi - lo) * 0.12, 1e-6);
       return [lo - pad, hi + pad];
     };
-    const titles = ['coherence \u2014 finds the break, ignores the fold',
-                    'dip (degrees) \u2014 which way the bed is heading',
-                    'curvature (1/km) \u2014 how fast the dip is changing'];
-    const cols = [SLATE, TEAL, CRIM];
-    [zs, ds, ks].forEach((arr, n) => {
+    const titles = ['1 \u00b7 dip (degrees) \u2014 which way the bed is heading',
+                    '2 \u00b7 coherence \u2014 finds the break, ignores the fold',
+                    '3 \u00b7 curvature (1/km) \u2014 how fast the dip is changing'];
+    const cols = [TEAL, SLATE, CRIM];
+    [ds, zs, ks].forEach((arr, n) => {
       const R = rects[n];
       const [lo, hi] = span(arr);
       const X = (ix) => R.x + (ix / (NG - 1)) * R.w;
@@ -895,7 +989,7 @@
         SEIS.dashedLine(ctx, fx, R.y, fx, R.y + R.h, 'rgba(132,22,23,.5)', [4, 4], 1.2);
       }
       SEIS.frame(ctx, R);
-      SEIS.axisLeft(ctx, R, lo, hi, null, (v) => v.toFixed(n === 0 ? 0 : 2),
+      SEIS.axisLeft(ctx, R, lo, hi, null, (v) => v.toFixed(n === 0 ? 1 : 2),
         { flip: true, ticks: 3 });
       SEIS.tag(ctx, R.x + 8, R.y + 12, titles[n], cols[n]);
       if (n === 2) {
@@ -1004,7 +1098,7 @@
 
   function drawStep3() {
     const w = rowWidth('row3', 3);
-    const h = clamp(Math.round(w * 0.94), 240, 330);
+    const h = clamp(Math.round(w * 0.94), 240, 330) + 52;
     const lim = Math.max(kRange(FIELD.k1), kRange(FIELD.k2));
     curvMap('c3k1', FIELD.k1, w, h, lim);
     curvMap('c3k2', FIELD.k2, w, h, lim);
@@ -1020,7 +1114,10 @@
                 Math.round(255 - (255 - col[1]) * v.m),
                 Math.round(255 - (255 - col[2]) * v.m)];
       });
-    }, markPoint);
+    }, markPoint, (ctx, R) => {
+      colorbar(ctx, R, (u) => (ATTR.MAPS.azimuth || ATTR.MAPS.dip)(u),
+        '\u221290\u00b0  E\u2013W', 'E\u2013W  +90\u00b0', 'lineament strike \u00b7 N\u2013S 0\u00b0');
+    });
 
     const i = S.py * NG + S.px;
     $('s3a').textContent = (kRange(FIELD.k1) * KM).toFixed(3) + ' km⁻¹';
@@ -1034,12 +1131,60 @@
 
   /* ------------------------------- step 4 ------------------------------ */
 
+  /* The same fold twice, flat and tilted. k₁ fits a circle to the bed, which
+     does not care about the tilt. k_pos measures the bend against the vertical,
+     which does. */
+  function drawCart4() {
+    const el = $('cCart4');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el);
+    const h = clamp(Math.round(w * 0.30), 200, 260);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const halfW = (w - 60) / 2;
+    [0, 1].forEach((side) => {
+      const R = { x: 24 + side * (halfW + 12), y: 40, w: halfW, h: h - 84 };
+      const A = R.h * 0.17, L = R.w * 0.8;
+      const tilt = side ? R.h * 0.34 : 0;
+      const mid = R.y + R.h * (side ? 0.36 : 0.5);
+      const yOf = (x) => mid - A * Math.sin(Math.PI * (x - R.x) / L * 2)
+        + tilt * ((x - R.x) / R.w);
+      ctx.save();
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.6; ctx.beginPath();
+      for (let x = R.x; x <= R.x + R.w; x += 2) {
+        const y = yOf(x); x === R.x ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      // the circle k1 fits: the same size on both sides
+      const xc = R.x + L / 4, yc = yOf(xc);
+      const rad = L * L / (Math.PI * Math.PI * A) / 4;
+      ctx.setLineDash([4, 3]); ctx.strokeStyle = CRIM; ctx.lineWidth = 1.6;
+      const m = tilt / R.w, hyp = Math.hypot(1, m);
+      ctx.beginPath();
+      ctx.arc(xc - rad * (-m / hyp), yc - rad * (-1 / hyp), rad, 0, 6.2832);
+      ctx.stroke(); ctx.setLineDash([]);
+      // what k_pos measures: the bend read straight down the page
+      ctx.strokeStyle = TEAL; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(xc, yc); ctx.lineTo(xc, R.y + R.h + 6); ctx.stroke();
+      ctx.restore();
+      SEIS.tag(ctx, R.x, R.y - 26, side ? 'the same fold, on a tilt' : 'flat-lying', INK);
+      SEIS.tag(ctx, R.x, R.y + R.h + 14,
+        side ? 'k\u2081 unchanged \u00b7 k_pos larger' : 'k\u2081 = k_pos', side ? CRIM : SLATE);
+    });
+    SEIS.tag(ctx, 24, h - 14, 'crimson: the circle k\u2081 fits to the bed \u00b7 ' +
+      'teal: the vertical direction k_pos measures against', SLATE);
+  }
+
   function drawStep4() {
-    const w = rowWidth('row4', 2);
-    const h = clamp(Math.round(w * 0.86), 250, 340);
+    drawCart4();
+    const w = rowWidth('row4', 3);
+    const h = clamp(Math.round(w * 0.94), 230, 320) + 52;
     const lim = Math.max(kRange(FIELD.k1), kRange(FIELD.kpos));
     curvMap('c4k1', FIELD.k1, w, h, lim);
     curvMap('c4kp', FIELD.kpos, w, h, lim);
+    const diff = new Float32Array(NG * NG);
+    for (let i = 0; i < diff.length; i++) diff[i] = FIELD.kpos[i] - FIELD.k1[i];
+    curvMap('c4df', diff, w, h, Math.max(kRange(diff), lim * 0.02));
 
     // how the two separate as the regional dip grows
     const wc = pw($('c4curve')), hc = 230;
@@ -1079,10 +1224,13 @@
   }
 
   // the strongest anticline on the map, measured both ways
+  /* Measured on the fold. The fault is a far sharper bend and would otherwise
+     be the answer to every question about the strongest anticline. */
   function crestOf(f) {
     let best = -Infinity, bi = 0;
     for (let iy = EDGE; iy < NG - EDGE; iy++) {
       for (let ix = EDGE; ix < NG - EDGE; ix++) {
+        if (Math.abs(ix - FAULTX) <= FAULTW * 3) continue;
         const i = iy * NG + ix;
         if (f.k1[i] > best) { best = f.k1[i]; bi = i; }
       }
@@ -1232,7 +1380,7 @@
     syncLabels();
     if (!$('p1').hidden || !$('p2').hidden || !$('p3').hidden
         || !$('p4').hidden || !$('p5').hidden) drawHeader();
-    if (visible('p1')) drawStep1();
+    if (visible('p1')) { drawCartoon(); drawStep1(); }
     if (visible('p2')) drawStep2();
     if (visible('p3')) drawStep3();
     if (visible('p4')) drawStep4();
