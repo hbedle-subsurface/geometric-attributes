@@ -55,6 +55,10 @@
               <label for="reg">Regional dip <span class="val" id="regV">0°</span></label>
               <input type="range" data-key="reg" id="reg" min="0" max="25" step="1" value="0">
             </div>
+            <div class="ctl">
+              <label for="flt">Fault throw <span class="val" id="fltV">30 m</span></label>
+              <input type="range" data-key="flt" id="flt" min="0" max="60" step="5" value="25">
+            </div>
           </div>
           <div class="ctl-col">
             <h2>The data</h2>
@@ -96,20 +100,36 @@
       <h3><span class="stepno">1</span>From dip to curvature</h3>
       <span class="hint">One profile, differentiated twice</span>
     </div>
-    <p class="lede">Here is a single profile cut through the structure, west to east. The top panel is the
-      reflector itself. The middle panel is its dip, which is what modules 01 to 03 spent their time
-      estimating. The bottom panel is curvature, which is simply how fast that dip is changing.</p>
-    <p class="lede">Watch what lines up. Where the reflector is steepest, dip is at its largest and curvature
-      passes through <b>zero</b>. Where the reflector crests or troughs, dip passes through zero and
-      curvature is at its largest. Curvature peaks where the dip is flat, which is exactly backwards from
-      most people's first guess.</p>
+    <p class="lede">Start with what you would actually be handed: a seismic line. It runs west to east
+      through the structure, and it has a gentle fold in it and one small fault. Everything else on this
+      page is derived from it.</p>
+    <p class="lede">Under it are three curves, and the point of this step is what each one responds to.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Coherence</b> asks whether neighboring traces look alike. It goes dark at the fault, where the
+        reflector is <em>broken</em>. Across the fold it sees nothing at all, because a fold is perfectly
+        continuous — nothing is broken, the beds simply bend.</li>
+      <li><b>Dip</b> is which way the reflector is heading, from modules 01 to 03. It is largest on the
+        flanks of the fold and passes through zero at the crest and the trough.</li>
+      <li><b>Curvature</b> is how fast that dip is <em>changing</em>. It lights up on the fold, which
+        coherence ignored completely, and it also reacts at the fault.</li>
+    </ul>
+    <p class="lede">That contrast is the whole reason curvature exists. <b>Coherence finds breaks;
+      curvature finds bends.</b> A fold that no coherence volume will ever show you is plain in curvature,
+      and that is where a lot of structural and stratigraphic detail lives!</p>
 
-    <canvas id="c1" aria-label="A structural profile with its dip and its curvature below it"></canvas>
+    <canvas id="c1" aria-label="A seismic line with coherence, dip and curvature curves beneath it"></canvas>
+
+    <p class="lede" style="margin-top:12px">Now look at <em>where</em> the curvature peaks sit relative to
+      the seismic. They are not on the steep flanks — the flanks are where curvature crosses zero. The peaks
+      are at the crest and the trough, exactly where the reflector is momentarily flat. A bright curvature
+      anomaly means a place where the dip is changing quickly, not a place that is steep, and that catches
+      almost everyone out the first time.</p>
 
     <div class="stats">
-      <div class="stat key"><span>Curvature at the crest</span><b id="s1a">—</b></div>
-      <div class="stat"><span>Curvature at the trough</span><b id="s1b">—</b></div>
+      <div class="stat key"><span>Curvature at the fold crest</span><b id="s1a">—</b></div>
+      <div class="stat"><span>Curvature at the fold trough</span><b id="s1b">—</b></div>
       <div class="stat"><span>Steepest dip on the profile</span><b id="s1c">—</b></div>
+      <div class="stat"><span>Lowest coherence on the line</span><b id="s1e">—</b></div>
       <div class="stat wide"><span>The sign convention</span><b id="s1d">—</b></div>
     </div>
     <div class="legend prose">
@@ -299,11 +319,22 @@
     <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
+        <li><b>Turn the fault off and watch coherence go blind.</b> In step 1, set the fault throw to 0
+          and look at the coherence curve, then put it back to 25 m.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">With no fault,
+            coherence sits at about 0.99 straight across the line — flat, featureless, nothing to
+            interpret — while curvature still maps the fold at 0.91 km⁻¹. Put the throw back and coherence
+            drops to about 0.84, and at 60 m it falls to 0.36. So coherence is responding to one thing only:
+            whether the reflector is broken. The fold is invisible to it at every throw setting, because a
+            fold is perfectly continuous. This is why the two attributes are run together rather than one
+            instead of the other — they answer different questions, and a structure can be dramatic in one
+            and absent from the other.</span></details></li>
         <li><b>Find where curvature is zero on a steeply dipping bed.</b> In step 1, set the fold relief to
           about 100 m and look at where the middle and bottom panels cross zero.
           <details class="reveal"><summary>Show what to look for</summary><span class="ans">The dip curve
             and the curvature curve cross zero in completely different places, a quarter of a wavelength
-            apart. Curvature is zero exactly where the bed is steepest, and largest where the bed is flat at
+            apart. On the default structure, curvature at the steepest point on the fold is 0.013 km⁻¹
+            against 0.913 km⁻¹ at the crest — a factor of seventy. Curvature is zero exactly where the bed is steepest, and largest where the bed is flat at
             a crest or a trough. This is the single most common misreading of a curvature volume: a bright
             curvature anomaly is not a steep place, it is a place where the dip is <em>changing</em>
             quickly.</span></details></li>
@@ -490,10 +521,12 @@
   const NG = 121;            // samples each way
   const BIN = 25;            // meters between them
   const EDGE = 10;           // samples ignored at the rim, see below
+  const FAULTX = 88;         // the fault cuts here
+  const FAULTW = 4;          // bins it is smeared over, as seismic would image it
 
   const DEF = {
     amp: 60, wave: 900, reg: 0, rough: 0, noise: 0, smooth: 3, az: 0,
-    px: 34, py: 46, tab: 'p1',
+    flt: 25, px: 34, py: 46, tab: 'p1',
   };
   let S = SEIS.readState(DEF);
 
@@ -545,6 +578,11 @@
           v += F.a * Math.exp(-0.5 * (u * u + w * w));
         }
         if (S.rough > 0) v += S.rough * 1.6 * tex[iy * NG + ix];
+        // a small normal fault, so there is a genuine break as well as bends
+        if (S.flt > 0) {
+          const u = clamp((ix - FAULTX + FAULTW / 2) / FAULTW, 0, 1);
+          v += S.flt * (u * u * (3 - 2 * u));      // smooth over the fault zone
+        }
         z[iy * NG + ix] = v;
       }
     }
@@ -753,20 +791,75 @@
 
   /* ------------------------------- step 1 ------------------------------ */
 
+  /* A synthetic seismic line down the profile, so the module starts from
+     something a beginner recognizes rather than from a depth curve. */
+  const SN = NG, ST = 190, SDT = 0.002, SVEL = 3000;
+  function buildLine() {
+    const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
+    const rnd = SEIS.mulberry32(31);
+    const beds = [];
+    for (let d = -60; d <= 60; d += 18) {
+      beds.push({ d, r: (rnd() < 0.5 ? -1 : 1) * (0.05 + rnd() * 0.06) });
+    }
+    const f = new Float32Array(SN * ST);
+    for (let ix = 0; ix < SN; ix++) {
+      // depth to two-way time, then to samples
+      const t0 = 90 + (Z[S.py * NG + ix] * 2 / SVEL) * 1000 / (SDT * 1000);
+      f.set(SEIS.traceFromSpikes(
+        beds.map((b) => ({ t: (t0 + b.d) * SDT, r: b.r })), 0, SDT, ST, wav), ix * ST);
+    }
+    let pk = 1e-6;
+    for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
+    return { f, pk };
+  }
+
+  // semblance between neighboring traces, steered along the local dip
+  function lineCoherence(L) {
+    const half = 2, kHalf = 8, J = 2 * half + 1, K = 2 * kHalf + 1;
+    const buf = new Float64Array(J * K);
+    const out = new Float32Array(SN);
+    for (let ix = 0; ix < SN; ix++) {
+      const dzdx = FIELD.p[S.py * NG + ix];
+      const pSamp = (dzdx * 2 / SVEL) * 1000 / (SDT * 1000) * (BIN / 1);
+      const t0 = Math.round(90 + (Z[S.py * NG + ix] * 2 / SVEL) * 1000 / (SDT * 1000));
+      ATTR.gatherAlongDip(L.f, SN, ST, ix, clamp(t0, kHalf, ST - kHalf - 1),
+        pSamp, half, kHalf, buf);
+      out[ix] = ATTR.semblance(buf, J, K);
+    }
+    return out;
+  }
+
   function drawStep1() {
     const w = pw($('c1'));
-    const h = clamp(Math.round(w * 0.62), 380, 520);
+    const h = clamp(Math.round(w * 0.80), 480, 660);
     const ctx = SEIS.fitCanvas($('c1'), w, h);
     ctx.clearRect(0, 0, w, h);
-    const gap = 16, ph = (h - 2 * gap - M.t - M.b) / 3;
+    const gap = 14;
+    const seisH = Math.round((h - M.t - M.b - 3 * gap) * 0.40);
+    const ph = (h - M.t - M.b - 3 * gap - seisH) / 3;
+    const RS = { x: M.l, y: M.t, w: w - M.l - M.r, h: seisH };
     const rects = [0, 1, 2].map((i) => ({
-      x: M.l, y: M.t + i * (ph + gap), w: w - M.l - M.r, h: ph,
+      x: M.l, y: M.t + seisH + gap + i * (ph + gap), w: w - M.l - M.r, h: ph,
     }));
 
+    const LINE = buildLine();
+    ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(RS.x, RS.y, RS.w, RS.h); ctx.restore();
+    SEIS.drawVarDensity(ctx, LINE.f, SN, ST, RS,
+      { cmap: SEIS.COLORMAPS.gray, clip: LINE.pk * 0.8 });
+    SEIS.frame(ctx, RS);
+    SEIS.axisLeft(ctx, RS, 0, (ST - 1) * SDT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 3 });
+    SEIS.tag(ctx, RS.x + 8, RS.y + 12, 'the seismic line', INK);
+    if (S.flt > 0) {
+      const fx = RS.x + (FAULTX / (SN - 1)) * RS.w;
+      SEIS.dashedLine(ctx, fx, RS.y, fx, RS.y + RS.h, 'rgba(132,22,23,.8)', [5, 4], 1.6);
+      SEIS.tag(ctx, Math.min(fx + 7, RS.x + RS.w - 46), RS.y + RS.h - 16, 'fault', CRIM);
+    }
+
+    const coh = lineCoherence(LINE);
     const zs = [], ds = [], ks = [];
     for (let ix = 0; ix < NG; ix++) {
       const i = S.py * NG + ix;
-      zs.push(Z[i]);
+      zs.push(coh[ix]);
       ds.push(Math.atan(FIELD.p[i]) / DEG);
       ks.push(FIELD.k1[i] * KM);
     }
@@ -776,8 +869,10 @@
       const pad = Math.max((hi - lo) * 0.12, 1e-6);
       return [lo - pad, hi + pad];
     };
-    const titles = ['the reflector (depth, m)', 'its dip (degrees)', 'its curvature (1/km)'];
-    const cols = [INK, TEAL, CRIM];
+    const titles = ['coherence \u2014 finds the break, ignores the fold',
+                    'dip (degrees) \u2014 which way the bed is heading',
+                    'curvature (1/km) \u2014 how fast the dip is changing'];
+    const cols = [SLATE, TEAL, CRIM];
     [zs, ds, ks].forEach((arr, n) => {
       const R = rects[n];
       const [lo, hi] = span(arr);
@@ -793,8 +888,11 @@
       ctx.beginPath();
       arr.forEach((v, ix) => { const x = X(ix), y = Y(v); ix ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
       ctx.stroke();
-      // the depth panel reads better with depth increasing downward
       ctx.restore();
+      if (S.flt > 0) {
+        const fx = R.x + (FAULTX / (NG - 1)) * R.w;
+        SEIS.dashedLine(ctx, fx, R.y, fx, R.y + R.h, 'rgba(132,22,23,.5)', [4, 4], 1.2);
+      }
       SEIS.frame(ctx, R);
       SEIS.axisLeft(ctx, R, lo, hi, null, (v) => v.toFixed(n === 0 ? 0 : 2),
         { flip: true, ticks: 3 });
@@ -806,20 +904,32 @@
     });
 
     // where the crest, the trough and the steepest point are
-    let iCrest = 0, iTrough = 0, iSteep = 0;
-    for (let ix = 2; ix < NG - 2; ix++) {
+    // measured on the fold, away from the fault, which is a far sharper bend
+    const offFault = (ix) => Math.abs(ix - FAULTX) > FAULTW * 2.5;
+    let iCrest = EDGE, iTrough = EDGE, iSteep = EDGE, iFault = FAULTX;
+    for (let ix = EDGE; ix < NG - EDGE; ix++) {
+      if (!offFault(ix)) continue;
       if (ks[ix] > ks[iCrest]) iCrest = ix;
       if (ks[ix] < ks[iTrough]) iTrough = ix;
       if (Math.abs(ds[ix]) > Math.abs(ds[iSteep])) iSteep = ix;
     }
+    for (let ix = FAULTX - FAULTW * 2; ix <= FAULTX + FAULTW * 2; ix++) {
+      if (ix > 0 && ix < NG && Math.abs(ks[ix]) > Math.abs(ks[iFault])) iFault = ix;
+    }
+    let cohMin = 1;
+    for (let ix = EDGE; ix < NG - EDGE; ix++) cohMin = Math.min(cohMin, zs[ix]);
     $('s1a').textContent = ks[iCrest].toFixed(3) + ' km⁻¹';
     $('s1b').textContent = ks[iTrough].toFixed(3) + ' km⁻¹';
+    $('s1e').textContent = cohMin.toFixed(3) + ' at the fault';
     $('s1c').textContent = Math.abs(ds[iSteep]).toFixed(2) + '° at ' +
       (iSteep * BIN / 1000).toFixed(2) + ' km';
     $('s1d').textContent = S.amp === 0
       ? 'A flat reflector has zero curvature everywhere, however you tilt it.'
-      : 'Curvature is ' + Math.abs(ks[iSteep]).toFixed(3) + ' km⁻¹ where the bed is steepest, and ' +
-        Math.abs(ks[iCrest]).toFixed(3) + ' km⁻¹ at the crest. Steep is not the same as curved.';
+      : 'On the fold, curvature is ' + Math.abs(ks[iSteep]).toFixed(3) +
+        ' km⁻¹ where the bed is steepest and ' + Math.abs(ks[iCrest]).toFixed(3) +
+        ' km⁻¹ at the crest. Steep is not the same as curved.' +
+        (S.flt > 0 ? ' At the fault curvature reaches ' + Math.abs(ks[iFault]).toFixed(2) +
+          ' km⁻¹, because a fault is a very sharp bend as well as a break.' : '');
   }
 
   /* ------------------------------- step 2 ------------------------------ */
@@ -1069,11 +1179,12 @@
     $('ampV').textContent = S.amp === 0 ? 'flat' : S.amp + ' m';
     $('waveV').textContent = S.wave + ' m';
     $('regV').textContent = S.reg + '°';
+    $('fltV').textContent = S.flt === 0 ? 'none' : S.flt + ' m';
     $('roughV').textContent = S.rough === 0 ? 'none' : S.rough + '%';
     $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
     $('smoothV').textContent = S.smooth + (S.smooth === 1 ? ' trace' : ' traces');
     $('azV').textContent = S.az + '°';
-    ['amp', 'wave', 'reg', 'rough', 'noise', 'smooth'].forEach((k) => {
+    ['amp', 'wave', 'reg', 'flt', 'rough', 'noise', 'smooth'].forEach((k) => {
       const el = $(k);
       if (el && parseFloat(el.value) !== S[k]) el.value = S[k];
     });
