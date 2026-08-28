@@ -107,6 +107,7 @@
     <button role="tab" data-tab="p4" aria-selected="false">4 · One equation</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · Sobel</button>
     <button role="tab" data-tab="p6" aria-selected="false">6 · Compare</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
@@ -364,13 +365,21 @@
 
         <p class="lede">
       Now the payoff. One synthetic line, flat-lying so that steering is not a factor, divided into five
-      zones of forty traces each. The zones are boxed and named along the top. Every zone has a sharp vertical edge down
-      its middle, and every edge is a different kind of problem: zone 1 has no problem at all and is the
+      zones of forty traces each. The zones are boxed and named along the top. Every zone has a sharp edge down its
+      middle — vertical in zones 2, 3 and 4, and a realistically dipping fault plane in zone 5 — and every edge is a different kind of problem: zone 1 has no problem at all and is the
       control, zone 2 changes amplitude across the edge without changing the waveform, zone 3 changes the
       waveform without changing its size, zone 4 has noise added to its right-hand half, and zone 5 is a
       fault with 16 ms of throw. Every attribute is computed at every sample with the same window.</p>
 
     <canvas id="c6seis" aria-label="The five-zone synthetic line"></canvas>
+
+    <div class="ctl" style="margin:16px 0 10px">
+      <label>Draw the seismic as</label>
+      <div class="seg" role="group" aria-label="Display style for the zone panel">
+        <button type="button" id="zWig" aria-pressed="true">Wiggle</button>
+        <button type="button" id="zCol" aria-pressed="false">Color</button>
+      </div>
+    </div>
 
     <div class="ctl" style="margin:16px 0 10px">
       <label>Attribute displayed</label>
@@ -385,9 +394,6 @@
 
     <canvas id="c6attr" aria-label="The selected attribute over the five-zone line"></canvas>
 
-    <p class="sublabel" style="margin-top:16px"><b>·</b> All five attributes at each edge
-      <span class="note">taller is more coherent, except Sobel, which is an edge response</span></p>
-    <canvas id="c6bars" aria-label="Every attribute at the edge of every zone"></canvas>
 
     <div class="legend prose">
       <span>Semblance, eigenstructure and energy ratio run 0 to 1 and share a gray scale, so they can be
@@ -404,13 +410,74 @@
     </div>
     </section>
 
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">?</span>Why the choice of algorithm is yours to make</h3>
+      <span class="hint">What these attributes are used for, and how they mislead</span>
+    </div>
+    <p class="lede">Coherence is the workhorse of structural interpretation. It is what turns a volume into
+      a fault map, and on a time slice it does something no vertical section can: it shows a fault's
+      <em>trace</em>, the line it makes in map view, so you can follow it, see where it branches, and see
+      how it relates to its neighbors.</p>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      What it is used for</h2>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Faults.</b> Mapping them, counting them, and feeding them to an automatic fault extractor. Most
+        fault-surface software takes a discontinuity volume as its input, so the quality of your coherence
+        sets the ceiling on the quality of the fault framework.</li>
+      <li><b>Channels, fans and reef margins.</b> A channel edge is a discontinuity even where there is no
+        structural relief at all, which is why a coherence time slice can show a meander belt in a single
+        picture.</li>
+      <li><b>Data quality control.</b> Acquisition footprint, bad traces, migration smiles and statics
+        problems all show up as coherence anomalies, and they show up in patterns — regular stripes,
+        survey-edge effects, a single dark trace — that geology does not make.</li>
+      <li><b>As an input to other things.</b> Coherent energy from the same calculation drives amplitude
+        curvature in module 07, and coherence is a standard input to fault-likelihood volumes and to
+        structure-oriented filtering.</li>
+    </ul>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      Which one to run</h2>
+    <p class="lede">This is the practical payoff of the whole module. The dividing line is
+      <b>amplitude</b>. Energy ratio and eigenstructure are blind to a pure change of amplitude; semblance
+      and Sobel are not. So:</p>
+    <ul class="lede" style="padding-left:20px">
+      <li>Mapping <b>faults</b>, especially where reflection strength fades into the fault zone: the
+        eigenvalue-based attributes hold the edge together where semblance blurs it.</li>
+      <li>Mapping <b>internal architecture</b> in a thin channel, where the waveform is constant and only
+        the amplitude changes: energy ratio will show you nothing and semblance will show you the edges.
+        This is not a subtlety — step 6 has energy ratio reading exactly 1.000 at an amplitude edge that
+        semblance calls 0.786.</li>
+      <li>Not sure: run two and compare. Where they agree you have a discontinuity in both waveform and
+        amplitude; where they disagree, the disagreement itself tells you which one it is.</li>
+    </ul>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      And the discipline that goes with it</h2>
+    <p class="lede">Low coherence means one thing only: the traces in this window stopped looking alike.
+      Zone 4 in step 6 is a reminder worth keeping — every attribute goes dark there, and there is no fault,
+      no stratigraphic edge and no geology of any kind, only noise. Nothing in the number distinguishes it
+      from the fault two zones along.</p>
+    <p class="lede">So a dark lineament earns its interpretation from context rather than from its value:
+      whether it is planar, whether it persists across many time slices, whether it lines up with structure
+      you can see on the section, and whether it behaves the way the different algorithms predict it should.
+      A number without its algorithm, its window and its dip field is not interpretable, which is the
+      sentence this whole module exists to earn.</p>
+    <div class="legend prose">
+      <span>Worth saying plainly: none of these attributes finds faults. They find places where neighboring
+        traces disagree. Deciding which of those places are faults is the interpretation, and it is
+        yours.</span>
+    </div>
+  </section>
+
   <section class="tabpane" id="pe" role="tabpanel" hidden>
 <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
         <li><b>Make the two attributes disagree completely.</b> In step 2, set the amplitude change to 65%
           and leave the waveform change at zero. Then read semblance and eigenstructure in step 4.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Eigenstructure and energy ratio read exactly 1.000 while semblance reads 0.896.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Eigenstructure and energy ratio read exactly 1.000 while semblance reads 0.896.
             Push the amplitude change to 80% and semblance falls to 0.818 while the other two do not move
             at all.
             This is not a bug in either. If every trace is the same waveform at a different size, the whole
@@ -421,7 +488,7 @@
             independent of amplitude, while semblance is sensitive to both.</span></details></li>
         <li><b>Watch the eigenvalues collapse to one.</b> With the amplitude change still at 65%, look at
           the eigenvalue panel in step 3.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">λ₁ holds essentially all the energy and λ₂ onwards are at the level of rounding
+          <details class="reveal"><summary>Hint</summary><span class="ans">λ₁ holds essentially all the energy and λ₂ onwards are at the level of rounding
             error: the readout shows λ₁ holding 100.00% of the energy and λ₂ holding 0.00%. The matrix is
             rank one. That is the mathematical statement of "same waveform, different size", and it is why
             the ratio λ₁ / Σλ cannot see the amplitude change. Now add a waveform
@@ -429,7 +496,7 @@
         <li><b>Turn the gain up and down.</b> First set the waveform change to about 40°, so that there is
           something for the variance to measure. Then move the overall amplitude slider from 0.2 to 3 and
           watch the three numbers underneath.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Semblance holds at 0.9405 and normalized variance at 0.0590 through the whole
+          <details class="reveal"><summary>Hint</summary><span class="ans">Semblance holds at 0.9405 and normalized variance at 0.0590 through the whole
             sweep, because both are ratios of energies and the scale cancels exactly. The raw variance goes
             from 3.5 × 10⁻⁷ to 8.0 × 10⁻⁵, a factor of 225, which is 15 squared. That is why raw statistical
             variance is not usable as a seismic attribute and why packages displaying "variance" display a
@@ -437,7 +504,7 @@
             coherent.</span></details></li>
         <li><b>Raise L and watch coherence appear from nowhere.</b> In step 4, set the noise in step 2 to
           about 40% and then move L from 1 to 3.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Energy ratio climbs from 0.78 at L = 1 to 0.96 at L = 2 and 0.99 at L = 3,
+          <details class="reveal"><summary>Hint</summary><span class="ans">Energy ratio climbs from 0.78 at L = 1 to 0.96 at L = 2 and 0.99 at L = 3,
             without the data changing at all. Keeping more principal components means calling more of the window "signal", so of course
             more of it looks coherent. AASPI notes that for small windows of 5 or 9 traces the first
             component usually represents more than 95% of the variability, and that L = 2 or 3 is intended
@@ -445,8 +512,8 @@
             you were looking for.</span></details></li>
         <li><b>Find the case where they rank the opposite way round.</b> In step 6, compare zone 2 with
           zone 5 across all five attributes.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">At the amplitude edge semblance reads 0.79 and energy ratio 1.00: semblance sees
-            an edge, energy ratio sees nothing. At the fault semblance reads 0.29 and energy ratio 0.88:
+          <details class="reveal"><summary>Hint</summary><span class="ans">At the amplitude edge semblance reads 0.79 and energy ratio 1.00: semblance sees
+            an edge, energy ratio sees nothing. At the fault semblance reads 0.46 and energy ratio 0.85:
             both see something, but semblance far more strongly. So the two attributes do not simply differ
             in sharpness, they order the two features differently. If you are mapping architectural elements
             inside a thin channel, where the waveform is constant and only amplitude changes, energy ratio
@@ -454,7 +521,7 @@
             AASPI identifies.</span></details></li>
         <li><b>Check that low coherence is not the same as a fault.</b> In step 6, look at the noise zone in
           each attribute.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Every attribute goes dark in zone 4, and there is no fault there, no
+          <details class="reveal"><summary>Hint</summary><span class="ans">Every attribute goes dark in zone 4, and there is no fault there, no
             stratigraphic edge and no geology of any kind — only noise. Nothing in the number distinguishes
             it from zone 5. That distinction has to come from you, from the seismic itself, and from whether
             the anomaly is planar, laterally persistent and consistent between attributes.</span></details></li>
@@ -917,6 +984,12 @@
      ===================================================================== */
 
   const ZN = 200, ZT = 170, ZW = 40;
+  /* The fault in zone 5 dips rather than standing vertical, so where it cuts
+     each bed depends on that bed's time. Anything that samples the fault has to
+     follow it, which is why this lives out here rather than inside the builder. */
+  const FSLOPE = 1 / 8.5;                               // traces per sample
+  // 170 samples of section drifts it 20 traces, which keeps it inside the zone
+  const faultAt = (t) => 4 * ZW + 10 + FSLOPE * t;
   let ZF = null, ZH = null, ZPEAK = 1, ZATT = null;
 
   function buildZones() {
@@ -928,12 +1001,13 @@
     const f = new Float32Array(ZN * ZT);
     for (let ix = 0; ix < ZN; ix++) {
       const z = Math.floor(ix / ZW), right = (ix % ZW) >= ZW / 2;
-      let amp = 1, ph = 0, sh = 0;
+      let amp = 1, ph = 0;
       if (z === 1 && right) amp = 0.35;
       if (z === 2 && right) ph = 90;
-      if (z === 4 && right) sh = 8;                     // 16 ms of throw
-      f.set(SEIS.traceFromSpikes(beds.map((b) => ({ t: (b.it + sh) * DT, r: b.r * amp })),
-        0, DT, ZT, wavAt(ph)), ix * ZT);
+      f.set(SEIS.traceFromSpikes(beds.map((b) => {
+        const w = z === 4 ? clamp(ix - faultAt(b.it) + 0.5, 0, 1) : 0;
+        return { t: (b.it + w * 8) * DT, r: b.r * amp };   // 16 ms of throw
+      }), 0, DT, ZT, wavAt(ph)), ix * ZT);
     }
     let pk = 1e-6;
     for (let i = 0; i < f.length; i++) pk = Math.max(pk, Math.abs(f[i]));
@@ -990,10 +1064,13 @@
   function zoneEdgeValues() {
     const rows = [];
     for (let z = 0; z < 5; z++) {
-      const a = Math.round((z * ZW + ZW / 2) / ZATT.dec);
       const acc = { semb: 0, eig: 0, er: 0, var: 0, sob: 0 };
       let n = 0;
       for (let b = 12; b < ZATT.gt - 12; b++) {
+        const it = b * ZATT.dec;
+        // zone 5's edge leans; the rest stand straight down the zone center
+        const ix = z === 4 ? faultAt(it - 4) : z * ZW + ZW / 2;
+        const a = clamp(Math.round(ix / ZATT.dec), 0, ZATT.gx - 1);
         ['semb', 'eig', 'er', 'var', 'sob'].forEach((k) => { acc[k] += ZATT[k][a * ZATT.gt + b]; });
         n++;
       }
@@ -1395,20 +1472,6 @@
       isSobel ? ATTR.MAPS.scan : ATTR.MAPS.coherence);
 
     const rows = zoneEdgeValues();
-    const wb = pw($('c6bars'));
-    const flat = [];
-    ['semb', 'eig', 'er', 'var', 'sob'].forEach((k) => {
-      const nm = { semb: 'semblance', eig: 'eigenstructure', er: 'energy ratio',
-                   var: 'variance', sob: 'Sobel edge' }[k];
-      rows.forEach((r, z) => {
-        if (z === 1 || z === 4) {
-          flat.push({ label: nm + '  \u00b7  ' + ZONE_NAMES[z], v: r[k],
-                      map: k === 'var' || k === 'sob' ? ATTR.MAPS.coherence : ATTR.MAPS.scan });
-        }
-      });
-    });
-    barChart('c6bars', flat, wb, 26 * flat.length + 24, { labW: 252 });
-
     const z2 = rows[1], z5 = rows[4];
     $('s6a').textContent = 'semblance ' + z2.semb.toFixed(3) + ' \u00b7 eigenstructure ' +
       z2.eig.toFixed(3) + ' \u00b7 energy ratio ' + z2.er.toFixed(3) +
@@ -1485,8 +1548,12 @@
     setVal('kHalf', '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms');
     setVal('npc', String(S.npc));
     allOf('npc').forEach((el) => { el.max = 2 * S.half + 1; });
-    if ($('dWig')) $('dWig').setAttribute('aria-pressed', S.disp === 'wiggle');
-    if ($('dCol')) $('dCol').setAttribute('aria-pressed', S.disp === 'color');
+    ['dWig', 'zWig'].forEach((q) => {
+      if ($(q)) $(q).setAttribute('aria-pressed', S.disp === 'wiggle');
+    });
+    ['dCol', 'zCol'].forEach((q) => {
+      if ($(q)) $(q).setAttribute('aria-pressed', S.disp === 'color');
+    });
     ['amp', 'phase', 'noise', 'gain', 'half', 'kHalf', 'npc'].forEach((k) => {
       allOf(k).forEach((el) => { if (parseFloat(el.value) !== S[k]) el.value = S[k]; });
     });
@@ -1567,6 +1634,8 @@
   };
   $('dWig').addEventListener('click', () => setDisp('wiggle'));
   $('dCol').addEventListener('click', () => setDisp('color'));
+  $('zWig').addEventListener('click', () => setDisp('wiggle'));
+  $('zCol').addEventListener('click', () => setDisp('color'));
 
   $('resetBtn').addEventListener('click', () => {
     S = Object.assign({}, DEF);
@@ -1575,11 +1644,11 @@
 
   /* Tabs. Canvases in a hidden pane have no width, so anything drawn while
      hidden comes out at zero size; every pane is redrawn on the way in. */
-  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'pe', 'pk', 'pt', 'pm'];
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'pw', 'pe', 'pk', 'pt', 'pm'];
   const STEPNAMES = {
     p1: 'Two traces', p2: 'A window', p3: 'The matrix', p4: 'One equation',
-    p5: 'Sobel', p6: 'Compare', pe: 'Exercises', pk: 'Key points',
-    pt: 'Terminology', pm: 'Method',
+    p5: 'Sobel', p6: 'Compare', pw: 'Why it matters',
+    pe: 'Exercises', pk: 'Key points', pt: 'Terminology', pm: 'Method',
   };
 
   /* Every pane gets its own forward and back control. Without it the most
