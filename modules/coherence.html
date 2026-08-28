@@ -381,6 +381,12 @@
       </div>
     </div>
 
+    <div class="ctl" style="margin:16px 0 10px;max-width:520px">
+      <label for="npc6">Principal components kept, L
+        <span class="val" data-val="npc" id="npc6V">1</span></label>
+      <input type="range" data-key="npc" id="npc6" min="1" max="5" step="1" value="1">
+    </div>
+
     <div class="ctl" style="margin:16px 0 10px">
       <label>Attribute displayed</label>
       <div class="seg" role="group" aria-label="Which attribute to display">
@@ -394,6 +400,22 @@
 
     <canvas id="c6attr" aria-label="The selected attribute over the five-zone line"></canvas>
 
+
+    <div class="legend prose">
+      <span><b>Two of these five are copies, and that is the point.</b> Variance here is defined as one
+        minus semblance, so it correlates with semblance at exactly &minus;1.000: the same volume with the
+        sign flipped, adding no information whatever. Energy ratio at <b>L = 1</b> is mathematically
+        identical to eigenstructure &mdash; not similar, identical, agreeing to the last bit at every one of
+        the 7,500 samples on this line. Raise L above 1 with the slider above and they separate: at the fault,
+        energy ratio climbs 0.851, 0.967, 1.000 for L = 1, 2, 3 while eigenstructure stays at 0.851, and
+        across the whole line their correlation falls to 0.65. Zone 2 is the exception and worth pausing on
+        &mdash; its covariance matrix is rank one, so there is no second eigenvalue for a second component
+        to keep, and no value of L changes anything. Sobel is the interesting near-copy: allowing for its
+        opposite sign it tracks semblance at 0.95, because both are amplitude-sensitive, so on this data it
+        carries almost the same information by a completely different route. The genuinely independent pair
+        is semblance against eigenstructure, at 0.86. Running five attributes does not buy you five
+        opinions.</span>
+    </div>
 
     <div class="legend prose">
       <span>Semblance, eigenstructure and energy ratio run 0 to 1 and share a gray scale, so they can be
