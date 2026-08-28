@@ -84,6 +84,13 @@
           <label for="kHalf">Window height <span class="val" data-val="kHalf" id="kHalfV">± 16 ms</span></label>
           <input type="range" data-key="kHalf" id="kHalf" min="3" max="20" step="1" value="8">
         </div>
+        <div class="ctl">
+          <label>Draw traces as</label>
+          <div class="seg" role="group" aria-label="Display style">
+            <button type="button" id="dWig" aria-pressed="true">Wiggle</button>
+            <button type="button" id="dCol" aria-pressed="false">Color</button>
+          </div>
+        </div>
         <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
       </div>
     </div>
@@ -135,12 +142,12 @@
       they come apart they do not.</p>
 
     <div class="stats">
-      <div class="stat"><span>Normalised crosscorrelation at zero lag</span><b id="s1a">—</b></div>
+      <div class="stat"><span>Normalized crosscorrelation at zero lag</span><b id="s1a">—</b></div>
       <div class="stat"><span>Semblance of the pair</span><b id="s1b">—</b></div>
       <div class="stat wide"><span>What the two numbers disagree about</span><b id="s1c">—</b></div>
     </div>
     <div class="legend prose">
-      <span>Crosscorrelation is normalised by the energy of each trace separately, so it ignores a change of
+      <span>Crosscorrelation is normalized by the energy of each trace separately, so it ignores a change of
         scale. Semblance is not, so it does not. Neither is right; they answer different questions. That
         distinction is the whole of this module.</span>
     </div>
@@ -182,14 +189,14 @@
 
     <div class="stats">
       <div class="stat key"><span>Semblance</span><b id="s2a">—</b></div>
-      <div class="stat"><span>Variance (the normalised form, 1 − semblance)</span><b id="s2b">—</b></div>
+      <div class="stat"><span>Variance (the normalized form, 1 − semblance)</span><b id="s2b">—</b></div>
       <div class="stat"><span>Raw variance about the mean trace</span><b id="s2c">—</b></div>
       <div class="stat wide"><span>Why the raw number is a problem</span><b id="s2d">—</b></div>
     </div>
     <div class="legend prose">
       <span><b>A note on the word.</b> Semblance and variance here are two ways of saying the same thing:
         variance is what is left over when semblance is subtracted from one, so a coherent window has high
-        semblance and low variance. Packages that display a "variance" attribute display this normalised
+        semblance and low variance. Packages that display a "variance" attribute display this normalized
         form. The raw statistical variance shown above is a different quantity — it depends on how loud the
         data is, not just on how well the traces match — which is why it is not used directly.</span>
     </div>
@@ -274,8 +281,14 @@
         set of weights, and the answer is <b>eigenstructure coherence</b>. Since no proposal can explain
         more, this is the largest value the equation can return, and it works out to λ₁ divided by the sum
         of the eigenvalues.</li>
-      <li>Propose the actual trace amplitudes at the analysis point and you get the third option AASPI
-        offers. Try each in turn below and watch the weights in panel 1 change shape.</li>
+      <li>Propose the <b>center sample vector</b> and you get the third option AASPI offers. That name
+        needs unpacking. Pick the one sample you are actually computing the attribute at, and read the
+        amplitude of every trace in the window at that instant — five traces gives five numbers. Those
+        numbers are the center sample vector. Using them as r asks a pointed question: how much of the whole
+        window looks like this one instant across the traces? It costs nothing to compute, because you
+        already have those amplitudes, whereas the first eigenvector has to be solved for.</li>
+      <li>Try each in turn and watch the weights in panel 1 change shape. On clean data all three land in
+        much the same place; it is when the window is noisy or the amplitudes vary that they separate.</li>
     </ul>
 
     <div class="ctl" style="margin-bottom:14px">
@@ -283,7 +296,7 @@
       <div class="seg" role="group" aria-label="Which test vector">
         <button type="button" data-r="const">Constant → semblance</button>
         <button type="button" data-r="eig">First eigenvector → eigenstructure</button>
-        <button type="button" data-r="centre">Centre sample vector</button>
+        <button type="button" data-r="center">Center sample vector</button>
       </div>
     </div>
 
@@ -328,7 +341,7 @@
         <p class="lede">
       This one is the odd one out, and it is worth knowing why. The Sobel filter comes from image
       processing, not from seismic statistics. AASPI describes its version as the magnitude of the inline and crossline derivatives of amplitude along structural dip,
-      normalised by the same derivatives taken on absolute values. It never builds a covariance matrix and
+      normalized by the same derivatives taken on absolute values. It never builds a covariance matrix and
       it has no concept of a common waveform. It simply asks how fast amplitude is changing sideways, which
       makes it respond strongly to a change in size that the eigenvalue-based attributes ignore entirely.</p>
 
@@ -377,10 +390,10 @@
     <canvas id="c6bars" aria-label="Every attribute at the edge of every zone"></canvas>
 
     <div class="legend prose">
-      <span>Semblance, eigenstructure and energy ratio run 0 to 1 and share a grey scale, so they can be
+      <span>Semblance, eigenstructure and energy ratio run 0 to 1 and share a gray scale, so they can be
         compared directly. Variance runs the other way, dark where the others are light, because it is what
         is left when semblance is taken from one. The Sobel panel cannot: it is an edge response, high where the others
-        are low, and it is plotted on its own scale. Putting a common colour bar on attributes that do not
+        are low, and it is plotted on its own scale. Putting a common color bar on attributes that do not
         share a range or a sign is one of the easiest ways to mislead yourself.</span>
     </div>
 
@@ -416,11 +429,11 @@
         <li><b>Turn the gain up and down.</b> First set the waveform change to about 40°, so that there is
           something for the variance to measure. Then move the overall amplitude slider from 0.2 to 3 and
           watch the three numbers underneath.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Semblance holds at 0.9405 and normalised variance at 0.0590 through the whole
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Semblance holds at 0.9405 and normalized variance at 0.0590 through the whole
             sweep, because both are ratios of energies and the scale cancels exactly. The raw variance goes
             from 3.5 × 10⁻⁷ to 8.0 × 10⁻⁵, a factor of 225, which is 15 squared. That is why raw statistical
             variance is not usable as a seismic attribute and why packages displaying "variance" display a
-            normalised form. It is also the reminder that a bright reflector and a dim one can be equally
+            normalized form. It is also the reminder that a bright reflector and a dim one can be equally
             coherent.</span></details></li>
         <li><b>Raise L and watch coherence appear from nowhere.</b> In step 4, set the noise in step 2 to
           about 40% and then move L from 1 to 3.
@@ -458,14 +471,14 @@
         <li><b>Most of them are one equation with a different test vector.</b> Outer-product similarity with
           a constant vector is semblance; with the first eigenvector it is eigenstructure.</li>
         <li><b>The dividing line is amplitude.</b> Eigenstructure and energy ratio are blind to a pure change
-          of amplitude; semblance and Sobel are not. Which behaviour you want depends on what you are
+          of amplitude; semblance and Sobel are not. Which behavior you want depends on what you are
           mapping.</li>
         <li><b>A number without its algorithm is not interpretable.</b> "Coherence is 0.8" says nothing
           until you know which one, over what window, with what L.</li>
         <li><b>Low coherence means a local loss of waveform similarity, nothing more.</b> Faults are one
           cause. Noise, acquisition footprint, processing artefacts, amplitude changes, tuning effects and a
           poor dip estimate all produce it too.</li>
-        <li><b>Do not share a colour bar between attributes that do not share a range or a sign.</b> An edge
+        <li><b>Do not share a color bar between attributes that do not share a range or a sign.</b> An edge
           response and a similarity are not the same quantity even when both happen to run 0 to 1.</li>
       </ul>
       </div>
@@ -526,9 +539,9 @@
       quantity, but the documentation does not say so, and rather than guess, both are displayed.</p>
     <p><b>Variance is not an AASPI attribute.</b> Program similarity3d does not output one. AASPI lists
       variance among the names the coherence family has acquired, some algorithmic and some simply renaming.
-      The normalised form shown here follows the generic usage described in the SEG Wiki entry on coherence,
+      The normalized form shown here follows the generic usage described in the SEG Wiki entry on coherence,
       where variance is mathematically close to 1 − semblance. The raw statistical variance is shown
-      alongside it only to demonstrate why the normalised form is the one that gets used.</p>
+      alongside it only to demonstrate why the normalized form is the one that gets used.</p>
     <p><b>Other simplifications.</b> The line in step 6 is flat, so dip steering is not a factor and the
       module can concentrate on the comparison; module 03 covers what happens otherwise. The multispectral
       forms, the amplitude gradients, the Laplacian filters, the data-adaptive windows and the
@@ -751,7 +764,7 @@
   const EXC = 0.45;
 
   const DEF = {
-    tab: 'p1', kase: 0, amp: 0, phase: 0, noise: 0, gain: 1,
+    tab: 'p1', kase: 0, amp: 0, phase: 0, noise: 0, gain: 1, disp: 'wiggle',
     half: 2, kHalf: 8, npc: 1, rkind: 'const', attr: 'semb',
   };
   let S = SEIS.readState(DEF);
@@ -857,7 +870,7 @@
     return { d, dH, J, K };
   }
 
-  function analyse(w, L) {
+  function analyze(w, L) {
     const C = covarianceAnalytic(w.d, w.dH, w.J, w.K);
     const E = totalEnergy(C, w.J);
     const e = jacobiEigen(C, w.J);
@@ -870,7 +883,7 @@
     };
   }
 
-  // raw and normalised variance about the mean trace, for step 2
+  // raw and normalized variance about the mean trace, for step 2
   function variances(w) {
     let sv = 0, se = 0;
     for (let k = 0; k < w.K; k++) {
@@ -887,7 +900,7 @@
 
   function testVector(kind, w, e) {
     if (kind === 'eig') return e.vectors[0];
-    if (kind === 'centre') {
+    if (kind === 'center') {
       const r = new Float64Array(w.J);
       const kc = S.kHalf;
       let n = 0;
@@ -994,10 +1007,20 @@
      DRAWING
      ===================================================================== */
 
-  const pw = (el) => (el && el.parentElement ? el.parentElement.clientWidth : 900);
+  /* clientWidth includes padding, and the tab pane has 26 px of it on each
+     side, so sizing a canvas to it pushed every full-width panel off the
+     right-hand edge. Measure the content box instead. */
+  function pw(el) {
+    const par = el && el.parentElement;
+    if (!par) return 900;
+    const cs = window.getComputedStyle(par);
+    const inner = par.clientWidth
+      - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+    return Math.max(240, Math.floor(inner));
+  }
   function rowWidth(rowId, n) {
     const row = $(rowId);
-    const total = row ? row.clientWidth : 800;
+    const total = row ? pw(row.firstElementChild || row) : 800;
     const w = window.innerWidth <= 700
       ? Math.max(240, total)
       : Math.max(180, Math.floor((total - 10 * (n - 1)) / n));
@@ -1013,8 +1036,12 @@
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
     const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
-    ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
-    SEIS.drawWiggle(ctx, arr, nTr, nt, R, { clip: peak, excursion: EXC, lineWidth: 1 });
+    if (S.disp === 'color') {
+      SEIS.drawVarDensity(ctx, arr, nTr, nt, R, { cmap: SEIS.COLORMAPS.gray, clip: peak * 0.9 });
+    } else {
+      ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+      SEIS.drawWiggle(ctx, arr, nTr, nt, R, { clip: peak, excursion: EXC, lineWidth: 1 });
+    }
     const X = (i) => R.x + ((i + 0.5) / nTr) * R.w;
     const Y = (it) => R.y + (it / (nt - 1)) * R.h;
     if (extras) extras(ctx, R, X, Y);
@@ -1069,7 +1096,7 @@
 
   /* Two traces side by side leaves most of a wide panel empty and makes the
      reader do the comparing by eye across a gap. Laid on the same axis in two
-     colours, the answer is immediate: where the lines sit on top of each other
+     colors, the answer is immediate: where the lines sit on top of each other
      the traces agree, and where they separate they do not. */
   function drawStep1() {
     const w = pw($('c1'));
@@ -1088,10 +1115,10 @@
     const Y = (v) => R.y + R.h / 2 - (v / (pk * 1.12)) * (R.h / 2);
     SEIS.dashedLine(ctx, R.x, Y(0), R.x + R.w, Y(0), 'rgba(22,25,28,.25)', [4, 4], 1);
 
-    const line = (arr, colour, width) => {
+    const line = (arr, color, width) => {
       ctx.save();
       ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-      ctx.strokeStyle = colour; ctx.lineWidth = width; ctx.lineJoin = 'round';
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin = 'round';
       ctx.beginPath();
       for (let i = 0; i < T1N; i++) {
         const x = X(i), y = Y(arr[i]);
@@ -1135,7 +1162,7 @@
     $('s2c').textContent = v.raw.toExponential(3);
     $('s2d').textContent = 'Multiply every trace by two and the raw number goes up four times, ' +
       'though nothing about the continuity of the reflector has changed. That is why the ' +
-      'normalised form is the one that gets displayed.';
+      'normalized form is the one that gets displayed.';
   }
 
   function drawStep3(A) {
@@ -1348,11 +1375,15 @@
     if (!ZATT) return;
     const w = pw($('c6seis'));
     const h = clamp(Math.round(w * 0.32), 220, 290);
-    // 200 traces of wiggle is a smear at this width; variable density reads
     const sctx = SEIS.fitCanvas($('c6seis'), w, h);
     sctx.clearRect(0, 0, w, h);
     const SR = { x: MZ.l, y: MZ.t, w: w - MZ.l - MZ.r, h: h - MZ.t - MZ.b };
-    SEIS.drawVarDensity(sctx, ZF, ZN, ZT, SR, { cmap: SEIS.COLORMAPS.gray, clip: ZPEAK * 0.8 });
+    if (S.disp === 'color') {
+      SEIS.drawVarDensity(sctx, ZF, ZN, ZT, SR, { cmap: SEIS.COLORMAPS.gray, clip: ZPEAK * 0.8 });
+    } else {
+      sctx.save(); sctx.fillStyle = '#fff'; sctx.fillRect(SR.x, SR.y, SR.w, SR.h); sctx.restore();
+      SEIS.drawWiggle(sctx, ZF, ZN, ZT, SR, { clip: ZPEAK, excursion: EXC, lineWidth: 0.7 });
+    }
     zoneDecor(sctx, SR, true);
     SEIS.frame(sctx, SR);
     SEIS.axisLeft(sctx, SR, 0, (ZT - 1) * DT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 4 });
@@ -1387,7 +1418,7 @@
       ' \u00b7 Sobel ' + z5.sob.toFixed(3);
     $('s6c').textContent = 'At the amplitude edge the eigenvalue-based attributes report a perfectly ' +
       'coherent window while semblance reports an edge. At the fault all of them respond, but by ' +
-      'different amounts. Two volumes labelled coherence can rank the same two features in opposite ' +
+      'different amounts. Two volumes labeled coherence can rank the same two features in opposite ' +
       'orders.';
     document.querySelectorAll('[data-attr]').forEach((b) => {
       b.setAttribute('aria-pressed', b.dataset.attr === S.attr);
@@ -1397,14 +1428,15 @@
   /* ------------------------------ terminology --------------------------- */
 
   const TERMS = [
-    ['Coherence', 'Umbrella term for any measure of waveform similarity between neighbouring traces along structure. Originally an Amoco name.', 'generic'],
+    ['Coherence', 'Umbrella term for any measure of waveform similarity between neighboring traces along structure. Originally an Amoco name.', 'generic'],
     ['Similarity', 'The same idea under a different name. AASPI uses it as the family name for the outputs of similarity3d.', 'generic / AASPI'],
     ['Semblance', 'Energy of the average trace over the average of the trace energies. Sensitive to both waveform and amplitude change.', 'Taner and Koehler; Marfurt et al. 1998'],
-    ['Outer-product similarity', 'rᵀCr / E. Generalises semblance and eigenstructure; the test vector r picks which you get.', 'AASPI'],
+    ['Outer-product similarity', 'r\u1d40Cr / E. Generalizes semblance and eigenstructure; the test vector r picks which you get.', 'AASPI'],
+    ['Center sample vector', 'The amplitude of every trace in the window read at the one sample being analyzed. One of the three choices of test vector, and the cheapest.', 'AASPI'],
     ['Eigenstructure coherence', 'λ₁ divided by the sum of the eigenvalues of the covariance matrix. Blind to a pure amplitude change.', 'Gersztenkorn and Marfurt 1999'],
     ['Energy-ratio coherence', 'Energy of the Karhunen–Loève filtered data over total energy. Identical to eigenstructure at L = 1.', 'Chopra and Marfurt 2007; AASPI'],
-    ['Variance', 'Normalised deviation from the local mean, close to 1 \u2212 semblance, so it runs the opposite way to the others. Common in other packages.', 'other packages'],
-    ['Sobel-filter similarity', 'Magnitude of the lateral amplitude derivatives along dip, normalised. No covariance matrix involved.', 'Luo et al.; AASPI'],
+    ['Variance', 'Normalized deviation from the local mean, close to 1 \u2212 semblance, so it runs the opposite way to the others. Common in other packages.', 'other packages'],
+    ['Sobel-filter similarity', 'Magnitude of the lateral amplitude derivatives along dip, normalized. No covariance matrix involved.', 'Luo et al.; AASPI'],
     ['Coherent energy', 'Energy retained by the Karhunen–Loève filter. The numerator of energy-ratio coherence, and useful on its own.', 'AASPI'],
   ];
 
@@ -1453,6 +1485,8 @@
     setVal('kHalf', '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms');
     setVal('npc', String(S.npc));
     allOf('npc').forEach((el) => { el.max = 2 * S.half + 1; });
+    if ($('dWig')) $('dWig').setAttribute('aria-pressed', S.disp === 'wiggle');
+    if ($('dCol')) $('dCol').setAttribute('aria-pressed', S.disp === 'color');
     ['amp', 'phase', 'noise', 'gain', 'half', 'kHalf', 'npc'].forEach((k) => {
       allOf(k).forEach((el) => { if (parseFloat(el.value) !== S[k]) el.value = S[k]; });
     });
@@ -1460,7 +1494,7 @@
 
   function drawWindowSteps() {
     const w0 = windowData();
-    const A = analyse(w0, S.npc);
+    const A = analyze(w0, S.npc);
     drawWindowPanel();
     if (visible('p2')) drawStep2(A);
     if (visible('p3')) drawStep3(A);
@@ -1524,6 +1558,15 @@
     if (key === 'half' || key === 'kHalf' || key === 'npc') scheduleZones();
     saveState();
   });
+
+  const setDisp = (v) => {
+    S.disp = v;
+    $('dWig').setAttribute('aria-pressed', v === 'wiggle');
+    $('dCol').setAttribute('aria-pressed', v === 'color');
+    drawAll(); saveState();
+  };
+  $('dWig').addEventListener('click', () => setDisp('wiggle'));
+  $('dCol').addEventListener('click', () => setDisp('color'));
 
   $('resetBtn').addEventListener('click', () => {
     S = Object.assign({}, DEF);
