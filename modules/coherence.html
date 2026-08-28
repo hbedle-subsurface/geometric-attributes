@@ -86,23 +86,23 @@
       </div>
       <div class="panel-col">
         <p class="sublabel"><b>2</b> Semblance and variance
-          <span class="note">two answers to the same question</span></p>
+          <span class="note">the same information, stated two ways round</span></p>
         <canvas id="c2bar" aria-label="Semblance and variance for the window"></canvas>
       </div>
     </div>
 
-    <div class="controls" style="margin-top:14px">
+    <div class="controls" id="winControls" style="margin-top:14px">
       <div class="ctl-col">
         <h2>What is wrong with the window</h2>
         <div class="ctl">
-          <label for="amp">Amplitude change across it <span class="val" id="ampV">none</span></label>
-          <input type="range" id="amp" min="0" max="90" step="2" value="0">
+          <label for="amp">Amplitude change across it <span class="val" data-val="amp" id="ampV">none</span></label>
+          <input type="range" data-key="amp" id="amp" min="0" max="90" step="2" value="0">
         </div>
         <p class="hint-line" style="margin:-8px 0 14px">The waveform stays identical; only its size changes
           from trace to trace.</p>
         <div class="ctl">
-          <label for="phase">Waveform change across it <span class="val" id="phaseV">none</span></label>
-          <input type="range" id="phase" min="0" max="180" step="5" value="0">
+          <label for="phase">Waveform change across it <span class="val" data-val="phase" id="phaseV">none</span></label>
+          <input type="range" data-key="phase" id="phase" min="0" max="180" step="5" value="0">
         </div>
         <p class="hint-line" style="margin:-8px 0 0">A phase rotation applied progressively across the
           window, so the shape itself changes.</p>
@@ -110,12 +110,12 @@
       <div class="ctl-col">
         <h2>And the usual suspects</h2>
         <div class="ctl">
-          <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
-          <input type="range" id="noise" min="0" max="60" step="2" value="0">
+          <label for="noise">Noise <span class="val" data-val="noise" id="noiseV">none</span></label>
+          <input type="range" data-key="noise" id="noise" min="0" max="60" step="2" value="0">
         </div>
         <div class="ctl">
-          <label for="gain">Overall amplitude <span class="val" id="gainV">1.0 ×</span></label>
-          <input type="range" id="gain" min="0.2" max="3" step="0.1" value="1">
+          <label for="gain">Overall amplitude <span class="val" data-val="gain" id="gainV">1.0 ×</span></label>
+          <input type="range" data-key="gain" id="gain" min="0.2" max="3" step="0.1" value="1">
         </div>
         <p class="hint-line" style="margin:-8px 0 0">Scales every trace in the window by the same factor.
           Watch which of the two numbers below notices.</p>
@@ -123,12 +123,12 @@
       <div class="ctl-col">
         <h2>The window</h2>
         <div class="ctl">
-          <label for="half">Traces used <span class="val" id="halfV">5 traces</span></label>
-          <input type="range" id="half" min="1" max="5" step="1" value="2">
+          <label for="half">Traces used <span class="val" data-val="half" id="halfV">5 traces</span></label>
+          <input type="range" data-key="half" id="half" min="1" max="5" step="1" value="2">
         </div>
         <div class="ctl">
-          <label for="kHalf">Window height <span class="val" id="kHalfV">± 16 ms</span></label>
-          <input type="range" id="kHalf" min="3" max="20" step="1" value="8">
+          <label for="kHalf">Window height <span class="val" data-val="kHalf" id="kHalfV">± 16 ms</span></label>
+          <input type="range" data-key="kHalf" id="kHalf" min="3" max="20" step="1" value="8">
         </div>
         <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
       </div>
@@ -136,15 +136,16 @@
 
     <div class="stats">
       <div class="stat key"><span>Semblance</span><b id="s2a">—</b></div>
-      <div class="stat"><span>Variance, as 1 − semblance</span><b id="s2b">—</b></div>
+      <div class="stat"><span>Variance (the normalised form, 1 − semblance)</span><b id="s2b">—</b></div>
       <div class="stat"><span>Raw variance about the mean trace</span><b id="s2c">—</b></div>
       <div class="stat wide"><span>Why the raw number is a problem</span><b id="s2d">—</b></div>
     </div>
     <div class="legend">
-      <span><b>Terminology warning.</b> Variance is not an AASPI attribute; program
-        <span class="k">similarity3d</span> does not output one. It is a coherence-family name used in other
-        packages, where it is normally the normalised form, mathematically close to 1 − semblance. The raw
-        statistical variance shown above is amplitude-sensitive and is not what those packages display.</span>
+      <span><b>A note on the word.</b> Semblance and variance here are two ways of saying the same thing:
+        variance is what is left over when semblance is subtracted from one, so a coherent window has high
+        semblance and low variance. Packages that display a "variance" attribute display this normalised
+        form. The raw statistical variance shown above is a different quantity — it depends on how loud the
+        data is, not just on how well the traces match — which is why it is not used directly.</span>
     </div>
   </section>
 
@@ -155,15 +156,27 @@
       <span class="hint">The covariance matrix and its eigenvalues</span>
     </div>
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Everything AASPI computes except the Sobel filter comes from a single object: a covariance matrix
-      built from the window. Entry <span class="k">C(m,n)</span> is trace m multiplied by trace n, summed
-      down the window. A window of J traces gives a J-by-J matrix, and it is built from the
-      <b>analytic trace</b> — the amplitude together with its Hilbert transform — which stabilises the
-      result near amplitude zero crossings.</p>
+      Every attribute on this page except the Sobel filter is built from a single object: a covariance
+      matrix. Entry <span class="k">C(m,n)</span> is trace m multiplied by trace n, sample by sample, summed
+      down the window. A window of J traces gives a J-by-J table of those products, and the diagonal
+      <span class="k">C(m,m)</span> is simply the energy of trace m. Two traces that rise and fall together
+      give a large positive entry; two that are unrelated give an entry near zero. The matrix is built from
+      the <b>analytic trace</b>, meaning the amplitude together with its Hilbert transform, which keeps the
+      estimate steady where the amplitude happens to pass through zero.</p>
+    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      <b>What an eigenvector is, for this purpose.</b> Ask a different question: is there a single waveform
+      that, scaled up or down trace by trace, could account for the whole window? An eigenvector is a
+      candidate set of those scale factors — one weight per trace. The <b>first eigenvector</b> is the set
+      of weights that accounts for as much of the window's energy as any set can, and it is what panel 3
+      draws: read it as "trace 1 needs this much of the common waveform, trace 2 this much", and so on.</p>
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Its eigenvalues say how many independent patterns the window contains. If every trace is the same
-      waveform, one pattern explains everything and there is a single large eigenvalue. If the traces are
-      unrelated, the energy is spread across all of them.</p>
+      <b>And an eigenvalue is how much that explained.</b> Each eigenvector comes with a number saying how
+      much of the total energy it accounts for, and the numbers add up to the total. So if one waveform
+      really does describe the window, λ₁ takes nearly everything and the rest are near zero. If the traces
+      are unrelated, no single waveform helps much and the energy is spread across all of them. Panel 2
+      shows each eigenvalue as a share of the total, which is why the bars always sum to 1.</p>
+
+    <div class="ctl-mirror" data-mirror="3" style="margin-bottom:16px"></div>
 
     <div class="sec-row" id="row3">
       <div class="panel-col">
@@ -197,17 +210,28 @@
       <h3>Step 4 &nbsp;·&nbsp; One equation, three named attributes</h3>
       <span class="hint">The difference is a single vector</span>
     </div>
+    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      AASPI defines <b>outer-product similarity</b> as <span class="k">c = rᵀ C r / E</span>, where C is the
+      covariance matrix from step 3, E is the total energy in the window, and r is a <b>test vector</b>: one
+      weight per trace, the same shape as an eigenvector.</p>
+    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+      Read it as a question. You are proposing a set of weights and asking how much of the window's energy
+      that proposal accounts for. The quantity <span class="k">rᵀ C r</span> is the energy explained by your
+      proposal; dividing by E turns it into a fraction between 0 and 1. So the answer is always "this share
+      of the window is described by the pattern I suggested".</p>
     <p style="margin:0 0 12px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      AASPI defines <b>outer-product similarity</b> as <span class="k">c = rᵀ C r / E</span>, where E is the
-      total energy in the window and r is a test vector. Changing r is what turns one equation into
-      different published attributes.</p>
+      What makes this worth knowing is that several separately published attributes are this one equation
+      with different proposals for r.</p>
     <ul style="margin:0 0 14px;padding-left:20px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      <li style="margin-bottom:6px">Set r to a constant vector of J equal components and you get a
-        <b>semblance</b> estimate of coherence.</li>
-      <li style="margin-bottom:6px">Set r to the first eigenvector and you get <b>eigenstructure
-        coherence</b>, which is the same as λ₁ divided by the sum of the eigenvalues.</li>
-      <li>Set r to the sample vector through the analysis point and you get the third option AASPI
-        offers.</li>
+      <li style="margin-bottom:6px">Propose that every trace contributes equally — r a constant vector —
+        and the answer is a <b>semblance</b> estimate of coherence. You are asking how much of the window is
+        explained by the traces simply being the same as each other.</li>
+      <li style="margin-bottom:6px">Propose the first eigenvector, which step 3 showed is the best possible
+        set of weights, and the answer is <b>eigenstructure coherence</b>. Since no proposal can explain
+        more, this is the largest value the equation can return, and it works out to λ₁ divided by the sum
+        of the eigenvalues.</li>
+      <li>Propose the actual trace amplitudes at the analysis point and you get the third option AASPI
+        offers. Try each in turn below and watch the weights in panel 1 change shape.</li>
     </ul>
 
     <div class="ctl" style="margin-bottom:14px">
@@ -218,6 +242,8 @@
         <button type="button" data-r="centre">Centre sample vector</button>
       </div>
     </div>
+
+    <div class="ctl-mirror" data-mirror="4" style="margin-bottom:16px"></div>
 
     <div class="sec-row" id="row4">
       <div class="panel-col">
@@ -233,8 +259,8 @@
     </div>
 
     <div class="ctl" style="margin-top:14px;max-width:520px">
-      <label for="npc">Principal components kept, L <span class="val" id="npcV">1</span></label>
-      <input type="range" id="npc" min="1" max="5" step="1" value="1">
+      <label for="npc">Principal components kept, L <span class="val" data-val="npc" id="npcV">1</span></label>
+      <input type="range" data-key="npc" id="npc" min="1" max="5" step="1" value="1">
     </div>
     <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">
       <b>Energy-ratio coherence</b> is the energy of the Karhunen–Loève filtered data over the total energy.
@@ -264,6 +290,8 @@
       it has no concept of a common waveform. It simply asks how fast amplitude is changing sideways, which
       makes it respond strongly to a change in size that the eigenvalue-based attributes ignore entirely.</p>
 
+    <div class="ctl-mirror" data-mirror="5" style="margin-bottom:16px"></div>
+
     <canvas id="c5" aria-label="Sobel edge response compared with the covariance-based attributes"></canvas>
 
     <div class="legend">
@@ -282,11 +310,16 @@
       <span class="hint">Where the algorithms part company</span>
     </div>
     <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      One synthetic line, flat-lying so that steering is not a factor, divided into five zones. Each zone has
-      a sharp vertical edge at its centre, and each edge is a different kind of problem. Every attribute is
-      computed at every sample with the same window.</p>
+      One synthetic line, flat-lying so that steering is not a factor, divided into five zones of forty
+      traces each. The zones are boxed and named along the top. Every zone has a sharp vertical edge down
+      its middle, and every edge is a different kind of problem: zone 1 has no problem at all and is the
+      control, zone 2 changes amplitude across the edge without changing the waveform, zone 3 changes the
+      waveform without changing its size, zone 4 has noise added to its right-hand half, and zone 5 is a
+      fault with 16 ms of throw. Every attribute is computed at every sample with the same window.</p>
 
     <canvas id="c6seis" aria-label="The five-zone synthetic line"></canvas>
+
+    <div class="ctl-mirror" data-mirror="6" style="margin:16px 0 6px"></div>
 
     <div class="ctl" style="margin:16px 0 10px">
       <label>Attribute displayed</label>
@@ -306,15 +339,16 @@
     <canvas id="c6bars" aria-label="Every attribute at the edge of every zone"></canvas>
 
     <div class="legend">
-      <span>Semblance, eigenstructure, energy ratio and variance all run 0 to 1 and share a grey scale, so
-        they can be compared directly. The Sobel panel cannot: it is an edge response, high where the others
+      <span>Semblance, eigenstructure and energy ratio run 0 to 1 and share a grey scale, so they can be
+        compared directly. Variance runs the other way, dark where the others are light, because it is what
+        is left when semblance is taken from one. The Sobel panel cannot: it is an edge response, high where the others
         are low, and it is plotted on its own scale. Putting a common colour bar on attributes that do not
         share a range or a sign is one of the easiest ways to mislead yourself.</span>
     </div>
 
     <div class="stats" style="margin-top:14px">
-      <div class="stat wide"><span>Zone 2, the amplitude edge</span><b id="s6a">—</b></div>
-      <div class="stat wide"><span>Zone 5, the fault</span><b id="s6b">—</b></div>
+      <div class="stat wide"><span>At the amplitude step, zone 2</span><b id="s6a">—</b></div>
+      <div class="stat wide"><span>At the fault, zone 5</span><b id="s6b">—</b></div>
       <div class="stat wide"><span>What that means when you choose one</span><b id="s6c">—</b></div>
     </div>
   </section>
@@ -892,7 +926,8 @@
     ZATT = out;
   }
 
-  const ZONE_NAMES = ['identical', 'amplitude step', 'waveform step', 'random noise', 'fault'];
+  const ZONE_NAMES = ['identical traces', 'amplitude step', 'waveform step',
+                      'random noise', 'fault'];
   function zoneEdgeValues() {
     const rows = [];
     for (let z = 0; z < 5; z++) {
@@ -1027,7 +1062,7 @@
     const v = variances(windowData());
     barChart('c2bar', [
       { label: 'semblance', v: A.semb, hi: true },
-      { label: '1 \u2212 semblance', v: v.norm, map: ATTR.MAPS.coherence },
+      { label: 'variance (1 \u2212 semblance)', v: v.norm, map: ATTR.MAPS.coherence },
     ], w, h);
     $('s2a').textContent = A.semb.toFixed(4);
     $('s2b').textContent = v.norm.toFixed(4);
@@ -1189,10 +1224,37 @@
     ], w, h, { labW: 150 });
   }
 
+  const MZ = { l: 50, r: 14, t: 32, b: 30 };
+
+  /* Boxes the five zones and names them along the top, so nobody has to count
+     blocks to work out which zone a readout refers to. */
+  function zoneDecor(ctx, R, withNames) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.85)'; ctx.lineWidth = 2;
+    for (let z = 1; z < 5; z++) {
+      const x = R.x + (z * ZW / ZN) * R.w;
+      ctx.beginPath(); ctx.moveTo(x, R.y); ctx.lineTo(x, R.y + R.h); ctx.stroke();
+    }
+    if (withNames) {
+      ctx.font = '600 10.5px "IBM Plex Mono", monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      for (let z = 0; z < 5; z++) {
+        const cx = R.x + ((z + 0.5) * ZW / ZN) * R.w;
+        ctx.fillStyle = CRIM;
+        ctx.fillText((z + 1) + ' \u00b7 ' + ZONE_NAMES[z], cx, R.y - 9);
+        ctx.strokeStyle = 'rgba(132,22,23,.45)'; ctx.lineWidth = 1;
+        const half = (0.5 * ZW / ZN) * R.w - 6;
+        ctx.beginPath();
+        ctx.moveTo(cx - half, R.y - 5); ctx.lineTo(cx + half, R.y - 5); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
   function attrPanel(canvasId, arr, w, h, lo, hi, map) {
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    const R = { x: MZ.l, y: MZ.t, w: w - MZ.l - MZ.r, h: h - MZ.t - MZ.b };
     const off = document.createElement('canvas');
     off.width = ZATT.gx; off.height = ZATT.gt;
     const octx = off.getContext('2d');
@@ -1209,37 +1271,26 @@
     octx.putImageData(img, 0, 0);
     ctx.save();
     ctx.imageSmoothingEnabled = true; ctx.drawImage(off, R.x, R.y, R.w, R.h); ctx.restore();
-    ctx.save();
-    for (let z = 1; z < 5; z++) {
-      const x = R.x + (z * ZW / ZN) * R.w;
-      SEIS.dashedLine(ctx, x, R.y, x, R.y + R.h, 'rgba(11,114,133,.75)', [4, 4], 1.2);
-    }
-    ctx.restore();
+    zoneDecor(ctx, R, true);
     SEIS.frame(ctx, R);
     SEIS.axisLeft(ctx, R, 0, (ZT - 1) * DT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 4 });
-    ctx.save();
-    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    for (let z = 0; z < 5; z++) {
-      ctx.fillText((z + 1) + ' \u00b7 ' + ZONE_NAMES[z],
-        R.x + ((z + 0.5) * ZW / ZN) * R.w, R.y + R.h + 8);
-    }
-    ctx.restore();
+    SEIS.axisBottom(ctx, R, 1, ZN, 'trace', (v) => v.toFixed(0), { ticks: 6 });
     return R;
   }
 
   function drawStep6() {
     if (!ZATT) return;
     const w = pw($('c6seis'));
-    const h = clamp(Math.round(w * 0.30), 210, 280);
-    tracePanel('c6seis', ZF, ZN, ZT, ZPEAK, w, h, (ctx, R) => {
-      ctx.save();
-      for (let z = 1; z < 5; z++) {
-        const x = R.x + (z * ZW / ZN) * R.w;
-        SEIS.dashedLine(ctx, x, R.y, x, R.y + R.h, 'rgba(11,114,133,.75)', [4, 4], 1.2);
-      }
-      ctx.restore();
-    });
+    const h = clamp(Math.round(w * 0.32), 220, 290);
+    // 200 traces of wiggle is a smear at this width; variable density reads
+    const sctx = SEIS.fitCanvas($('c6seis'), w, h);
+    sctx.clearRect(0, 0, w, h);
+    const SR = { x: MZ.l, y: MZ.t, w: w - MZ.l - MZ.r, h: h - MZ.t - MZ.b };
+    SEIS.drawVarDensity(sctx, ZF, ZN, ZT, SR, { cmap: SEIS.COLORMAPS.gray, clip: ZPEAK * 0.8 });
+    zoneDecor(sctx, SR, true);
+    SEIS.frame(sctx, SR);
+    SEIS.axisLeft(sctx, SR, 0, (ZT - 1) * DT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 4 });
+    SEIS.axisBottom(sctx, SR, 1, ZN, 'trace', (v) => v.toFixed(0), { ticks: 6 });
 
     const isSobel = S.attr === 'sob';
     attrPanel('c6attr', ZATT[S.attr], w, h,
@@ -1254,12 +1305,12 @@
                    var: 'variance', sob: 'Sobel edge' }[k];
       rows.forEach((r, z) => {
         if (z === 1 || z === 4) {
-          flat.push({ label: nm + '  \u00b7  zone ' + (z + 1), v: r[k],
+          flat.push({ label: nm + '  \u00b7  ' + ZONE_NAMES[z], v: r[k],
                       map: k === 'var' || k === 'sob' ? ATTR.MAPS.coherence : ATTR.MAPS.scan });
         }
       });
     });
-    barChart('c6bars', flat, wb, 26 * flat.length + 24, { labW: 190 });
+    barChart('c6bars', flat, wb, 26 * flat.length + 24, { labW: 252 });
 
     const z2 = rows[1], z5 = rows[4];
     $('s6a').textContent = 'semblance ' + z2.semb.toFixed(3) + ' \u00b7 eigenstructure ' +
@@ -1286,7 +1337,7 @@
     ['Outer-product similarity', 'rᵀCr / E. Generalises semblance and eigenstructure; the test vector r picks which you get.', 'AASPI'],
     ['Eigenstructure coherence', 'λ₁ divided by the sum of the eigenvalues of the covariance matrix. Blind to a pure amplitude change.', 'Gersztenkorn and Marfurt 1999'],
     ['Energy-ratio coherence', 'Energy of the Karhunen–Loève filtered data over total energy. Identical to eigenstructure at L = 1.', 'Chopra and Marfurt 2007; AASPI'],
-    ['Variance', 'Normalised deviation from the local mean, close to 1 − semblance. Not produced by AASPI; used in other packages.', 'other packages'],
+    ['Variance', 'Normalised deviation from the local mean, close to 1 \u2212 semblance, so it runs the opposite way to the others. Common in other packages.', 'other packages'],
     ['Sobel-filter similarity', 'Magnitude of the lateral amplitude derivatives along dip, normalised. No covariance matrix involved.', 'Luo et al.; AASPI'],
     ['Coherent energy', 'Energy retained by the Karhunen–Loève filter. The numerator of energy-ratio coherence, and useful on its own.', 'AASPI'],
   ];
@@ -1315,15 +1366,44 @@
      PLUMBING
      ===================================================================== */
 
+  /* The page is long, and the controls were only at the top of step 2, so by
+     step 6 the reader had to scroll back and lose their place. The block is
+     cloned into each later step instead; copies carry no ids, only data-key,
+     and every copy of a control moves whenever any one of them does. */
+  function mirrorControls() {
+    const src = $('winControls');
+    if (!src) return;
+    document.querySelectorAll('.ctl-mirror').forEach((slot) => {
+      if (slot.childElementCount) return;
+      const copy = src.cloneNode(true);
+      copy.removeAttribute('id');
+      copy.setAttribute('style', 'margin-top:0');
+      copy.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+      copy.querySelectorAll('label[for]').forEach((el) => el.removeAttribute('for'));
+      copy.querySelectorAll('button').forEach((el) => el.remove());
+      slot.appendChild(copy);
+    });
+  }
+
+  const allOf = (key) => document.querySelectorAll('[data-key="' + key + '"]');
+  const setVal = (key, text) => {
+    document.querySelectorAll('[data-val="' + key + '"]').forEach((el) => {
+      el.textContent = text;
+    });
+  };
+
   function syncLabels() {
-    $('ampV').textContent = S.amp === 0 ? 'none' : S.amp + '% across the window';
-    $('phaseV').textContent = S.phase === 0 ? 'none' : S.phase + '\u00b0 of rotation';
-    $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
-    $('gainV').textContent = S.gain.toFixed(1) + ' \u00d7';
-    $('halfV').textContent = (2 * S.half + 1) + ' traces';
-    $('kHalfV').textContent = '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms';
-    $('npcV').textContent = String(S.npc);
-    $('npc').max = 2 * S.half + 1;
+    setVal('amp', S.amp === 0 ? 'none' : S.amp + '% across the window');
+    setVal('phase', S.phase === 0 ? 'none' : S.phase + '\u00b0 of rotation');
+    setVal('noise', S.noise === 0 ? 'none' : S.noise + '%');
+    setVal('gain', S.gain.toFixed(1) + ' \u00d7');
+    setVal('half', (2 * S.half + 1) + ' traces');
+    setVal('kHalf', '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms');
+    setVal('npc', String(S.npc));
+    allOf('npc').forEach((el) => { el.max = 2 * S.half + 1; });
+    ['amp', 'phase', 'noise', 'gain', 'half', 'kHalf', 'npc'].forEach((k) => {
+      allOf(k).forEach((el) => { if (parseFloat(el.value) !== S[k]) el.value = S[k]; });
+    });
   }
 
   function drawWindowSteps() {
@@ -1333,7 +1413,7 @@
   }
 
   function drawAll() {
-    fillTerms(); syncLabels();
+    fillTerms(); mirrorControls(); syncLabels();
     drawStep1(); drawWindowSteps(); drawStep6();
   }
 
@@ -1353,29 +1433,26 @@
     S.attr = b.dataset.attr; drawStep6(); saveState();
   }));
 
-  ['amp', 'phase', 'noise', 'gain'].forEach((id) => $(id).addEventListener('input', () => {
-    S[id] = parseFloat($(id).value);
-    WIN = buildWindow(); syncLabels(); drawWindowSteps(); saveState();
-  }));
-  ['half', 'kHalf'].forEach((id) => $(id).addEventListener('input', () => {
-    S[id] = parseFloat($(id).value);
-    S.npc = clamp(S.npc, 1, 2 * S.half + 1); $('npc').value = S.npc;
-    syncLabels(); drawWindowSteps(); scheduleZones(); saveState();
-  }));
-  $('npc').addEventListener('input', () => {
-    S.npc = parseFloat($('npc').value); syncLabels(); drawWindowSteps(); scheduleZones(); saveState();
+  document.addEventListener('input', (ev) => {
+    const key = ev.target && ev.target.dataset && ev.target.dataset.key;
+    if (!key) return;
+    S[key] = parseFloat(ev.target.value);
+    if (key === 'half' || key === 'kHalf') S.npc = clamp(S.npc, 1, 2 * S.half + 1);
+    if (key === 'amp' || key === 'phase' || key === 'noise' || key === 'gain') WIN = buildWindow();
+    syncLabels(); drawWindowSteps();
+    if (key === 'half' || key === 'kHalf' || key === 'npc') scheduleZones();
+    saveState();
   });
 
   $('resetBtn').addEventListener('click', () => {
     S = Object.assign({}, DEF);
-    ['amp', 'phase', 'noise', 'gain', 'half', 'kHalf', 'npc'].forEach((id) => { $(id).value = S[id]; });
     WIN = buildWindow(); zoneAttrs(); drawAll(); saveState();
   });
 
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
 
-  ['amp', 'phase', 'noise', 'gain', 'half', 'kHalf', 'npc'].forEach((id) => { $(id).value = S[id]; });
+  mirrorControls();
   buildZones();
   zoneAttrs();
   drawAll();
