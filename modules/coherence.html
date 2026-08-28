@@ -86,6 +86,8 @@
     </div>
   </div>
 
+  <p class="tabhint">Work through the six steps in order &mdash; <b>then the exercises</b>.
+    Reference material is on the right-hand tabs.</p>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
     <button role="tab" data-tab="p1" aria-selected="false">1 · Two traces</button>
     <button role="tab" data-tab="p2" aria-selected="false">2 · A window</button>
@@ -93,11 +95,11 @@
     <button role="tab" data-tab="p4" aria-selected="false">4 · One equation</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · Sobel</button>
     <button role="tab" data-tab="p6" aria-selected="false">6 · Compare</button>
+    <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
     <button role="tab" data-tab="pt" aria-selected="false">Terminology</button>
     <button role="tab" data-tab="pm" aria-selected="false">Method</button>
-    <span class="spacer"></span>
   </nav>
 
   <section class="tabpane" id="p1" role="tabpanel" hidden>
@@ -529,7 +531,7 @@
 
   </section>
 
-  <section class="nextup">
+  <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
     <h3>Where this goes</h3>
     <p>These attributes are useful because a geological discontinuity usually reduces local waveform
@@ -539,7 +541,7 @@
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
-  <div class="pager">
+  <div class="pager" id="pager" hidden>
     <a class="btn ghost" href="dipsteer.html">← Module 03: dip steering</a>
     <a class="btn ghost" href="../index.html">All modules</a>
   </div>
@@ -1476,8 +1478,52 @@
   /* Tabs. Canvases in a hidden pane have no width, so anything drawn while
      hidden comes out at zero size; every pane is redrawn on the way in. */
   const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'pe', 'pk', 'pt', 'pm'];
+  const STEPNAMES = {
+    p1: 'Two traces', p2: 'A window', p3: 'The matrix', p4: 'One equation',
+    p5: 'Sobel', p6: 'Compare', pe: 'Exercises', pk: 'Key points',
+    pt: 'Terminology', pm: 'Method',
+  };
+
+  /* Every pane gets its own forward and back control. Without it the most
+     prominent thing on the page was the link to the next module, which is
+     exactly the wrong way out of step 1. */
+  function buildStepNav() {
+    PANES.forEach((id, i) => {
+      const pane = $(id);
+      if (!pane || pane.querySelector('.stepnav')) return;
+      const prev = PANES[i - 1], next = PANES[i + 1];
+      const nav = document.createElement('div');
+      nav.className = 'stepnav';
+      const mk = (target, text, ghost) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (ghost ? ' ghost' : '') + ' small';
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          showTab(target);
+          const t = document.querySelector('.tabhint');
+          if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return b;
+      };
+      nav.appendChild(prev ? mk(prev, '\u2190 ' + STEPNAMES[prev], true)
+                           : document.createElement('span'));
+      const where = document.createElement('span');
+      where.className = 'where';
+      where.textContent = i < 6 ? 'step ' + (i + 1) + ' of 6' : STEPNAMES[id];
+      nav.appendChild(where);
+      nav.appendChild(next ? mk(next, STEPNAMES[next] + ' \u2192')
+                           : document.createElement('span'));
+      pane.appendChild(nav);
+    });
+  }
+
   function showTab(id) {
     PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    // the links out of the module belong at the end of it, not on every step
+    const last = (id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !last;
+    if ($('pager')) $('pager').hidden = !last;
     document.querySelectorAll('#tabs button').forEach((b) => {
       b.setAttribute('aria-selected', b.dataset.tab === id);
     });
@@ -1497,6 +1543,7 @@
 
   buildZones();
   zoneAttrs();
+  buildStepNav();
   showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
   document.fonts && document.fonts.ready.then(drawAll);
 })();
