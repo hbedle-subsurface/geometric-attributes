@@ -80,12 +80,13 @@
     Method and references are there when you want them.</p>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
     <button role="tab" data-tab="p1" aria-selected="false">1 · Two sections</button>
-    <button role="tab" data-tab="p2" aria-selected="false">2 · Inline dip</button>
-    <button role="tab" data-tab="p3" aria-selected="false">3 · Crossline dip</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Inline</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Crossline</button>
     <button role="tab" data-tab="p4" aria-selected="false">4 · Every trace</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · Together</button>
     <button role="tab" data-tab="p6" aria-selected="false">6 · Rotate</button>
-    <button role="tab" data-tab="p7" aria-selected="false">7 · The computer</button>
+    <button role="tab" data-tab="p7" aria-selected="false">7 · The search</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
@@ -472,56 +473,100 @@
     </div>
     </section>
 
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">?</span>Why two components and not one number</h3>
+      <span class="hint">What the dip vector buys you downstream</span>
+    </div>
+    <p class="lede">Module 01 found dip on a single line. Real surveys are volumes, and the moment you leave
+      one line the question changes: a reflector does not have <em>a</em> dip, it has a direction it goes
+      down and a steepness in that direction. Two numbers per sample, not one.</p>
+    <p class="lede">That extra number is not bookkeeping. Here is what it buys.</p>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      What needs the full vector</h2>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Steering an analysis window in 3D.</b> A window aligned along the inline dip but not the
+        crossline dip is still cutting across the bed, and the attribute computed in it is still measuring
+        structure instead of discontinuity. Module 03 shows what that costs. You need both components or
+        you have steered in one direction and not the other.</li>
+      <li><b>Curvature, and everything above it.</b> The principal curvatures of module 05 are derivatives
+        of <em>both</em> dip components. With only one you cannot form them at all — there is no k₁ and k₂
+        from a single number, and no shape index, and no aberrancy.</li>
+      <li><b>Structure-oriented filtering</b> smooths along the bedding plane, which is a plane in three
+        dimensions. One component defines a line, not a plane.</li>
+      <li><b>Fault and fracture work.</b> Dip azimuth is what turns a dip field into a structural grain map.
+        Lineaments that are invisible on amplitude often stand out cleanly on azimuth, because a fault
+        changes the direction the beds go down even where it barely changes how steeply.</li>
+    </ul>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      And a warning that comes with it</h2>
+    <p class="lede">Dip azimuth is <b>cyclic</b>. An azimuth of 359° and one of 1° are two degrees apart, not
+      three hundred and fifty-eight, and a color scale that does not wrap will draw a hard boundary across
+      perfectly continuous structure — an artifact that looks exactly like a lineament. Step 4 uses a cyclic
+      scale for this reason, and it is worth checking what your own software does before you interpret an
+      azimuth map.</p>
+    <p class="lede">The same trap returns twice more in this course: curvature strike wraps at 180° because
+      it is an orientation, and aberrancy azimuth wraps at 360° because it is a direction. Three attributes,
+      three different wrapping rules, and each one draws a false edge if you get it wrong.</p>
+    <div class="legend prose">
+      <span>The practical summary: apparent dip belongs to the section you happened to shoot, and true dip
+        belongs to the rock. Every attribute after this one is computed in the rock's frame, which is why
+        this module exists before any of them.</span>
+    </div>
+  </section>
+
   <section class="tabpane" id="pe" role="tabpanel" hidden>
 <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
         <li><b>Make a dipping bed look flat.</b> Set inline dip to 0 and crossline dip to 6, then read the
           inline section in step 1.
-          <span class="ans">The inline section shows a horizontal reflector while the bed is dipping about
+          <details class="reveal"><summary>Hint</summary><span class="ans">The inline section shows a horizontal reflector while the bed is dipping about
             21 degrees. Nothing in that section is wrong or noisy; it is cut along strike, and along strike
             there is no time change to see. An interpreter working a single line through this volume would
-            report zero dip, describe the section correctly, and describe the geology not at all.</span></li>
+            report zero dip, describe the section correctly, and describe the geology not at all.</span></details></li>
         <li><b>Watch the pair change across the volume.</b> Press the <em>Flat</em> preset, then switch the
           dome on in step 4 and compare the two maps before and after.
-          <span class="ans">With a plane both maps are a single flat color. Every trace returns the same
+          <details class="reveal"><summary>Hint</summary><span class="ans">With a plane both maps are a single flat color. Every trace returns the same
             pair, so one measurement would have described the whole volume. With the dome on a flat regional,
             magnitude climbs from zero at the crest to about 0.12 ms/m at the edge, and azimuth runs right
             round the color wheel from 0 to 349 degrees, because the reflector falls away in every
             direction. Now put the crossline dip back to 4 and switch the dome on again: the azimuth range
             collapses to about 95 degrees, because the regional dip dominates and the dome only perturbs it.
             Real data behaves like these two cases rather than like the plane, which is why the estimate is
-            repeated at every sample instead of measured once.</span></li>
+            repeated at every sample instead of measured once.</span></details></li>
         <li><b>Find the two azimuths that matter.</b> With inline 2 and crossline 4, use step 6 to find the
           azimuth where the section is steepest and the azimuth where it is flat.
-          <span class="ans">Steepest at about 63 degrees from inline, flat at about 153, and the two are
+          <details class="reveal"><summary>Hint</summary><span class="ans">Steepest at about 63 degrees from inline, flat at about 153, and the two are
             exactly 90 degrees apart. The steepest direction is the dip azimuth and equals the arctangent of
             the two components; the flat direction is strike. Every other section shows something in between,
             following a cosine. Apparent dip is therefore not a property of the reflector but of the
-            reflector and the section together.</span></li>
+            reflector and the section together.</span></details></li>
         <li><b>Break the azimuth with rectangular bins.</b> In step 5 set the inline bin to 12.5 m and leave
           the crossline bin at 25 m.
-          <span class="ans">Not one pixel of the sections or the time slice changes, because the volume is
+          <details class="reveal"><summary>Hint</summary><span class="ans">Not one pixel of the sections or the time slice changes, because the volume is
             stored by bin number and the reflector still crosses the same number of traces. The computed
             azimuth moves from 63 degrees to 45, a swing of 18 degrees, because a step of one trace is now
             half the distance a step of one line is. Anything combining the two components has to divide by
             the bin spacing first. The error is invisible on square-bin surveys, which is how it survives
-            into production code.</span></li>
+            into production code.</span></details></li>
         <li><b>Compare a coarse grid with a coarse fan.</b> In step 7, note the number of combinations at a
           1 ms step, then set the step to 0.5 ms.
-          <span class="ans">The count goes from 289 to 1089, close to four times as many, because the grid is
+          <details class="reveal"><summary>Hint</summary><span class="ans">The count goes from 289 to 1089, close to four times as many, because the grid is
             two-dimensional. In module 01, halving the step doubled the work. This is the practical reason
             production dip estimators do not simply search a fine grid, and why several use a gradient
             structure tensor instead, which solves for the orientation directly rather than trying
-            candidates.</span></li>
+            candidates.</span></details></li>
         <li><b>Shrink the patch to 3 × 3.</b> With noise at 30%, drag the patch size down from 11 × 11 and
           read the score alongside the error.
-          <span class="ans">The score hardly moves: about 0.75 at 11 × 11 and about 0.77 at 3 × 3. The error
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score hardly moves: about 0.75 at 11 × 11 and about 0.77 at 3 × 3. The error
             changes by a factor of eighteen, from roughly 0.04 ms to roughly 0.70 ms per trace. Nine traces
             support two unknowns rather than one, and they reach only a single trace either side of the
             analysis point in each direction, which is barely enough to define a plane. The score is not
             measuring how well determined the estimate is; it is measuring how well the traces inside the
-            window happen to agree, and a small window makes that easy.</span></li>
+            window happen to agree, and a small window makes that easy.</span></details></li>
       </ol>
     </div>
   </section>
@@ -1156,7 +1201,10 @@
     const nx = e.x1 - e.x0 + 1, ny = e.y1 - e.y0 + 1;
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 58 : 0) };
+    const availW = w - M.l - M.r, availH = h - M.t - M.b - (bar ? 58 : 0);
+    // keep the bin aspect: nx by ny bins of equal size must plot to that shape
+    const scale = Math.min(availW / nx, availH / ny);
+    const R = { x: M.l + (availW - scale * nx) / 2, y: M.t, w: scale * nx, h: scale * ny };
     drawBody(ctx, R);
     const X = (ix) => R.x + ((ix - e.x0 + 0.5) / nx) * R.w;
     const Y = (iy) => R.y + R.h - ((iy - e.y0 + 0.5) / ny) * R.h;
@@ -1791,10 +1839,10 @@
     stopAnim(); S = Object.assign({}, DEF); pushToInputs(); rebuild();
   });
 
-  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'pe', 'pk', 'pm'];
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
     p1: 'Two sections', p2: 'Inline dip', p3: 'Crossline dip', p4: 'Every trace',
-    p5: 'Together', p6: 'Rotate', p7: 'The computer',
+    p5: 'Together', p6: 'Rotate', p7: 'The search', pw: 'Why it matters',
     pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };
 
@@ -1837,7 +1885,7 @@
     // the two dip sliders drive every step, so the header stays up for all of
     // them and only steps aside for the reference tabs
     const lab = document.querySelector('.labhead');
-    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    if (lab) lab.hidden = (id === 'pw' || id === 'pe' || id === 'pk' || id === 'pm');
     const last = (id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !last;
     if ($('pager')) $('pager').hidden = !last;
