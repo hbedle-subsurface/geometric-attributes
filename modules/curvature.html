@@ -100,26 +100,40 @@
       <h3><span class="stepno">1</span>From dip to curvature</h3>
       <span class="hint">One profile, differentiated twice</span>
     </div>
-    <p class="lede">Start with what you would actually be handed: a seismic line. It runs west to east
-      through the structure, and it has a gentle fold in it and one small fault. Everything else on this
-      page is derived from it.</p>
-    <p class="lede">Under it are three curves, and the point of this step is what each one responds to.</p>
+    <p class="lede">You have already built two of the three curves below, so let us take them in the order
+      you met them.</p>
     <ul class="lede" style="padding-left:20px">
-      <li><b>Coherence</b> asks whether neighboring traces look alike. It goes dark at the fault, where the
-        reflector is <em>broken</em>. Across the fold it sees nothing at all, because a fold is perfectly
-        continuous — nothing is broken, the beds simply bend.</li>
-      <li><b>Dip</b> is which way the reflector is heading, from modules 01 to 03. It is largest on the
-        flanks of the fold and passes through zero at the crest and the trough.</li>
-      <li><b>Curvature</b> is how fast that dip is <em>changing</em>. It lights up on the fold, which
-        coherence ignored completely, and it also reacts at the fault.</li>
+      <li><b>Dip</b> came first, in modules 01 to 03: which way the reflector is heading at every sample.
+        On this line it is largest on the flanks of the fold and passes through zero at the crest and the
+        trough.</li>
+      <li><b>Coherence</b> came next, in module 04. It compares neighboring traces <em>along</em> that dip
+        and asks whether they still look alike. It goes dark at the fault, where the reflector is
+        <b>broken</b>. Across the fold it sees nothing whatever, because a fold is perfectly continuous:
+        nothing is broken, the beds simply bend.</li>
+      <li><b>Curvature</b> is the next step in the same chain — the rate at which the dip is
+        <em>changing</em>. It lights up across the fold that coherence ignored, and it also reacts at the
+        fault.</li>
     </ul>
-    <p class="lede">That contrast is the whole reason curvature exists. <b>Coherence finds breaks;
-      curvature finds bends.</b> A fold that no coherence volume will ever show you is plain in curvature,
-      and that is where a lot of structural and stratigraphic detail lives!</p>
+    <p class="lede">So the three attributes form a sequence rather than a menu. Dip tells you the
+      orientation. Coherence asks whether the reflector is broken. Curvature asks whether it is bent.
+      <b>Coherence finds breaks; curvature finds bends</b> — and a fault too small to break the reflector
+      will still bend it, which is exactly the gap curvature was brought in to fill!</p>
+    <p class="lede">Curvature has a pleasingly physical definition. At any point on the reflector, fit the
+      circle that best hugs the bed. Curvature is <span class="k">k = 1/r</span>, one over that circle's
+      radius: a tight fold is a small circle and a big number, a gentle warp is a huge circle and a small
+      one, and a straight bed is a circle of infinite radius, so <span class="k">k = 0</span>. The sign
+      follows the shape — <b>anticlines positive, synclines negative</b>, and zero on any plane, however
+      steeply that plane dips.</p>
 
     <canvas id="c1" aria-label="A seismic line with coherence, dip and curvature curves beneath it"></canvas>
 
-    <p class="lede" style="margin-top:12px">Now look at <em>where</em> the curvature peaks sit relative to
+    <p class="lede" style="margin-top:12px">Now try the fault-throw slider in the header. Bring it down to
+      5 m and watch the two curves part company: coherence returns to a flat 0.99, exactly as if there were
+      no fault at all, while curvature still marks the spot. Below the seismic resolution the offset stops
+      being a break and becomes a flexure — and a flexure is precisely what curvature measures. That is why
+      a fault interpretation is normally run on coherence and curvature together, and why very small faults
+      appear on one and not the other.</p>
+    <p class="lede">Finally, look at <em>where</em> the curvature peaks sit relative to
       the seismic. They are not on the steep flanks — the flanks are where curvature crosses zero. The peaks
       are at the crest and the trough, exactly where the reflector is momentarily flat. A bright curvature
       anomaly means a place where the dip is changing quickly, not a place that is steep, and that catches
@@ -319,16 +333,17 @@
     <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
-        <li><b>Turn the fault off and watch coherence go blind.</b> In step 1, set the fault throw to 0
-          and look at the coherence curve, then put it back to 25 m.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">With no fault,
-            coherence sits at about 0.99 straight across the line — flat, featureless, nothing to
-            interpret — while curvature still maps the fold at 0.91 km⁻¹. Put the throw back and coherence
-            drops to about 0.84, and at 60 m it falls to 0.36. So coherence is responding to one thing only:
-            whether the reflector is broken. The fold is invisible to it at every throw setting, because a
-            fold is perfectly continuous. This is why the two attributes are run together rather than one
-            instead of the other — they answer different questions, and a structure can be dramatic in one
-            and absent from the other.</span></details></li>
+        <li><b>Shrink the fault until only curvature can see it.</b> In step 1, walk the fault throw down
+          from 60 m to 5 m, reading the coherence value and the fault curvature at each stop.
+          <details class="reveal"><summary>Show what to look for</summary><span class="ans">At 60 m throw coherence reads 0.36 and the fault
+            is unmistakable. At 25 m it is 0.84. At 10 m it is 0.97, and at 5 m it is 0.992 — which is
+            exactly the value it reads with no fault at all. Coherence has gone completely blind. Curvature
+            meanwhile goes 8.30, 3.96, 1.75, 0.98 km⁻¹: reduced, but still clearly there at every step. Once
+            the offset drops below what the wavelet can resolve, the reflector is no longer broken, it is
+            bent, and only an attribute that measures bending will find it. This is the classic progression
+            — large offsets to coherence, small offsets to curvature, and offsets below even that to
+            aberrancy, which has a module of its own. Notice too that the fold sits at 0.91 km⁻¹ throughout
+            and coherence never sees it at any setting.</span></details></li>
         <li><b>Find where curvature is zero on a steeply dipping bed.</b> In step 1, set the fold relief to
           about 100 m and look at where the middle and bottom panels cross zero.
           <details class="reveal"><summary>Show what to look for</summary><span class="ans">The dip curve
@@ -918,7 +933,9 @@
     }
     let cohMin = 1;
     for (let ix = EDGE; ix < NG - EDGE; ix++) cohMin = Math.min(cohMin, zs[ix]);
-    $('s1a').textContent = ks[iCrest].toFixed(3) + ' km⁻¹';
+    const rad = Math.abs(ks[iCrest]) > 1e-6 ? (1 / Math.abs(ks[iCrest])) : Infinity;
+    $('s1a').textContent = ks[iCrest].toFixed(3) + ' km⁻¹' +
+      (isFinite(rad) ? '   (a circle of radius ' + rad.toFixed(2) + ' km)' : '');
     $('s1b').textContent = ks[iTrough].toFixed(3) + ' km⁻¹';
     $('s1e').textContent = cohMin.toFixed(3) + ' at the fault';
     $('s1c').textContent = Math.abs(ds[iSteep]).toFixed(2) + '° at ' +
