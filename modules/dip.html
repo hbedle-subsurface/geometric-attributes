@@ -748,6 +748,7 @@
   }
 
   function drawStep2() {
+    drawMain();
     drawScore('c2c', scoreFor(S.guess));
     drawGathered('c2b', S.guess);
   }
@@ -821,7 +822,7 @@
 
   /* -------------------------------- step 3 ----------------------------- */
 
-  function drawStep3() { drawCurve(); }
+  function drawStep3() { drawMain(); drawCurve(); }
 
   function drawCurve() {
     const w = panelWidth($('c3b'));
@@ -968,7 +969,6 @@
 
   function drawAll() {
     if (visible('p1')) drawStep1();
-    if (visible('p2') || visible('p3')) drawMain();
     if (visible('p2')) drawStep2();
     if (visible('p3')) drawStep3();
     syncLabels(); updateStats();
