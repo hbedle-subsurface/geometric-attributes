@@ -616,6 +616,71 @@ details.notes summary {
 }
 details.notes p, details.notes li { font-size: 14px; color: var(--ink-soft); max-width: 92ch; }
 
+/* --- tabbed module layout ------------------------------------------------ */
+/* A long module is hard to work through by scrolling, because the controls and
+   the data end up off screen by the time you reach the discussion. These three
+   pieces keep the live panel and its sliders pinned at the top while the
+   explanation changes underneath. */
+
+.labhead {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 16px 18px 14px;
+  margin: 18px 0 0;
+}
+.labhead .labgrid {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 20px; align-items: start;
+}
+.labhead canvas { display: block; width: 100%; height: auto; }
+.labhead .controls { margin: 0; border: 0; padding: 0; background: none; }
+.labhead .cap {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--crimson); margin: 0 0 8px;
+}
+.labhead .cap span { text-transform: none; letter-spacing: 0; color: var(--slate); }
+
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 0;
+  border: 1px solid var(--rule); border-top: 0;
+  background: var(--panel); margin: 0 0 20px;
+}
+.tabs button {
+  font-family: var(--body); font-size: 12.5px; padding: 10px 14px;
+  background: none; border: 0; border-right: 1px solid var(--rule);
+  border-bottom: 3px solid transparent;
+  color: var(--slate); cursor: pointer; white-space: nowrap;
+}
+.tabs button:last-child { border-right: 0; }
+.tabs button:hover { color: var(--ink); background: var(--cream); }
+.tabs button[aria-selected="true"] {
+  color: var(--crimson); font-weight: 600; border-bottom-color: var(--crimson);
+  background: var(--cream);
+}
+.tabs .spacer { flex: 1; border-right: 0; }
+
+.tabpane { animation: fade .18s ease-out; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* --- reveal-on-demand answers -------------------------------------------- */
+
+details.reveal { margin: 8px 0 0; }
+details.reveal summary {
+  cursor: pointer; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--crimson);
+  list-style: none; display: inline-block;
+  border: 1px solid var(--rule); padding: 3px 10px; background: #fff;
+}
+details.reveal summary::-webkit-details-marker { display: none; }
+details.reveal summary:hover { background: var(--cream); }
+details.reveal[open] summary { background: var(--cream); border-color: var(--cream-edge); }
+details.reveal .ans { display: block; margin-top: 9px; }
+
+.foot-grid .lic {
+  font-size: 12.5px; color: var(--slate); max-width: 78ch; margin: 8px 0 0;
+}
+.foot-grid .lic .k { font-family: var(--mono); font-size: 12px; color: var(--crimson); }
+
 .pager {
   display: flex; justify-content: space-between; gap: 14px;
   padding: 26px 0 0; margin-top: 22px; border-top: 1px solid var(--rule); flex-wrap: wrap;
@@ -624,6 +689,7 @@ details.notes p, details.notes li { font-size: 14px; color: var(--ink-soft); max
 /* --- responsive ---------------------------------------------------------- */
 
 @media (max-width: 940px) {
+  .labhead .labgrid { grid-template-columns: 1fr; gap: 16px; }
   .hero-grid { grid-template-columns: 1fr; gap: 30px; }
   .primer-grid { grid-template-columns: 1fr; gap: 22px; }
   .lab { grid-template-columns: 1fr; }
