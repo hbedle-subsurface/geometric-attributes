@@ -37,11 +37,11 @@
   <div class="labhead">
     <div class="labgrid">
       <div>
-        <p class="cap">The analysis window <span>&mdash; the same data every step below refers to</span></p>
+        <p class="cap">The analysis window <span>&mdash; the same data every step uses</span></p>
         <canvas id="c2win" aria-label="An analysis window of several traces"></canvas>
       </div>
       <div>
-        <p class="cap">Change the traces <span>&mdash; every panel updates as you drag</span></p>
+        <p class="cap">Change the traces <span>&mdash; results update as you drag</span></p>
         <div class="controls" id="winControls">
       <div class="ctl-col">
         <h2>How the traces differ</h2>
@@ -157,6 +157,19 @@
       the bed using the dip field from modules 01 to 03. The question becomes: can this whole window be
       described as one seismic event? Two long-standing ways of answering that are below, and the sliders
       above let you change the window in different ways to see how each one responds.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Amplitude changes sideways.</b> The shape of the wavelet stays exactly the same; only how big
+        it is changes from trace to trace. This happens constantly in real data — a bed thins, porosity
+        changes, the reflection gets weaker.</li>
+      <li><b>The shape itself changes.</b> Now the wavelet is rotated a little more on each trace, so the
+        traces are genuinely different shapes rather than different sizes. Watch which attributes care about
+        this and which cared about the slider above.</li>
+      <li><b>Noise</b>, because real traces never match perfectly, and it is worth knowing how much of the
+        disagreement is only noise.</li>
+      <li><b>Overall amplitude</b> turns the whole window up or down together. Nothing about how well the
+        traces agree has changed — so watch closely which numbers stay put and which do not!</li>
+      <li><b>Traces used</b> and <b>window height</b> set how much data each answer rests on.</li>
+    </ul>
 
     <div class="sec-row" id="row2">
       <div class="panel-col">
@@ -1458,7 +1471,7 @@
     const el = $('c2win');
     if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
     const w = pw(el);
-    const h = clamp(Math.round(w * 0.62), 200, 280);
+    const h = clamp(Math.round(w * 0.46), 150, 210);
     const J = 2 * S.half + 1;
     const sub = new Float32Array(J * WT);
     for (let j = 0; j < J; j++) {
