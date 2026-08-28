@@ -27,12 +27,14 @@
     <h1>Dip steering: why the window has to follow the bed</h1>
     <p class="sub">Modules <a href="dip.html">01</a> and <a href="dip3d.html">02</a> produced a reflector
       orientation at every sample. This module is about what that orientation is <em>for</em>. Every
-      attribute that compares neighbouring traces has to decide where to look on each of them, and the
+      attribute that compares neighboring traces has to decide where to look on each of them, and the
       difference between looking along the bed and looking straight across the screen decides what the
       attribute ends up imaging.</p>
   </div>
 
-  <section class="controls" style="margin-top:6px;margin-bottom:0">
+  <div class="labhead">
+    <p class="cap">The wavelet and the window <span>&mdash; these apply to every step</span></p>
+    <div class="controls" id="winControls">
 <div class="ctl-col">
         <h2>The wavelet</h2>
         <div class="ctl">
@@ -68,19 +70,31 @@
         </div>
         <button class="btn ghost small" id="resetBtn" type="button">Reset everything</button>
       </div>
-      </section>
-  <p class="hint-line" style="margin:6px 0 0;max-width:84ch">These settings apply to every step on the
-    page. Steps 1 and 2 use them on a single reflector; steps 3 and 4 use them on a whole section.</p>
+          </div>
+  </div>
 
-  <!-- ============================== STEP ONE ============================== -->
-  <section class="plot" style="margin-top:6px">
-    <div class="plot-head">
-      <h3>Step 1 &nbsp;·&nbsp; Two windows on the same sample</h3>
+  <p class="tabhint">Work through the four steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two windows</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · When it fails</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · A whole section</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · A wrong dip</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Two windows on the same sample</h3>
       <span class="hint">One continuous reflector, two ways of sampling it</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       Below is a single, perfectly continuous reflector with no fault, no noise and no change of any kind
-      along it. Two analysis windows sit on the same sample. The grey one is horizontal. The crimson one is
+      along it. Two analysis windows sit on the same sample. The gray one is horizontal. The crimson one is
       tilted to follow the bed. Both read the same traces; they differ only in <em>where on each trace</em>
       they read.</p>
 
@@ -90,7 +104,7 @@
       <label for="dip">Dip of the bed <span class="val" id="dipV">2.00 ms per trace</span></label>
       <input type="range" id="dip" min="-12" max="12" step="0.1" value="6">
     </div>
-    <p class="hint-line" style="margin:-8px 0 16px;max-width:84ch">At zero the two windows are the same
+    <p class="hint-line" style="margin:-8px 0 16px">At zero the two windows are the same
       window. Move the dip either way and they separate; a negative dip simply tilts the bed the other way,
       and the horizontal window is equally wrong about it.</p>
 
@@ -118,27 +132,27 @@
       <span>The score is semblance, the same measure the dip search maximised in module 01: 1 when every
         trace in the window is identical, falling toward 1/N when they are unrelated.</span>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================== STEP TWO ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 2 &nbsp;·&nbsp; When does the horizontal window fail?</h3>
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>When does the horizontal window fail?</h3>
       <span class="hint">It depends on the wavelet, not on the geology</span>
     </div>
-    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       Think of it as two lengths of time competing. The first is how much the reflector's arrival time
       changes from one end of the window to the other — the dip multiplied by the width of the aperture. The
       second is the period of the wavelet, the time from one peak to the next.</p>
-    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       While the first is a small fraction of the second, the traces still broadly overlap and the window
       sees one event. As it grows toward half a period, the far end of the window is reading a trough where
       the near end reads a peak, and the window is being shown two opposite things and asked whether they
       agree. That is the whole mechanism, and it explains why the failure point depends on the
       <em>wavelet</em> rather than on anything geological.</p>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       The curve sweeps the bed dip and plots both scores. The steered window holds at 1.0 the whole way,
-      because a continuous reflector is continuous no matter how steeply it sits. Watch where the grey curve
+      because a continuous reflector is continuous no matter how steeply it sits. Watch where the gray curve
       crosses the dashed line, and watch the box below that reports the shift as a fraction of a period at
       that crossing.</p>
 
@@ -152,15 +166,15 @@
       <div class="stat"><span>Dip at which the flat window drops below 0.8</span><b id="s2d">—</b></div>
       <div class="stat wide"><span>The rule this gives you</span><b id="s2e">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP THREE ============================= -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 3 &nbsp;·&nbsp; The same attribute over a whole section</h3>
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>The same attribute over a whole section</h3>
       <span class="hint">One of these images the fault; the other images the bedding</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       Now a folded section cut by a single fault. Coherence is computed at every sample twice, with
       identical windows and identical arithmetic, differing only in whether the window is steered. Dark is
       low coherence.</p>
@@ -179,13 +193,13 @@
 
     <div class="legend">
       <span>The seismic is displayed as variable density, the way a section of this many traces normally is.
-        Panels 2 and 3 share one grey scale, black at 0.5 and white at 1.0, so they can be compared
+        Panels 2 and 3 share one gray scale, black at 0.5 and white at 1.0, so they can be compared
         directly. The fault cuts obliquely across the reflectors, which is what makes the dark stripe lean.</span>
     </div>
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:26px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       The same comparison on a time slice</h2>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       A section shows the fault as a line, which is a hard place to judge how much damage an unsteered
       window does. A map view is much clearer. These two panels are horizontal slices through a small 3D
       volume: a sequence of reflectors carried over a monoclinal flexure, flat on both sides and steepening
@@ -218,7 +232,7 @@
       <label for="noise">Noise <span class="val" id="noiseV">none</span></label>
       <input type="range" id="noise" min="0" max="50" step="2" value="12">
     </div>
-    <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">Both panels degrade, but not in the same
+    <p class="hint-line" style="margin:-8px 0 12px">Both panels degrade, but not in the same
       way. The unsteered one was already dark on the flanks before any noise was added.</p>
 
     <div class="stats">
@@ -229,15 +243,15 @@
       <div class="stat key"><span>How often the darkest point is the fault</span><b id="s3e">—</b></div>
       <div class="stat wide"><span>What this means for picking</span><b id="s3f">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================= STEP FOUR ============================== -->
-  <section class="plot" style="margin-top:20px">
-    <div class="plot-head">
-      <h3>Step 4 &nbsp;·&nbsp; Steering with the wrong dip</h3>
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Steering with the wrong dip</h3>
       <span class="hint">Steering is not a switch; it is only as good as the dip volume</span>
     </div>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+
+        <p class="lede">
       Modules 01 and 02 spent a good deal of effort on how a dip estimate goes wrong. This is the bill for
       it. The slider adds a fixed error to every dip estimate before the window is steered by it, so the
       window still tilts, just not by the right amount.</p>
@@ -250,13 +264,13 @@
     <p class="sublabel"><b>1</b> What the error does to the window
       <span class="note">a bed dipping 2 ms per trace, with both windows on it</span></p>
     <canvas id="c4zoom" aria-label="A dipping bed with a correctly steered window and a wrongly steered one"></canvas>
-    <p class="hint-line" style="margin:8px 0 16px;max-width:84ch">The teal window is steered by the correct
+    <p class="hint-line" style="margin:8px 0 16px">The teal window is steered by the correct
       dip and lies along the bed. The crimson one is steered by the dip plus your error, so it still tilts
       but cuts across. At a large enough error it is no better aligned than a horizontal window would have
       been, which is the point of the last exercise.</p>
 
     <p class="sublabel"><b>2</b> Coherence, steered by the wrong dip
-      <span class="note">same grey scale as step 3</span></p>
+      <span class="note">same gray scale as step 3</span></p>
     <canvas id="c4map" aria-label="Coherence computed with a deliberately incorrect dip"></canvas>
 
     <p class="sublabel" style="margin-top:16px"><b>3</b> What the error costs
@@ -270,11 +284,10 @@
       <div class="stat"><span>Steepest dip in this section</span><b id="s4d">—</b></div>
       <div class="stat wide"><span>Verdict</span><b id="s4e">—</b></div>
     </div>
-  </section>
+    </section>
 
-  <!-- ============================== TEACHING ============================== -->
-  <div class="teach">
-    <div class="tryit">
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+<div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
         <li><b>Find the tolerance of an unsteered window.</b> In step 2, leave the frequency at 30 Hz and
@@ -324,12 +337,14 @@
             percent error. Bedding coherence collapses to 0.614, well below the 0.78 the unsteered window
             managed, and the darkest point on a row is the fault only 41% of the time rather than 90%.
             Steering by a badly wrong dip is therefore worse than not steering at all, and more dangerous,
-            because the volume is labelled as dip-steered. Push on to 4 ms per trace and the fault is found
+            because the volume is labeled as dip-steered. Push on to 4 ms per trace and the fault is found
             on 10% of rows: the attribute is imaging the error.</span></li>
       </ol>
     </div>
+  </section>
 
-    <div class="takeaway">
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+<div class="takeaway" style="max-width:none">
       <h3>The main points</h3>
       <ul>
         <li><b>An unsteered window measures dip, not discontinuity.</b> On a continuous dipping reflector it
@@ -344,10 +359,11 @@
         <li><b>This is why dip comes first.</b> Coherence, curvature, aberrancy and structure-oriented
           filtering all take the dip field as an input, and none of them can tell you it was wrong.</li>
       </ul>
-    </div>
-  </div>
+      </div>
+  </section>
 
-  <details class="notes" id="notes">
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+  <details class="notes" id="notes" open>
     <summary>Method, assumptions, and where to read more</summary>
     <p>Steps 1 and 2 use a single reflector across a small patch of traces, built by convolving one
       reflection coefficient with a Ricker wavelet and shifting each trace by the bed dip. Steps 3 and 4 use
@@ -392,7 +408,9 @@
     </ul>
   </details>
 
-  <section class="nextup">
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
     <h3><a href="coherence.html">04 · Coherence, similarity and variance</a></h3>
     <p>The window now follows the bed, so the traces inside it can finally be compared. The next question is
@@ -402,7 +420,7 @@
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
-  <div class="pager">
+  <div class="pager" id="pager" hidden>
     <a class="btn ghost" href="dip3d.html">← Module 02: inline and crossline dip</a>
     <a class="btn" href="coherence.html">Next: the coherence family →</a>
   </div>
@@ -439,6 +457,7 @@
 
   const $ = (id) => document.getElementById(id);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const visible = (id) => { const el = $(id); return el && !el.hidden; };
 
   /* cohField arrived with a later assets/attributes.js; define it here when
      absent so the module runs against an older checkout. */
@@ -486,7 +505,7 @@
 
   const DEF = {
     dip: 6, f: 30, half: 2, kHalf: 10,
-    noise: 12, bias: 0, disp: 'wiggle',
+    noise: 12, bias: 0, disp: 'wiggle', tab: 'p1',
   };
   let S = SEIS.readState(DEF);
 
@@ -581,7 +600,7 @@
      Steering uses the analytic dip of the model rather than an estimate,
      because step 4 is where estimation error is the subject. */
 
-  const VN = 100, VS = 81, VC = 40;                 // traces each way, slab, centre
+  const VN = 100, VS = 81, VC = 40;                 // traces each way, slab, center
   /* A monoclinal flexure rather than a dome. An earlier version used a product
      of two cosines, which repeats and drew a grid of bullseyes that had nothing
      to do with the lesson; and it carried a single reflector with more relief
@@ -737,10 +756,19 @@
   const M = { l: 50, r: 14, t: 10, b: 34 };
   const EXC = 0.45;
 
-  const pw = (el) => (el && el.parentElement ? el.parentElement.clientWidth : 900);
+  /* clientWidth includes padding, and a tab pane has plenty, so sizing a
+     canvas to it pushes the panel past the right-hand edge. */
+  function pw(el) {
+    const par = el && el.parentElement;
+    if (!par) return 900;
+    const cs = window.getComputedStyle(par);
+    const inner = par.clientWidth
+      - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+    return Math.max(240, Math.floor(inner));
+  }
   function rowWidth(rowId, n) {
     const row = $(rowId);
-    const total = row ? row.clientWidth : 800;
+    const total = row ? pw(row.firstElementChild || row) : 800;
     const w = window.innerWidth <= 700
       ? Math.max(240, total)
       : Math.max(190, Math.floor((total - 10 * (n - 1)) / n));
@@ -1032,10 +1060,10 @@
     tracePanel('c4zoom', P.a, PN, PT, P.pk, w, h, {
       extras: (ctx, R, X, Y) => {
         const mid = PCT * DT * 1000;
-        const box = (dipMs, colour, dash) => {
+        const box = (dipMs, color, dash) => {
           ctx.save();
           ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
-          ctx.strokeStyle = colour; ctx.lineWidth = 1.9; ctx.setLineDash(dash);
+          ctx.strokeStyle = color; ctx.lineWidth = 1.9; ctx.setLineDash(dash);
           ctx.beginPath();
           ctx.moveTo(X(PCX - half) - 6, Y(mid - dipMs * half - kk * 2));
           ctx.lineTo(X(PCX + half) + 6, Y(mid + dipMs * half - kk * 2));
@@ -1156,7 +1184,7 @@
           : rel < 0.9
             ? 'The error is now a large fraction of the structure itself.'
             : 'The error exceeds the steepest dip in the section. Steering this badly is worse than ' +
-              'not steering, because the volume is labelled as steered.';
+              'not steering, because the volume is labeled as steered.';
     }
   }
 
@@ -1180,8 +1208,14 @@
      PLUMBING
      ===================================================================== */
 
+  /* Only the pane on screen is drawn; a canvas in a hidden pane has no width
+     and would come out at zero size. */
   function drawAll() {
-    drawStep1(); drawStep2(); drawStep3(); drawStep4(); syncLabels(); updateStats();
+    if (visible('p1')) drawStep1();
+    if (visible('p2')) drawStep2();
+    if (visible('p3')) drawStep3();
+    if (visible('p4')) drawStep4();
+    syncLabels(); updateStats();
   }
 
   let heavy = null;
@@ -1234,6 +1268,63 @@
     pushToInputs(); buildSection(); computeSection(); computeSlices(); drawAll(); saveState();
   });
 
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'pe', 'pk', 'pm'];
+  const STEPNAMES = {
+    p1: 'Two windows', p2: 'When it fails', p3: 'A whole section', p4: 'A wrong dip',
+    pe: 'Exercises', pk: 'Key points', pm: 'Method',
+  };
+
+  function buildStepNav() {
+    PANES.forEach((id, i) => {
+      const pane = $(id);
+      if (!pane || pane.querySelector('.stepnav')) return;
+      const prev = PANES[i - 1], next = PANES[i + 1];
+      const nav = document.createElement('div');
+      nav.className = 'stepnav';
+      const mk = (target, text, ghost) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn' + (ghost ? ' ghost' : '') + ' small';
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          showTab(target);
+          const t = document.querySelector('.tabhint');
+          if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return b;
+      };
+      nav.appendChild(prev ? mk(prev, '\u2190 ' + STEPNAMES[prev], true)
+                           : document.createElement('span'));
+      const where = document.createElement('span');
+      where.className = 'where';
+      where.textContent = i < 4 ? 'step ' + (i + 1) + ' of 4' : STEPNAMES[id];
+      nav.appendChild(where);
+      nav.appendChild(next ? mk(next, STEPNAMES[next] + ' \u2192')
+                           : document.createElement('span'));
+      pane.appendChild(nav);
+    });
+  }
+
+  function showTab(id) {
+    PANES.forEach((q) => { const el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach((b) => {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    // the wavelet and window settings matter on every step, so the header
+    // stays up and only steps aside for the reference tabs
+    const lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    const last = (id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !last;
+    if ($('pager')) $('pager').hidden = !last;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
 
@@ -1241,7 +1332,8 @@
   computeSection();
   computeSlices();
   pushToInputs();
-  drawAll();
+  buildStepNav();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
   document.fonts && document.fonts.ready.then(drawAll);
 })();
 </script>
