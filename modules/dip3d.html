@@ -531,10 +531,12 @@
           dome on in step 4 and compare the two maps before and after.
           <details class="reveal"><summary>Hint</summary><span class="ans">With a plane both maps are a single flat color. Every trace returns the same
             pair, so one measurement would have described the whole volume. With the dome on a flat regional,
-            magnitude climbs from zero at the crest to about 0.12 ms/m at the edge, and azimuth runs right
-            round the color wheel from 0 to 349 degrees, because the reflector falls away in every
-            direction. Now put the crossline dip back to 4 and switch the dome on again: the azimuth range
-            collapses to about 95 degrees, because the regional dip dominates and the dome only perturbs it.
+            magnitude climbs from zero at the crest to about 0.39 ms/m at the edge, and azimuth runs right
+            round the color wheel, because the reflector falls away in every direction. Now put the
+            crossline dip back to 4 and switch the dome on again: magnitude runs 0.00 to 0.52 ms/m, the
+            crest shifts off center toward the south, and the azimuth pattern leans that way rather than
+            being symmetric — the dome and the regional dip are simply added, and the crest is wherever
+            the two cancel.
             Real data behaves like these two cases rather than like the plane, which is why the estimate is
             repeated at every sample instead of measured once.</span></details></li>
         <li><b>Find the two azimuths that matter.</b> With inline 2 and crossline 4, use step 6 to find the
@@ -778,7 +780,7 @@
   const CX = 12, CY = 12;                    // the analysis trace: inline 13, line 13
   const msToS = (ms) => ms / (DT * 1000);
   const sToMs = (s) => s * DT * 1000;
-  const DOME_C = 0.104;                      // ms per bin squared, when domed
+  const DOME_C = 0.34;                       // ms per bin squared, when domed
 
   const DEF = {
     px: 0, py: 4, t0: 220, f: 30, noise: 0, beds: false, dome: false,
@@ -907,7 +909,7 @@
         const ix = xs[a], iy = ys[b];
         const it = clamp(Math.round(msToS(refMs(ix, iy, 0))), 12, NT - 13);
         const r = scan3D(VOL, NIL, NXL, NT, ix, iy, it,
-          { half: 2, kHalf: 8, pMax: msToS(9), nP: MAPNP });
+          { half: 2, kHalf: 8, pMax: msToS(14), nP: MAPNP });
         const g = magAzim(gxOf(sToMs(r.px)), gyOf(sToMs(r.py)));
         mag[b * gxn + a] = g.mag; az[b * gxn + a] = g.az;
         lo = Math.min(lo, g.mag); hi = Math.max(hi, g.mag);
