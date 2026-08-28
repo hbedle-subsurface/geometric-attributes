@@ -35,8 +35,8 @@
   <div class="labhead">
     <div class="labgrid">
       <div>
-        <p class="cap">The structure <span>&mdash; click the map to move the analysis point</span></p>
-        <canvas id="cMap" aria-label="Map of the modeled structure with the analysis point marked"></canvas>
+        <p class="cap">The seismic line <span>&mdash; click it to move the analysis point</span></p>
+        <canvas id="cMap" aria-label="Vertical seismic section through the modeled structure"></canvas>
       </div>
       <div>
         <p class="cap">Build the structure <span>&mdash; every step updates as you drag</span></p>
@@ -100,8 +100,10 @@
       <h3><span class="stepno">1</span>From dip to curvature</h3>
       <span class="hint">One profile, differentiated twice</span>
     </div>
-    <p class="lede">You have already built two of the three curves below, so let us take them in the order
-      you met them.</p>
+    <p class="lede">The seismic line above the tabs is the whole of the input. It runs west to east through
+      a gentle fold and one small fault, and it stays on screen for every step so you can always see what
+      the numbers are describing. The three curves below line up with it trace for trace. You have already
+      built two of them, so let us take them in the order you met them.</p>
     <ul class="lede" style="padding-left:20px">
       <li><b>Dip</b> came first, in modules 01 to 03: which way the reflector is heading at every sample.
         On this line it is largest on the flanks of the fold and passes through zero at the crest and the
@@ -846,31 +848,15 @@
 
   function drawStep1() {
     const w = pw($('c1'));
-    const h = clamp(Math.round(w * 0.80), 480, 660);
+    const h = clamp(Math.round(w * 0.52), 340, 470);
     const ctx = SEIS.fitCanvas($('c1'), w, h);
     ctx.clearRect(0, 0, w, h);
     const gap = 14;
-    const seisH = Math.round((h - M.t - M.b - 3 * gap) * 0.40);
-    const ph = (h - M.t - M.b - 3 * gap - seisH) / 3;
-    const RS = { x: M.l, y: M.t, w: w - M.l - M.r, h: seisH };
+    const ph = (h - M.t - M.b - 2 * gap) / 3;
     const rects = [0, 1, 2].map((i) => ({
-      x: M.l, y: M.t + seisH + gap + i * (ph + gap), w: w - M.l - M.r, h: ph,
+      x: M.l, y: M.t + i * (ph + gap), w: w - M.l - M.r, h: ph,
     }));
-
-    const LINE = buildLine();
-    ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(RS.x, RS.y, RS.w, RS.h); ctx.restore();
-    SEIS.drawVarDensity(ctx, LINE.f, SN, ST, RS,
-      { cmap: SEIS.COLORMAPS.gray, clip: LINE.pk * 0.8 });
-    SEIS.frame(ctx, RS);
-    SEIS.axisLeft(ctx, RS, 0, (ST - 1) * SDT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 3 });
-    SEIS.tag(ctx, RS.x + 8, RS.y + 12, 'the seismic line', INK);
-    if (S.flt > 0) {
-      const fx = RS.x + (FAULTX / (SN - 1)) * RS.w;
-      SEIS.dashedLine(ctx, fx, RS.y, fx, RS.y + RS.h, 'rgba(132,22,23,.8)', [5, 4], 1.6);
-      SEIS.tag(ctx, Math.min(fx + 7, RS.x + RS.w - 46), RS.y + RS.h - 16, 'fault', CRIM);
-    }
-
-    const coh = lineCoherence(LINE);
+    const coh = lineCoherence(buildLine());
     const zs = [], ds = [], ks = [];
     for (let ix = 0; ix < NG; ix++) {
       const i = S.py * NG + ix;
@@ -1208,11 +1194,38 @@
     if ($('az') && parseFloat($('az').value) !== S.az) $('az').value = S.az;
   }
 
+  /* The header holds the seismic itself rather than a map, because a vertical
+     section is what an interpreter actually looks at, and because every curve
+     in step 1 sits directly beneath it and lines up with it trace for trace. */
   function drawHeader() {
     const el = $('cMap');
     if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
     const w = pw(el);
-    reliefMap('cMap', w, clamp(Math.round(w * 0.78), 200, 280));
+    const h = clamp(Math.round(w * 0.42), 180, 250);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
+    const L = buildLine();
+    ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+    SEIS.drawVarDensity(ctx, L.f, SN, ST, R, { cmap: SEIS.COLORMAPS.gray, clip: L.pk * 0.8 });
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    if (S.flt > 0) {
+      const fx = R.x + (FAULTX / (SN - 1)) * R.w;
+      SEIS.dashedLine(ctx, fx, R.y, fx, R.y + R.h, 'rgba(132,22,23,.85)', [5, 4], 1.7);
+    }
+    const px = R.x + (S.px / (SN - 1)) * R.w;
+    ctx.strokeStyle = TEAL; ctx.lineWidth = 1.8; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(px, R.y); ctx.lineTo(px, R.y + R.h); ctx.stroke();
+    ctx.restore();
+    SEIS.frame(ctx, R);
+    SEIS.axisLeft(ctx, R, 0, (ST - 1) * SDT * 1000, 'time (ms)', (v) => v.toFixed(0), { ticks: 3 });
+    SEIS.axisBottom(ctx, R, 0, (SN - 1) * BIN / 1000, 'east (km)', (v) => v.toFixed(1), { ticks: 5 });
+    if (S.flt > 0) {
+      SEIS.tag(ctx, clamp(R.x + (FAULTX / (SN - 1)) * R.w + 7, R.x, R.x + R.w - 44),
+        R.y + R.h - 16, 'fault', CRIM);
+    }
+    SEIS.tag(ctx, clamp(px - 30, R.x + 2, R.x + R.w - 78), R.y + 12, 'this point', TEAL);
   }
 
   function drawAll() {
@@ -1307,7 +1320,7 @@
 
   /* Both maps accept a click, because the interesting question in step 2 is
      what a saddle looks like, and you have to be able to stand on one. */
-  function attachProbe(canvasId) {
+  function attachProbe(canvasId, xOnly) {
     const c = $(canvasId);
     if (!c) return;
     let down = false;
@@ -1317,7 +1330,8 @@
       const fx = (ev.clientX - r.left - R.x) / R.w;
       const fy = 1 - (ev.clientY - r.top - R.y) / R.h;
       S.px = clamp(Math.round(fx * NG), EDGE, NG - 1 - EDGE);
-      S.py = clamp(Math.round(fy * NG), EDGE, NG - 1 - EDGE);
+      // the header is a vertical section, so it fixes east-west only
+      if (!xOnly) S.py = clamp(Math.round(fy * NG), EDGE, NG - 1 - EDGE);
       drawAll(); saveState();
     };
     c.addEventListener('pointerdown', (e) => {
@@ -1328,7 +1342,7 @@
     c.addEventListener('pointerup', () => { down = false; });
     c.addEventListener('pointercancel', () => { down = false; });
   }
-  attachProbe('cMap');
+  attachProbe('cMap', true);
   attachProbe('c2map');
 
   let rt;
