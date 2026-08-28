@@ -26,10 +26,12 @@
   <div class="mod-head">
     <p class="eyebrow">Module 04 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Coherence is not one calculation</h1>
-    <p class="sub">Module <a href="dipsteer.html">03</a> got the analysis window aligned with the bed, so
-      the traces inside it can finally be compared. This module is about what "compared" means. Several
-      different attributes all get called coherence, they measure different properties, and on the same data
-      they disagree — sometimes completely.</p>
+    <p class="sub">Module <a href="dipsteer.html">03</a> got the analysis window lying along the bed, so
+      the traces inside it can finally be compared with each other. Now for the interesting part: what does
+      "compared" actually mean? At least five different calculations all get called coherence. They are not
+      minor variations on one idea — they measure genuinely different things, and on the same piece of data
+      they can disagree completely. One of them will call a window perfectly coherent while another calls it
+      an edge. Knowing which is which is the difference between reading an attribute and guessing at it.</p>
   </div>
 
   <div class="labhead">
@@ -39,25 +41,27 @@
         <canvas id="c2win" aria-label="An analysis window of several traces"></canvas>
       </div>
       <div>
-        <p class="cap">What is wrong with it <span>&mdash; every panel updates as you drag</span></p>
+        <p class="cap">Change the traces <span>&mdash; every panel updates as you drag</span></p>
         <div class="controls" id="winControls">
       <div class="ctl-col">
-        <h2>What is wrong with the window</h2>
+        <h2>How the traces differ</h2>
         <div class="ctl">
-          <label for="amp">Amplitude change across it <span class="val" data-val="amp" id="ampV">none</span></label>
+          <label for="amp">Amplitude changes sideways <span class="val" data-val="amp" id="ampV">none</span></label>
           <input type="range" data-key="amp" id="amp" min="0" max="90" step="2" value="0">
         </div>
-        <p class="hint-line" style="margin:-8px 0 14px">The waveform stays identical; only its size changes
-          from trace to trace.</p>
+        <p class="hint-line" style="margin:-8px 0 14px">The shape of the wavelet stays exactly the same;
+          only how big it is changes from trace to trace. This happens constantly in real data — a bed
+          thins, porosity changes, the reflection gets weaker.</p>
         <div class="ctl">
-          <label for="phase">Waveform change across it <span class="val" data-val="phase" id="phaseV">none</span></label>
+          <label for="phase">The shape itself changes <span class="val" data-val="phase" id="phaseV">none</span></label>
           <input type="range" data-key="phase" id="phase" min="0" max="180" step="5" value="0">
         </div>
-        <p class="hint-line" style="margin:-8px 0 0">A phase rotation applied progressively across the
-          window, so the shape itself changes.</p>
+        <p class="hint-line" style="margin:-8px 0 0">Now the wavelet is rotated a little more on each
+          trace, so the traces are genuinely different shapes rather than different sizes. Watch which
+          attributes care about this and which cared about the slider above.</p>
       </div>
       <div class="ctl-col">
-        <h2>And the usual suspects</h2>
+        <h2>Noise and gain</h2>
         <div class="ctl">
           <label for="noise">Noise <span class="val" data-val="noise" id="noiseV">none</span></label>
           <input type="range" data-key="noise" id="noise" min="0" max="60" step="2" value="0">
@@ -66,11 +70,12 @@
           <label for="gain">Overall amplitude <span class="val" data-val="gain" id="gainV">1.0 ×</span></label>
           <input type="range" data-key="gain" id="gain" min="0.2" max="3" step="0.1" value="1">
         </div>
-        <p class="hint-line" style="margin:-8px 0 0">Scales every trace in the window by the same factor.
-          Watch which of the two numbers below notices.</p>
+        <p class="hint-line" style="margin:-8px 0 0">Turns the whole window up or down together. Nothing
+          about the traces' agreement changes — so watch closely which numbers stay put and which do
+          not!</p>
       </div>
       <div class="ctl-col">
-        <h2>The window</h2>
+        <h2>The window itself</h2>
         <div class="ctl">
           <label for="half">Traces used <span class="val" data-val="half" id="halfV">5 traces</span></label>
           <input type="range" data-key="half" id="half" min="1" max="5" step="1" value="2">
@@ -86,8 +91,8 @@
     </div>
   </div>
 
-  <p class="tabhint">Work through the six steps in order &mdash; <b>then the exercises</b>.
-    Reference material is on the right-hand tabs.</p>
+  <p class="tabhint">Work through the six steps in order, <b>then try the exercises</b>.
+    Terminology and method are there when you want them.</p>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
     <button role="tab" data-tab="p1" aria-selected="false">1 · Two traces</button>
     <button role="tab" data-tab="p2" aria-selected="false">2 · A window</button>
@@ -104,14 +109,15 @@
 
   <section class="tabpane" id="p1" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3>Step 1 &nbsp;·&nbsp; How similar are two traces?</h3>
+      <h3><span class="stepno">1</span>How similar are two traces?</h3>
       <span class="hint">Before any equation, decide what your eye says</span>
     </div>
 
-        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Four cases. Look at each and decide, before reading any number, whether you would call the two traces
-      similar. Case 3 is the interesting one: the shape is identical and only the size differs. Is that
-      similar or not? Your answer decides which attribute you should be running.</p>
+        <p class="lede">
+      Four pairs of traces. Look at each one and decide, before you read a single number, whether you would
+      call them similar. Take case 3 seriously — the shape is identical and only the size differs. Is that
+      similar or not? There is no right answer, and that is exactly the point: your instinct about case 3
+      decides which attribute you ought to be running.</p>
 
     <div class="ctl" style="margin-bottom:14px">
       <label>The case</label>
@@ -123,7 +129,10 @@
       </div>
     </div>
 
-    <canvas id="c1" aria-label="Two seismic traces compared"></canvas>
+    <canvas id="c1" aria-label="Two seismic traces drawn on the same axis for comparison"></canvas>
+    <p class="hint-line" style="margin:8px 0 0">Both traces are drawn on the same axis so you can see the
+      answer rather than work it out. Where the two lines lie on top of each other the traces agree; where
+      they come apart they do not.</p>
 
     <div class="stats">
       <div class="stat"><span>Normalised crosscorrelation at zero lag</span><b id="s1a">—</b></div>
@@ -139,14 +148,15 @@
 
   <section class="tabpane" id="p2" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3>Step 2 &nbsp;·&nbsp; From two traces to a window</h3>
+      <h3><span class="stepno">2</span>From two traces to a window</h3>
       <span class="hint">The question becomes: are these one event?</span>
     </div>
 
-        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Attributes are not computed on pairs of traces but on a window of several, aligned along the bed by
-      the dip field from modules 01 to 03. The question the algorithm asks is whether the whole window can
-      be described as one coherent seismic event. Two long-standing ways of answering it are below.</p>
+        <p class="lede">
+      Real attributes do not work on pairs of traces. They work on a window of several at once, laid along
+      the bed using the dip field from modules 01 to 03. The question becomes: can this whole window be
+      described as one seismic event? Two long-standing ways of answering that are below, and the sliders
+      above let you change the window in different ways to see how each one responds.</p>
 
     <div class="sec-row" id="row2">
       <div class="panel-col">
@@ -174,25 +184,25 @@
 
   <section class="tabpane" id="p3" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3>Step 3 &nbsp;·&nbsp; One matrix underneath all of it</h3>
+      <h3><span class="stepno">3</span>One matrix underneath all of it</h3>
       <span class="hint">The covariance matrix and its eigenvalues</span>
     </div>
 
-        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      Every attribute on this page except the Sobel filter is built from a single object: a covariance
-      matrix. Entry <span class="k">C(m,n)</span> is trace m multiplied by trace n, sample by sample, summed
+        <p class="lede">
+      Here is the idea that ties nearly all of these attributes together. Except for the Sobel filter, every
+      one of them is built from a single object: a covariance matrix. Entry <span class="k">C(m,n)</span> is trace m multiplied by trace n, sample by sample, summed
       down the window. A window of J traces gives a J-by-J table of those products, and the diagonal
       <span class="k">C(m,m)</span> is simply the energy of trace m. Two traces that rise and fall together
       give a large positive entry; two that are unrelated give an entry near zero. The matrix is built from
       the <b>analytic trace</b>, meaning the amplitude together with its Hilbert transform, which keeps the
       estimate steady where the amplitude happens to pass through zero.</p>
-    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       <b>What an eigenvector is, for this purpose.</b> Ask a different question: is there a single waveform
       that, scaled up or down trace by trace, could account for the whole window? An eigenvector is a
       candidate set of those scale factors — one weight per trace. The <b>first eigenvector</b> is the set
       of weights that accounts for as much of the window's energy as any set can, and it is what panel 3
       draws: read it as "trace 1 needs this much of the common waveform, trace 2 this much", and so on.</p>
-    <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       <b>And an eigenvalue is how much that explained.</b> Each eigenvector comes with a number saying how
       much of the total energy it accounts for, and the numbers add up to the total. So if one waveform
       really does describe the window, λ₁ takes nearly everything and the rest are near zero. If the traces
@@ -227,23 +237,23 @@
 
   <section class="tabpane" id="p4" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3>Step 4 &nbsp;·&nbsp; One equation, three named attributes</h3>
+      <h3><span class="stepno">4</span>One equation, three named attributes</h3>
       <span class="hint">The difference is a single vector</span>
     </div>
 
-        <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+        <p class="lede">
       AASPI defines <b>outer-product similarity</b> as <span class="k">c = rᵀ C r / E</span>, where C is the
       covariance matrix from step 3, E is the total energy in the window, and r is a <b>test vector</b>: one
       weight per trace, the same shape as an eigenvector.</p>
-    <p style="margin:0 0 10px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
       Read it as a question. You are proposing a set of weights and asking how much of the window's energy
       that proposal accounts for. The quantity <span class="k">rᵀ C r</span> is the energy explained by your
       proposal; dividing by E turns it into a fraction between 0 and 1. So the answer is always "this share
       of the window is described by the pattern I suggested".</p>
-    <p style="margin:0 0 12px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      What makes this worth knowing is that several separately published attributes are this one equation
-      with different proposals for r.</p>
-    <ul style="margin:0 0 14px;padding-left:20px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+    <p class="lede">
+      And here is the satisfying part. Several attributes that were published separately, under different
+      names, in different decades, turn out to be this one equation with different proposals for r!</p>
+    <ul style="margin:0 0 14px;padding-left:20px;font-size:15px;color:var(--ink-soft);">
       <li style="margin-bottom:6px">Propose that every trace contributes equally — r a constant vector —
         and the answer is a <b>semblance</b> estimate of coherence. You are asking how much of the window is
         explained by the traces simply being the same as each other.</li>
@@ -281,7 +291,7 @@
       <label for="npc">Principal components kept, L <span class="val" data-val="npc" id="npcV">1</span></label>
       <input type="range" data-key="npc" id="npc" min="1" max="5" step="1" value="1">
     </div>
-    <p class="hint-line" style="margin:-8px 0 12px;max-width:84ch">
+    <p class="hint-line" style="margin:-8px 0 12px;">
       <b>Energy-ratio coherence</b> is the energy of the Karhunen–Loève filtered data over the total energy.
       Because the eigenvectors are orthonormal, keeping L components retains exactly the first L
       eigenvalues, so with L = 1 it is numerically identical to eigenstructure coherence. Raise L and
@@ -298,13 +308,13 @@
 
   <section class="tabpane" id="p5" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3>Step 5 &nbsp;·&nbsp; Sobel: the one that is not a covariance</h3>
+      <h3><span class="stepno">5</span>Sobel: the one that is not a covariance</h3>
       <span class="hint">An image-processing edge detector, steered along dip</span>
     </div>
 
-        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      The Sobel filter comes from image processing rather than from seismic statistics. AASPI describes its
-      version as the magnitude of the inline and crossline derivatives of amplitude along structural dip,
+        <p class="lede">
+      This one is the odd one out, and it is worth knowing why. The Sobel filter comes from image
+      processing, not from seismic statistics. AASPI describes its version as the magnitude of the inline and crossline derivatives of amplitude along structural dip,
       normalised by the same derivatives taken on absolute values. It never builds a covariance matrix and
       it has no concept of a common waveform. It simply asks how fast amplitude is changing sideways, which
       makes it respond strongly to a change in size that the eigenvalue-based attributes ignore entirely.</p>
@@ -322,13 +332,13 @@
 
   <section class="tabpane" id="p6" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3>Step 6 &nbsp;·&nbsp; The same data, five problems, five attributes</h3>
+      <h3><span class="stepno">6</span>The same data, five problems, five attributes</h3>
       <span class="hint">Where the algorithms part company</span>
     </div>
 
-        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
-      One synthetic line, flat-lying so that steering is not a factor, divided into five zones of forty
-      traces each. The zones are boxed and named along the top. Every zone has a sharp vertical edge down
+        <p class="lede">
+      Now the payoff. One synthetic line, flat-lying so that steering is not a factor, divided into five
+      zones of forty traces each. The zones are boxed and named along the top. Every zone has a sharp vertical edge down
       its middle, and every edge is a different kind of problem: zone 1 has no problem at all and is the
       control, zone 2 changes amplitude across the edge without changing the waveform, zone 3 changes the
       waveform without changing its size, zone 4 has noise added to its right-hand half, and zone 5 is a
@@ -450,11 +460,11 @@
 
   <section class="tabpane" id="pt" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3>Terminology, and who owns which word</h3>
+      <h3><span class="stepno ref">?</span>Terminology, and who owns which word</h3>
       <span class="hint">These names are not standardised</span>
     </div>
 
-        <p style="margin:0 0 14px;font-size:15px;color:var(--ink-soft);max-width:84ch">
+        <p class="lede">
       AASPI notes that the coherence family acquired many of its names to avoid conflicts with the original
       Amoco patents rather than because the algorithms differ. Check which definition your software means
       before comparing two volumes or two papers.</p>
@@ -1041,18 +1051,47 @@
     ctx.restore();
   }
 
+  /* Two traces side by side leaves most of a wide panel empty and makes the
+     reader do the comparing by eye across a gap. Laid on the same axis in two
+     colours, the answer is immediate: where the lines sit on top of each other
+     the traces agree, and where they separate they do not. */
   function drawStep1() {
     const w = pw($('c1'));
-    const h = clamp(Math.round(w * 0.30), 230, 300);
+    const h = clamp(Math.round(w * 0.30), 240, 320);
     const p = pair(S.kase);
-    const two = new Float32Array(2 * T1N);
-    two.set(p.a, 0); two.set(p.b, T1N);
     let pk = 1e-6;
-    for (let i = 0; i < two.length; i++) pk = Math.max(pk, Math.abs(two[i]));
-    tracePanel('c1', two, 2, T1N, pk, w, h, (ctx, R, X) => {
-      SEIS.tag(ctx, X(0) - 26, R.y + 12, 'trace A', SLATE);
-      SEIS.tag(ctx, X(1) - 26, R.y + 12, 'trace B', SLATE);
-    });
+    for (let i = 0; i < T1N; i++) {
+      pk = Math.max(pk, Math.abs(p.a[i]), Math.abs(p.b[i]));
+    }
+    const ctx = SEIS.fitCanvas($('c1'), w, h);
+    ctx.clearRect(0, 0, w, h);
+    const R = { x: 54, y: 14, w: w - 68, h: h - 14 - 40 };
+    ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h); ctx.restore();
+
+    const X = (i) => R.x + (i / (T1N - 1)) * R.w;
+    const Y = (v) => R.y + R.h / 2 - (v / (pk * 1.12)) * (R.h / 2);
+    SEIS.dashedLine(ctx, R.x, Y(0), R.x + R.w, Y(0), 'rgba(22,25,28,.25)', [4, 4], 1);
+
+    const line = (arr, colour, width) => {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+      ctx.strokeStyle = colour; ctx.lineWidth = width; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      for (let i = 0; i < T1N; i++) {
+        const x = X(i), y = Y(arr[i]);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke(); ctx.restore();
+    };
+    // where they overlap, the darker line sits on top of the paler one
+    line(p.a, 'rgba(132,22,23,.95)', 2.6);
+    line(p.b, 'rgba(11,114,133,.95)', 2.2);
+
+    SEIS.frame(ctx, R);
+    SEIS.axisBottom(ctx, R, 0, (T1N - 1) * DT * 1000, 'time (ms)',
+      (v) => v.toFixed(0), { ticks: 6 });
+    SEIS.tag(ctx, R.x + 8, R.y + 12, 'trace A', CRIM);
+    SEIS.tag(ctx, R.x + 74, R.y + 12, 'trace B', TEAL);
     $('s1a').textContent = corrZero(p.a, p.b).toFixed(3);
     $('s1b').textContent = sembPair(p.a, p.b).toFixed(3);
     $('s1c').textContent = [
