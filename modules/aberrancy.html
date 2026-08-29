@@ -731,9 +731,16 @@
     ctx.strokeRect(B.x + 0.5, B.y + 0.5, B.w, B.h);
     ctx.font = '9.5px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
     ctx.textBaseline = 'top';
+    // the caption gets its own row whenever the end labels would reach it
+    const wLo = ctx.measureText(loLabel).width, wHi = ctx.measureText(hiLabel).width;
+    const wMid = midLabel ? ctx.measureText(midLabel).width : 0;
+    const roomy = (wLo + wHi + wMid + 76) < B.w;   // real fonts are wider than the metric here
     ctx.textAlign = 'left'; ctx.fillText(loLabel, B.x, B.y + B.h + 3);
     ctx.textAlign = 'right'; ctx.fillText(hiLabel, B.x + B.w, B.y + B.h + 3);
-    if (midLabel) { ctx.textAlign = 'center'; ctx.fillText(midLabel, B.x + B.w / 2, B.y + B.h + 3); }
+    if (midLabel) {
+      ctx.textAlign = 'center';
+      ctx.fillText(midLabel, B.x + B.w / 2, B.y + B.h + (roomy ? 3 : 16));
+    }
     ctx.restore();
   }
   function mapPanel(canvasId, w, h, get, map, bar) {
@@ -1014,20 +1021,25 @@
 
   /* The idea in one picture: an aberrancy is a vector, there are three of them
      at every point, and the one you display is their sum. */
+  /* Three panels, left to right: what the azimuth means, where the three roots
+     come from, and what is actually displayed. The middle panel is the point —
+     the roots are not three arbitrary arrows, they are the three extrema of the
+     azimuth sweep from step 2. */
   function drawVecCartoon() {
     const el = $('cVec');
     if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
-    const w = pw(el), h = clamp(Math.round(w * 0.30), 210, 270);
+    const w = pw(el), h = clamp(Math.round(w * 0.34), 240, 300);
     const ctx = SEIS.fitCanvas(el, w, h);
     ctx.clearRect(0, 0, w, h);
-    const half = (w - 70) / 2;
+    const pw3 = (w - 4 * 22) / 3;
+    const top = 46, bodyH = h - 96;
+    const roots = [[24, 52], [96, 44], [158, 26]];   // azimuth in degrees, magnitude
 
-    /* left: a flexure seen in section, with the aberrancy vector pointing
-       across it toward the side that has dropped */
-    const L = { x: 30, y: 46, w: half, h: h - 96 };
+    /* ---- 1. a flexure in section, and which way the azimuth points ---- */
+    const L = { x: 22, y: top, w: pw3, h: bodyH };
     const yOf = (x) => {
       const u = (x - L.x) / L.w;
-      return L.y + L.h * (0.22 + 0.56 / (1 + Math.exp(-(u - 0.5) * 11)));
+      return L.y + L.h * (0.24 + 0.52 / (1 + Math.exp(-(u - 0.5) * 11)));
     };
     ctx.save();
     ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.lineJoin = 'round';
@@ -1039,42 +1051,70 @@
     const mx = L.x + L.w / 2, my = yOf(mx);
     ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
     ctx.beginPath(); ctx.arc(mx, my, 5, 0, 6.2832); ctx.fill(); ctx.stroke();
-    // the vector: across the flexure, toward the downthrown side
     ctx.strokeStyle = CRIM; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + 62, my); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + 40, my); ctx.stroke();
     ctx.fillStyle = CRIM;
     ctx.beginPath();
-    ctx.moveTo(mx + 70, my); ctx.lineTo(mx + 58, my - 6); ctx.lineTo(mx + 58, my + 6);
+    ctx.moveTo(mx + 48, my); ctx.lineTo(mx + 37, my - 5.5); ctx.lineTo(mx + 37, my + 5.5);
     ctx.closePath(); ctx.fill();
     ctx.restore();
-    SEIS.tag(ctx, L.x, L.y - 24, 'a flexure, seen in section', INK);
-    SEIS.tag(ctx, L.x + 4, L.y + L.h + 16, 'up-thrown', SLATE);
-    SEIS.tag(ctx, L.x + L.w - 74, L.y + L.h + 16, 'down-thrown', SLATE);
-    SEIS.tag(ctx, mx + 10, my - 18, 'azimuth points this way', CRIM);
+    SEIS.tag(ctx, L.x, top - 26, '1 \u00b7 a flexure in section', INK);
+    SEIS.tag(ctx, L.x, L.y + L.h + 14, 'the azimuth points downthrown', CRIM);
 
-    /* right: three vectors from one point, and the sum of them */
-    const cx = 40 + half + 30 + half / 2, cy = L.y + L.h * 0.5;
-    const roots = [[24, 52], [96, 44], [158, 26]];      // azimuth, length
+    /* ---- 2. the azimuth sweep, with its three extrema ---- */
+    const M2 = { x: 22 * 2 + pw3, y: top, w: pw3, h: bodyH };
+    const val = (deg) => {
+      let v = 0;
+      roots.forEach((r) => {
+        let d = (deg - r[0]) % 180; if (d > 90) d -= 180; if (d < -90) d += 180;
+        v += r[1] * Math.exp(-(d * d) / 900);
+      });
+      return v;
+    };
+    let vmax = 1e-6;
+    for (let d = 0; d < 180; d++) vmax = Math.max(vmax, val(d));
+    const AX = (d) => M2.x + (d / 180) * M2.w;
+    const AY = (v) => M2.y + M2.h * 0.86 - (v / vmax) * M2.h * 0.72;
     ctx.save();
-    ctx.strokeStyle = 'rgba(22,25,28,.18)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(cx, cy, 56, 0, 6.2832); ctx.stroke();
+    ctx.strokeStyle = 'rgba(22,25,28,.25)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(M2.x, AY(0)); ctx.lineTo(M2.x + M2.w, AY(0)); ctx.stroke();
+    ctx.strokeStyle = TEAL; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    for (let d = 0; d <= 180; d += 2) {
+      const y = AY(val(d)); d === 0 ? ctx.moveTo(AX(d), y) : ctx.lineTo(AX(d), y);
+    }
+    ctx.stroke();
+    roots.forEach((r, i) => {
+      ctx.strokeStyle = 'rgba(22,25,28,.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(AX(r[0]), AY(0)); ctx.lineTo(AX(r[0]), AY(val(r[0]))); ctx.stroke();
+      ctx.fillStyle = TEAL;
+      ctx.beginPath(); ctx.arc(AX(r[0]), AY(val(r[0])), 4.5, 0, 6.2832); ctx.fill();
+      ctx.font = '600 10px "IBM Plex Mono", monospace';
+      ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(String(i + 1), AX(r[0]), AY(val(r[0])) - 8);
+    });
+    ctx.restore();
+    SEIS.tag(ctx, M2.x, top - 26, '2 \u00b7 sweep the azimuth', INK);
+    SEIS.tag(ctx, M2.x, M2.y + M2.h + 14, 'three peaks = three roots', TEAL);
+
+    /* ---- 3. those three as vectors, and their sum ---- */
+    const M3 = { x: 22 * 3 + pw3 * 2, y: top, w: pw3, h: bodyH };
+    const cx = M3.x + M3.w / 2, cy = M3.y + M3.h * 0.52;
+    const sc = Math.min(M3.w, M3.h) * 0.40 / 52;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.15)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, 52 * sc, 0, 6.2832); ctx.stroke();
     let sx = 0, sy = 0;
     roots.forEach((r, i) => {
-      const a = r[0] * DEG, dx = Math.cos(a) * r[1], dy = -Math.sin(a) * r[1];
-      sx += Math.cos(a) * r[1]; sy += -Math.sin(a) * r[1];
+      const a = r[0] * DEG, dx = Math.cos(a) * r[1] * sc, dy = -Math.sin(a) * r[1] * sc;
+      sx += dx; sy += dy;
       ctx.strokeStyle = TEAL; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + dx, cy + dy); ctx.stroke();
-      ctx.fillStyle = TEAL;
-      const ux = dx / r[1], uy = dy / r[1];
-      ctx.beginPath();
-      ctx.moveTo(cx + dx + ux * 7, cy + dy + uy * 7);
-      ctx.lineTo(cx + dx - uy * 4, cy + dy + ux * 4);
-      ctx.lineTo(cx + dx + uy * 4, cy + dy - ux * 4);
-      ctx.closePath(); ctx.fill();
-      SEIS.tag(ctx, cx + dx * 1.18 - 8, cy + dy * 1.18 - 6, String(i + 1), TEAL);
+      ctx.font = '600 10px "IBM Plex Mono", monospace';
+      ctx.fillStyle = TEAL; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(i + 1), cx + dx * 1.16, cy + dy * 1.16);
     });
-    // their sum, which is what gets displayed
-    const sl = Math.hypot(sx, sy);
+    const sl = Math.hypot(sx, sy) || 1;
     ctx.strokeStyle = CRIM; ctx.lineWidth = 3.4;
     ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + sx, cy + sy); ctx.stroke();
     ctx.fillStyle = CRIM;
@@ -1087,11 +1127,10 @@
     ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
     ctx.beginPath(); ctx.arc(cx, cy, 4.5, 0, 6.2832); ctx.fill(); ctx.stroke();
     ctx.restore();
-    SEIS.tag(ctx, cx - 90, L.y - 24, 'the three roots at one point, and their sum', INK);
-    SEIS.tag(ctx, cx + sx * 0.55 + 8, cy + sy * 0.55 - 6, 'total aberrancy', CRIM);
-    SEIS.tag(ctx, cx - 96, L.y + L.h + 16,
-      'teal: the three principal aberrancies \u00b7 crimson: what you display', SLATE);
+    SEIS.tag(ctx, M3.x, top - 26, '3 \u00b7 add them up', INK);
+    SEIS.tag(ctx, M3.x, M3.y + M3.h + 14, 'crimson = total aberrancy', CRIM);
   }
+
 
   /* ------------------------------- step 3 ------------------------------ */
 
@@ -1101,7 +1140,7 @@
     mapPanel('c3m', w, h, (ix, iy) => FIELD.totM[iy * NG + ix] / ml,
       (u) => ATTR.MAPS.scan(clamp(u, 0, 1)),
       (ctx, R) => colorbar(ctx, R, (u) => ATTR.MAPS.scan(u),
-        '0  no flexure', 'strong  ' + (ml * ASC).toFixed(1), 'total aberrancy magnitude'));
+        '0  flat', (ml * ASC).toFixed(1) + '  strong', 'total aberrancy magnitude'));
     mapPanel('c3a', w, h, (ix, iy) => {
       const i = iy * NG + ix;
       return { a: FIELD.totA[i], m: clamp(FIELD.totM[i] / (ml * 0.3), 0, 1) };
@@ -1111,7 +1150,7 @@
               Math.round(255 - (255 - c[1]) * v.m),
               Math.round(255 - (255 - c[2]) * v.m)];
     }, (ctx, R) => colorbar(ctx, R, (u) => azColor(u * 360 - 180),
-      '\u2212180\u00b0', '+180\u00b0', 'azimuth, full circle \u00b7 0\u00b0'));
+      '\u2212180\u00b0', '+180\u00b0', 'azimuth \u00b7 full circle'));
 
     const i = S.py * NG + S.px;
     $('s3a').textContent = (FIELD.totM[i] * ASC).toFixed(2);
