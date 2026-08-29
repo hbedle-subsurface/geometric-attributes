@@ -684,7 +684,7 @@ details.notes p, details.notes li { font-size: 14px; color: var(--ink-soft); max
   padding-top: 14px;
 }
 .tabs button {
-  font-family: var(--body); font-size: 13px; padding: 9px 15px 8px;
+  font-family: var(--body); font-size: 12.5px; padding: 9px 12px 8px;
   background: var(--cream); color: var(--slate); cursor: pointer;
   border: 1px solid var(--rule); border-bottom: 0;
   border-top: 3px solid transparent;
