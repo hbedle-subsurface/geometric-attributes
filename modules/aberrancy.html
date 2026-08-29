@@ -83,6 +83,7 @@
     <button role="tab" data-tab="p3" aria-selected="false">3 · Vectors</button>
     <button role="tab" data-tab="p4" aria-selected="false">4 · Total aberrancy</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · What for</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
@@ -106,6 +107,27 @@
     <p class="lede">That is why aberrancy is useful. A flexure gives curvature a <em>pair</em> of anomalies
       straddling it, which is awkward to pick, and gives aberrancy a <b>single</b> anomaly sitting exactly
       on it.</p>
+
+    <p class="lede">First, the layout of the model, because two faults crossing is easy to say and harder to
+      picture. The map below is the structure the whole module works on: a broad regional fold with two
+      faults cutting across each other at an angle. The teal line marks the seismic line in the header, and
+      the circle marks the point everything is measured at &mdash; <b>click the map to move it</b>.</p>
+
+    <div class="sec-row" id="row1map">
+      <div class="panel-col">
+        <p class="sublabel"><b>1</b> The structure in map view
+          <span class="note">two faults, crossing</span></p>
+        <canvas id="c1map" aria-label="Map of the modeled structure showing the two crossing faults"></canvas>
+      </div>
+      <div class="panel-col">
+        <p class="sublabel"><b>2</b> Total aberrancy over the same map
+          <span class="note">both faults, both intact</span></p>
+        <canvas id="c1ab" aria-label="Total aberrancy over the modeled structure"></canvas>
+      </div>
+    </div>
+
+    <p class="lede" style="margin-top:16px">Now the profile. These four panels run along the seismic line,
+      and each one is the derivative of the one above it.</p>
 
     <canvas id="c1" aria-label="Structure, dip, curvature and aberrancy plotted one above another"></canvas>
 
@@ -272,6 +294,54 @@
     </div>
   </section>
 
+  <!-- ============================ WHY IT MATTERS ========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">?</span>Why go a derivative further</h3>
+      <span class="hint">The last rung, and what it costs to stand on it</span>
+    </div>
+    <p class="lede">There is a ladder running through this whole course. Coherence needs the reflector to be
+      <b>broken</b>. Curvature only needs it <b>bent</b>. Aberrancy needs only that the bend be
+      <b>asymmetric</b> — that the flexure leans one way rather than being a symmetric fold — and that is
+      the faintest trace a fault leaves before it disappears entirely.</p>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      What it buys</h2>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Faults below curvature's reach.</b> The subseismic flexures that still compartmentalize a
+        reservoir, and that no coherence volume will ever show.</li>
+      <li><b>One anomaly on the fault, not two beside it.</b> Curvature straddles a flexure with a positive
+        and a negative lineament; aberrancy puts a single one down the middle. That is materially easier to
+        autotrack and easier to hand to someone else.</li>
+      <li><b>A direction, not just an orientation.</b> The azimuth runs the full 360° and points toward the
+        downthrown side, so a single fault carries one color along its length. Curvature strike wraps at
+        180° and cannot tell one side of a fault from the other, so it cannot do this.</li>
+      <li><b>Fracture and shear work.</b> The two smaller roots may highlight zones of strong shearing; the
+        AASPI documentation is explicit that this is unproven and needs further research, and it is worth
+        repeating that caution rather than quietly dropping it.</li>
+    </ul>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      What it costs</h2>
+    <p class="lede"><b>Compute.</b> Twenty-seven second derivatives taken from the nine first derivatives
+      curvature already needs, so roughly four times the run time of curvature on its own, plus the disk to
+      hold three vector volumes instead of two scalar ones.</p>
+    <p class="lede"><b>Noise, worse than anything else here.</b> A third derivative multiplies the high
+      wavenumbers three times over. Put the noise slider up with a short operator and aberrancy falls apart
+      while curvature is still readable and coherence has barely noticed. In practice it demands the
+      cleanest dip volume of any attribute in this course, which is the last and strongest argument for the
+      care modules 01 to 03 spent on getting dip right.</p>
+    <p class="lede"><b>And a habit worth taking from step 4.</b> Sorting components by magnitude breaks
+      features wherever the ranking changes, and the break is an artifact of the sorting rather than the
+      geology. That applies well beyond aberrancy — any time an attribute hands you a "maximum" volume made
+      of several ranked pieces, ask what happened to the pieces that lost.</p>
+    <div class="legend prose">
+      <span>Aberrancy is a specialist tool rather than a default. Run coherence and curvature first; reach
+        for this when you have reason to believe there is structure below what they can resolve, and when
+        your dip volume is good enough to support a third derivative.</span>
+    </div>
+  </section>
+
   <!-- ============================== EXERCISES ============================= -->
   <section class="tabpane" id="pe" role="tabpanel" hidden>
     <div class="tryit" style="max-width:none">
@@ -279,7 +349,7 @@
       <ol>
         <li><b>Put the anomalies where they belong.</b> In step 1, read where the dip, curvature and
           aberrancy peaks sit relative to the flexure.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Dip peaks in the
+          <details class="reveal"><summary>Hint</summary><span class="ans">Dip peaks in the
             middle of the flexure. Curvature gives two peaks, one positive and one negative, straddling it.
             Aberrancy gives a single peak back in the middle. Each derivative shifts the anomaly by a
             quarter cycle, which is why an odd derivative sits on the feature and an even one straddles it.
@@ -287,7 +357,7 @@
             it.</span></details></li>
         <li><b>Count the roots.</b> In step 2, look at how many extrema the azimuth sweep has, and compare
           with what module 05 found for curvature.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">At the
+          <details class="reveal"><summary>Hint</summary><span class="ans">At the
             starting point, near where the two faults cross, there are three: around 23°, 88° and 145°, so
             the gaps are 65° and 57° — nothing like curvature's rigid ninety. Now click elsewhere on the
             line. Over most of this surface only one root survives, because a single smoothed fault is
@@ -297,7 +367,7 @@
             azimuth — exactly as module 01 searched for dip.</span></details></li>
         <li><b>Break the maximum-aberrancy map.</b> In step 4, set both faults to similar throws, then make
           one clearly stronger.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Where the two
+          <details class="reveal"><summary>Hint</summary><span class="ans">Where the two
             faults compete, each claims the maximum root over part of its length and loses it over the rest,
             and the pieces missing from the maximum map turn up on the intermediate one. The total map keeps
             both faults continuous, because a vector sum discards nothing. On this simple model the effect
@@ -308,15 +378,18 @@
             artifact of the sorting, not of the geology.</span></details></li>
         <li><b>Use the azimuth as a fault-drop map.</b> In step 3, look at the azimuth colors on either side
           of a fault.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The azimuth
+          <details class="reveal"><summary>Hint</summary><span class="ans">The azimuth
             points consistently across the flexure toward the downthrown side, so a single fault carries one
             color along its length rather than two. A curvature strike map cannot do this: strike is an
             orientation that wraps at 180°, so it cannot distinguish one side from the other. If you want to
             know which way a subtle fault drops, this is the attribute that
             answers.</span></details></li>
         <li><b>Find the cost.</b> Set the operator length to 3 and put the noise up to about 16%.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Aberrancy is the
-            first attribute to fall apart, before curvature and long before coherence. A third derivative
+          <details class="reveal"><summary>Hint</summary><span class="ans">Aberrancy is the
+            first attribute to fall apart, before curvature and long before coherence. On this model it goes
+            wrong quickly and quietly: by 8% noise at an operator length of 3, the aberrancy peak has moved
+            off the fault altogether &mdash; it reports trace 34 when the fault is at 39 &mdash; and it goes
+            on reporting a confident peak in the wrong place as the noise rises. A third derivative
             multiplies the high wavenumbers three times over, so any noise in the dip field arrives cubed.
             Raising the operator length rescues it, at the usual cost of losing the narrowest features. In
             practice aberrancy demands the cleanest dip volume of anything in this course, which is another
@@ -483,7 +556,7 @@
       }
     }
     if (S.noise > 0) {
-      for (let i = 0; i < z.length; i++) z[i] += (S.noise / 100) * 3.0 * (rnd() * 2 - 1);
+      for (let i = 0; i < z.length; i++) z[i] += (S.noise / 100) * 120 * (rnd() * 2 - 1);
     }
     Z = z;
   }
@@ -609,7 +682,7 @@
      DRAWING
      ===================================================================== */
 
-  const M = { l: 48, r: 14, t: 12, b: 34 };
+  const M = { l: 62, r: 16, t: 12, b: 36 };
   function pw(el) {
     const par = el && el.parentElement;
     if (!par) return 900;
@@ -651,7 +724,9 @@
   function mapPanel(canvasId, w, h, get, map, bar) {
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 52 : 0) };
+    const availW = w - M.l - M.r, availH = h - M.t - M.b - (bar ? 52 : 0);
+    const side = Math.max(40, Math.min(availW, availH));
+    const R = { x: M.l + (availW - side) / 2, y: M.t, w: side, h: side };
     const off = document.createElement('canvas');
     off.width = NG; off.height = NG;
     const octx = off.getContext('2d');
@@ -675,6 +750,25 @@
     if (bar) bar(ctx, R);
     return R;
   }
+  /* Shallow warm, deep cool, the way a structure map is normally colored. */
+  function depthColor(u) {
+    const t = clamp(u, 0, 1);
+    const stops = [
+      [0.00, [178, 24, 43]], [0.18, [226, 106, 60]], [0.36, [246, 190, 100]],
+      [0.52, [235, 235, 170]], [0.68, [120, 190, 140]], [0.84, [60, 125, 185]],
+      [1.00, [72, 40, 120]],
+    ];
+    for (let i = 1; i < stops.length; i++) {
+      if (t <= stops[i][0]) {
+        const a = stops[i - 1], b = stops[i], f = (t - a[0]) / (b[0] - a[0]);
+        return [Math.round(a[1][0] + f * (b[1][0] - a[1][0])),
+                Math.round(a[1][1] + f * (b[1][1] - a[1][1])),
+                Math.round(a[1][2] + f * (b[1][2] - a[1][2]))];
+      }
+    }
+    return stops[stops.length - 1][1];
+  }
+
   const rangeOf = (arr) => {
     let m = 1e-14;
     for (let iy = EDGE; iy < NG - EDGE; iy++) {
@@ -723,6 +817,50 @@
   }
 
   /* ------------------------------- step 1 ------------------------------ */
+
+  /* The model in map view. Two faults crossing is the premise of step 4, and
+     leaving it until then means the reader has to take it on trust for four
+     steps. */
+  function drawStep1Maps() {
+    const w = rowWidth('row1map', 2), h = clamp(Math.round(w * 0.94), 240, 330) + 52;
+    let zl = Infinity, zh = -Infinity;
+    for (let i = 0; i < Z.length; i++) { zl = Math.min(zl, Z[i]); zh = Math.max(zh, Z[i]); }
+    const DATUM = 500;
+    const R = mapPanel('c1map', w, h,
+      (ix, iy) => (Z[iy * NG + ix] - zl) / Math.max(zh - zl, 1e-6),
+      (u) => depthColor(u),
+      (ctx2, R2) => colorbar(ctx2, R2, (u) => depthColor(u),
+        'shallow  \u2212' + (DATUM + zl).toFixed(0) + ' m',
+        '\u2212' + (DATUM + zh).toFixed(0) + ' m  deep', 'depth'));
+    // the two fault traces, and the line the profile is cut along
+    const ctx = $('c1map').getContext('2d');
+    const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
+    const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+    ctx.strokeStyle = 'rgba(22,25,28,.85)'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(X(40 + 0.28 * (0 - 55)), Y(0));
+    ctx.lineTo(X(40 + 0.28 * (NG - 55)), Y(NG));
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(X(66 - (0.78 / 0.62) * (0 - 52)), Y(0));
+    ctx.lineTo(X(66 - (0.78 / 0.62) * (NG - 52)), Y(NG));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = TEAL; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(R.x, Y(S.py)); ctx.lineTo(R.x + R.w, Y(S.py)); ctx.stroke();
+    ctx.restore();
+    SEIS.tag(ctx, clamp(X(38) - 22, R.x + 2, R.x + R.w - 56), R.y + 16, 'fault A', INK);
+    SEIS.tag(ctx, clamp(X(78) - 22, R.x + 2, R.x + R.w - 56), R.y + 34, 'fault B', INK);
+    SEIS.tag(ctx, R.x + 6, Y(S.py) - 12, 'the seismic line', TEAL);
+
+    const ml = rangeOf(FIELD.totM);
+    mapPanel('c1ab', w, h, (ix, iy) => FIELD.totM[iy * NG + ix] / ml,
+      (u) => ATTR.MAPS.scan(clamp(u, 0, 1)),
+      (ctx2, R2) => colorbar(ctx2, R2, (u) => ATTR.MAPS.scan(u),
+        '0  no flexure', 'strong  ' + (ml * ASC).toFixed(1), 'total aberrancy'));
+  }
 
   function drawStep1() {
     const w = pw($('c1')), h = clamp(Math.round(w * 0.66), 420, 560);
@@ -1009,19 +1147,19 @@
 
   function drawAll() {
     syncLabels();
-    if (!$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
+    if (!$('pw').hidden || !$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
     drawHeader();
-    if (visible('p1')) drawStep1();
+    if (visible('p1')) { drawStep1Maps(); drawStep1(); }
     if (visible('p2')) drawStep2();
     if (visible('p3')) drawStep3();
     if (visible('p4')) drawStep4();
     if (visible('p5')) drawStep5();
   }
 
-  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pe', 'pk', 'pm'];
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
     p1: 'The ladder', p2: 'Three roots', p3: 'Vectors',
-    p4: 'Total aberrancy', p5: 'What for',
+    p4: 'Total aberrancy', p5: 'What for', pw: 'Why it matters',
     pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };
   function buildStepNav() {
@@ -1060,7 +1198,7 @@
       b.setAttribute('aria-selected', b.dataset.tab === id);
     });
     const lab = document.querySelector('.labhead');
-    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    if (lab) lab.hidden = (id === 'pw' || id === 'pe' || id === 'pk' || id === 'pm');
     const last = (id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !last;
     if ($('pager')) $('pager').hidden = !last;
@@ -1103,7 +1241,8 @@
     c.addEventListener('pointerup', () => { down = false; });
     c.addEventListener('pointercancel', () => { down = false; });
   }
-  attachProbe('cSec');
+  ['cSec', 'c1map', 'c1ab', 'c3m', 'c3a', 'c4max', 'c4int', 'c4tot']
+    .forEach((q) => attachProbe(q));
 
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
