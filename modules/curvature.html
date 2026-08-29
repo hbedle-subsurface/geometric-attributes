@@ -83,10 +83,10 @@
   <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
     Method and references are there when you want them.</p>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
-    <button role="tab" data-tab="p1" aria-selected="false">1 · Dip to curvature</button>
-    <button role="tab" data-tab="p2" aria-selected="false">2 · Which direction?</button>
+    <button role="tab" data-tab="p1" aria-selected="false">1 · From dip</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Direction</button>
     <button role="tab" data-tab="p3" aria-selected="false">3 · k₁ and k₂</button>
-    <button role="tab" data-tab="p4" aria-selected="false">4 · Not the same as k_pos</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · k_pos</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · Wavelength</button>
     <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
@@ -379,7 +379,8 @@
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       The three ways it will mislead you</h2>
     <p class="lede"><b>Bright does not mean steep.</b> Curvature peaks where the bed is momentarily flat, at
-      a crest or a trough, and passes through zero where the bed is steepest. On the default structure that
+      a crest or a trough, and passes through zero where the bed is steepest — because a steeply dipping bed
+      at its inflection is momentarily straight, and straight means not bending. On the default structure that
       is 0.013 km⁻¹ at the steepest point against 0.913 at the crest, a factor of seventy the other way from
       most people's intuition.</p>
     <p class="lede"><b>Operator length is an interpretation, not a setting.</b> Long-wavelength curvature
@@ -417,8 +418,10 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">The dip curve
             and the curvature curve cross zero in completely different places, a quarter of a wavelength
             apart. On the default structure, curvature at the steepest point on the fold is 0.013 km⁻¹
-            against 0.913 km⁻¹ at the crest — a factor of seventy. Curvature is zero exactly where the bed is steepest, and largest where the bed is flat at
-            a crest or a trough. This is the single most common misreading of a curvature volume: a bright
+            against 0.913 km⁻¹ at the crest — a factor of seventy. Curvature is zero exactly where the bed
+            is steepest, and largest where the bed is level at a crest or a trough. The reason is worth
+            saying carefully: at the steepest point the bed is momentarily <em>straight</em>, not level.
+            It is dipping hard, but it is not bending, and bending is the only thing curvature measures. This is the single most common misreading of a curvature volume: a bright
             curvature anomaly is not a steep place, it is a place where the dip is <em>changing</em>
             quickly.</span></details></li>
         <li><b>Find a saddle.</b> In step 2, click near the plunging nose at the north end of one of the
@@ -917,11 +920,11 @@
     const el = $('cCart');
     if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
     const w = pw(el);
-    const h = clamp(Math.round(w * 0.30), 210, 270);
+    const h = clamp(Math.round(w * 0.34), 250, 330);
     const ctx = SEIS.fitCanvas(el, w, h);
     ctx.clearRect(0, 0, w, h);
 
-    const R = { x: 60, y: 56, w: w - 120, h: h - 96 };
+    const R = { x: 60, y: 52, w: w - 120, h: h - 118 };
     const A = R.h * 0.34;                 // fold amplitude on screen
     const L = R.w / 2;                    // one wavelength across half the panel
     const mid = R.y + R.h * 0.5;
@@ -962,12 +965,16 @@
     };
     dot(xc, yc, TEAL); dot(xt, yt, TEAL); dot(xz, yz, SLATE);
 
-    // labels, all placed clear of the curve and of each other
-    SEIS.tag(ctx, xc - 60, R.y - 28, 'anticline \u00b7 k positive', TEAL);
-    SEIS.tag(ctx, xt - 52, R.y + R.h + 20, 'syncline \u00b7 k negative', TEAL);
-    SEIS.tag(ctx, xz - 44, R.y - 28, 'steepest \u00b7 k = 0', SLATE);
-    SEIS.tag(ctx, R.x, h - 16, 'curvature k = 1 / r \u00b7 a plane has k = 0 however steeply it dips',
-      CRIM);
+    /* Labels, each anchored to its own feature and to a different height, so
+       none of them lands on another. The middle one is worded carefully: the
+       bed is at its steepest there, and its curvature is nonetheless zero,
+       because it is momentarily straight rather than momentarily level. */
+    SEIS.tag(ctx, xc - 62, yc - 26, 'anticline \u00b7 k positive', TEAL);
+    // kept clear of the fitted circle, which reaches to xc + rad
+    SEIS.tag(ctx, Math.max(xz - 20, xc + rad + 14), yz + 32, 'straight here, so k = 0', SLATE);
+    SEIS.tag(ctx, xt - 60, yt + 26, 'syncline \u00b7 k negative', TEAL);
+    SEIS.tag(ctx, R.x, h - 14,
+      'k = 1 / r \u00b7 a plane has k = 0 however steeply it dips', CRIM);
   }
 
 
@@ -1475,8 +1482,8 @@
 
   const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
-    p1: 'Dip to curvature', p2: 'Which direction?', p3: 'k₁ and k₂',
-    p4: 'Not the same as k_pos', p5: 'Wavelength', pw: 'Why it matters',
+    p1: 'From dip', p2: 'Direction', p3: 'k₁ and k₂',
+    p4: 'k_pos', p5: 'Wavelength', pw: 'Why it matters',
     pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };
 
