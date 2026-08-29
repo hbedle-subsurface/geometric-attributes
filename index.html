@@ -42,7 +42,7 @@
       </div>
     </div>
     <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
-      <div class="hero-cap"><span>one folded, faulted section &mdash; three questions</span><b>all from the dip field</b></div></div>
+      <div class="hero-cap"><span>structure is what these attributes measure</span><b>dip, bend, lean</b></div></div>
    </div>
   </section>
 
@@ -216,121 +216,79 @@
 (function () {
   'use strict';
 
-  /* Hero: the argument of the whole site in one picture. A faulted, folded
-     section on top, and under it the three things the attributes make of it —
-     the fault is invisible in one, obvious in another, and located precisely
-     in the third. */
+  /* Hero: a folded, faulted reflector package drawn as stacked horizons.
+     Deliberately plain — no attribute panels, no labels, nothing that could
+     claim more than it shows. It is just structure, which is what the whole
+     site is about measuring. */
   function drawHero() {
     const c = document.getElementById('heroCanvas');
     if (!c || !c.parentElement) return;
     const w = c.parentElement.clientWidth;
-    const h = Math.max(250, Math.round(w * 0.72));
+    const h = Math.max(240, Math.round(w * 0.66));
     const ctx = SEIS.fitCanvas(c, w, h);
     ctx.clearRect(0, 0, w, h);
 
-    const NX = 170, NT = 200, DT = 0.002, BIN = 25;
-    const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
-    const rnd = SEIS.mulberry32(4);
-    const beds = [];
-    for (let t = -60; t < NT + 60; t += 16) {
-      beds.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.04 + rnd() * 0.07) });
-    }
-    // a gentle fold, and one fault that dips rather than standing vertical
-    const FX = 0.60 * NX, FSL = 1 / 4.2;
-    const fold = (ix) => 20 * Math.sin(2 * Math.PI * ix / 80);
-    const shiftAt = (ix, t0) => {
-      const f = fold(ix);
-      const wgt = Math.max(0, Math.min(1, ix - (FX + FSL * (t0 + f)) + 0.5));
-      return f + wgt * 8;
+    const pad = 0;
+    const N = 22;                       // horizons
+    const FX = 0.63 * w, FSL = 0.34;    // a fault, dipping to the right
+    const THROW = h * 0.055;
+
+    const yOf = (x, n) => {
+      const t = n / (N - 1);
+      const base = h * 0.14 + t * h * 0.68;
+      const fold = h * 0.075 * Math.sin(2 * Math.PI * x / (w * 0.62) + 0.7)
+        + h * 0.030 * Math.sin(2 * Math.PI * x / (w * 0.27) + 2.1);
+      // the fold dies out gently with depth, the way a drape does
+      const decay = 0.45 + 0.55 * (1 - t);
+      const cut = FX + FSL * (base - h * 0.14);
+      return base + fold * decay + (x > cut ? THROW : 0);
     };
-    const fld = new Float32Array(NX * NT);
-    for (let ix = 0; ix < NX; ix++) {
-      fld.set(SEIS.traceFromSpikes(
-        beds.map((b) => ({ t: (b.it + shiftAt(ix, b.it)) * DT, r: b.r })), 0, DT, NT, wav), ix * NT);
-    }
-    let pk = 1e-6;
-    for (let q = 0; q < fld.length; q++) pk = Math.max(pk, Math.abs(fld[q]));
 
-    const grid = ATTR.dipField(fld, NX, NT,
-      { half: 2, kHalf: 10, pMax: 4.5, nP: 33, decX: 1, decT: 2 });
-
-    // the three strips: coherence, curvature, and where the fault actually is
-    const gx = grid.gx, gt = grid.gt;
-    const coh = new Float32Array(gx * gt), cur = new Float32Array(gx * gt);
-    const buf = new Float64Array(5 * 21);
-    for (let a = 0; a < gx; a++) {
-      for (let b = 0; b < gt; b++) {
-        ATTR.gatherAlongDip(fld, NX, NT, a, b * grid.decT,
-          ATTR.sampleGrid(grid, grid.p, a, b * grid.decT), 2, 10, buf);
-        coh[a * gt + b] = ATTR.semblance(buf, 5, 21);
-      }
-    }
-    for (let a = 1; a < gx - 1; a++) {
-      for (let b = 1; b < gt - 1; b++) {
-        const pL = ATTR.sampleGrid(grid, grid.p, a - 1, b * grid.decT);
-        const pR = ATTR.sampleGrid(grid, grid.p, a + 1, b * grid.decT);
-        cur[a * gt + b] = (pR - pL) / 2;
-      }
-    }
-    // one more derivative again: the third of structure, which puts a single
-    // anomaly on the fault where curvature puts one either side of it
-    const abr = new Float32Array(gx * gt);
-    for (let a = 2; a < gx - 2; a++) {
-      for (let b = 1; b < gt - 1; b++) {
-        abr[a * gt + b] = (cur[(a + 1) * gt + b] - cur[(a - 1) * gt + b]) / 2;
-      }
-    }
-    const robust = (arr, mult) => {
-      const v = [];
-      for (let q = 0; q < arr.length; q++) if (arr[q]) v.push(Math.abs(arr[q]));
-      if (!v.length) return 1e-9;
-      v.sort((x, y) => x - y);
-      return Math.max(v[Math.floor(0.5 * v.length)] * mult, 1e-9);
-    };
-    const cl = robust(cur, 3), al = robust(abr, 3);
-
-    const gap = 7, capH = 0;
-    const seisH = Math.round((h - capH - 3 * gap) * 0.46);
-    const stripH = (h - capH - 3 * gap - seisH) / 3;
-    const R0 = { x: 0, y: 0, w: w, h: seisH };
-    SEIS.drawVarDensity(ctx, fld, NX, NT, R0,
-      { cmap: SEIS.COLORMAPS.gray, clip: pk * 0.75 });
-
-    const strip = (n, get, map, label) => {
-      const R = { x: 0, y: seisH + gap + n * (stripH + gap), w: w, h: stripH };
-      const off = document.createElement('canvas');
-      off.width = gx; off.height = gt;
-      const octx = off.getContext('2d');
-      const img = octx.createImageData(gx, gt);
-      for (let b = 0; b < gt; b++) {
-        for (let a = 0; a < gx; a++) {
-          const col = map(get(a, b));
-          const q = (b * gx + a) * 4;
-          img.data[q] = col[0]; img.data[q + 1] = col[1];
-          img.data[q + 2] = col[2]; img.data[q + 3] = 255;
-        }
-      }
-      octx.putImageData(img, 0, 0);
+    for (let n = 0; n < N; n++) {
+      const t = n / (N - 1);
+      // crimson at the top fading to slate with depth
+      const r = Math.round(132 + (92 - 132) * t);
+      const g = Math.round(22 + (102 - 22) * t);
+      const b = Math.round(23 + (112 - 23) * t);
+      const alpha = 0.92 - 0.35 * t;
       ctx.save();
-      ctx.imageSmoothingEnabled = true;
-      ctx.drawImage(off, R.x, R.y, R.w, R.h);
+      ctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha.toFixed(3) + ')';
+      ctx.lineWidth = 2.6 - 1.1 * t;
+      ctx.lineCap = 'round';
+      // left of the fault
+      ctx.beginPath();
+      let started = false;
+      for (let x = pad; x <= w - pad; x += 2) {
+        const cut = FX + FSL * ((n / (N - 1)) * h * 0.68);
+        if (x > cut - 1) { started = false; continue; }
+        const y = yOf(x, n);
+        started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        started = true;
+      }
+      ctx.stroke();
+      // right of the fault, offset
+      ctx.beginPath();
+      started = false;
+      for (let x = pad; x <= w - pad; x += 2) {
+        const cut = FX + FSL * ((n / (N - 1)) * h * 0.68);
+        if (x < cut + 1) { started = false; continue; }
+        const y = yOf(x, n);
+        started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        started = true;
+      }
+      ctx.stroke();
       ctx.restore();
-      ctx.save();
-      ctx.font = '600 10px "IBM Plex Mono", monospace';
-      ctx.fillStyle = 'rgba(255,255,255,.94)';
-      ctx.fillRect(6, R.y + 5, ctx.measureText(label).width + 12, 15);
-      ctx.fillStyle = '#841617';
-      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-      ctx.fillText(label, 12, R.y + 13);
-      ctx.restore();
-    };
+    }
 
-    strip(0, (a, b) => Math.max(0, Math.min(1, (coh[a * gt + b] - 0.45) / 0.55)),
-      (u) => ATTR.MAPS.coherence(u), 'coherence \u00b7 is it broken?');
-    strip(1, (a, b) => cur[a * gt + b] / cl,
-      (u) => ATTR.MAPS.dip(-Math.max(-1, Math.min(1, u))), 'curvature \u00b7 is it bent?');
-    strip(2, (a, b) => Math.max(0, Math.min(1, Math.abs(abr[a * gt + b]) / (al * 0.55))),
-      (u) => ATTR.MAPS.scan(u), 'aberrancy \u00b7 does the bend lean?');
+    // the fault plane itself, drawn faintly
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.32)';
+    ctx.lineWidth = 1.4; ctx.setLineDash([7, 5]);
+    ctx.beginPath();
+    ctx.moveTo(FX, h * 0.05);
+    ctx.lineTo(FX + FSL * h * 0.72, h * 0.95);
+    ctx.stroke();
+    ctx.restore();
   }
 
   function thumbDip(canvas) {
