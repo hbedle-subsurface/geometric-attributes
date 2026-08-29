@@ -8,8 +8,9 @@ Live at **https://hbedle-subsurface.github.io/geometric-attributes/**
 
 Every module builds a small synthetic model in the browser, computes a real
 attribute on it, and lets the reader change the parameters that are normally
-left at their defaults. There is no server, no build step, and no data leaves
-the reader's machine.
+left at their defaults. There is no server and no build step. Nothing that
+happens inside a module leaves the browser; the only thing recorded is that a
+page was opened (see *Page-view counting* below).
 
 ---
 
@@ -35,6 +36,7 @@ a student into the middle of the course.
 ```
 index.html          landing page: hero, module cards
 assets/
+  count.js          page-view counting, and nothing else
   seismic.js        SEIS — wavelets, synthetic traces, canvas drawing, colormaps
   attributes.js     ATTR — semblance, dip scans, covariance, eigen, colormaps
   style.css         the whole visual identity, shared by every page
@@ -60,6 +62,26 @@ libraries, and a stale `assets/` is the single most common cause of a module
 looking broken. Stylesheets in particular cache hard; if a layout change does
 not appear, open `assets/style.css` directly in the browser and check that the
 change is actually there before debugging anything else.
+
+## Page-view counting
+
+`assets/count.js` records that a page was opened, and nothing else. It is loaded
+by every page — `assets/count.js` from the root, `../assets/count.js` from
+`modules/` — as the first script at the foot of the body.
+
+Counts go to GoatCounter under the account code `hbedle`, shared with the other
+teaching repositories served from `hbedle-subsurface.github.io`; the path
+distinguishes them, so every module gets its own row at
+https://hbedle.goatcounter.com. No cookie is set and no identifier is stored.
+
+The script does not count `file://`, `localhost` or `127.0.0.1`, and honors Do
+Not Track. If it fails to load the page carries on unchanged. **Do not modify
+those guards, do not add event tracking** — counting page loads is a visitor
+log, counting slider moves is watching someone work, and it would contradict
+what the site tells people it does — and do not add a second analytics tool.
+
+A new page needs the loader line or it is invisible in the dashboard, which
+looks exactly like a page nobody visits.
 
 ## How a module is put together
 
