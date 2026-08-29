@@ -186,6 +186,11 @@
       flexure, from the up-thrown side toward the down-thrown one, so an aberrancy azimuth map tells you
       which way a fault drops. No curvature attribute can do that.</p>
 
+    <canvas id="cVec" aria-label="Schematic of the three aberrancy vectors and their sum"></canvas>
+    <p class="hint-line" style="margin:8px 0 18px">Left: what the azimuth means on a flexure. Right: the
+      three principal aberrancies at one point, drawn as vectors from that point, and the single vector you
+      get by adding them.</p>
+
     <div class="sec-row" id="row3">
       <div class="panel-col">
         <p class="sublabel"><b>1</b> Total aberrancy magnitude
@@ -272,10 +277,20 @@
       kept seeing it. Aberrancy is the next rung down. Take the main fault's throw toward zero and compare
       all three.</p>
     <p class="lede">A large offset breaks the reflector and coherence finds it. A smaller one only bends the
-      reflector and curvature finds it. Smaller still and the bend itself is gentle, but its
+      reflector, and curvature finds that. Smaller still and the bend is gentle, but its
       <em>asymmetry</em> survives — the flexure still leans one way — and that is what aberrancy responds
-      to. This is the progression sketched in every "fault expression on seismic attributes" figure, and
-      here it is with numbers attached.</p>
+      to.</p>
+    <p class="lede"><b>The chart below is worth reading carefully, because it does not say what people
+      often assume.</b> With one fault on a flat regional and no noise, curvature and aberrancy both fall
+      away in almost exact proportion to the throw: halve the throw and you halve both. Neither has a
+      magic sensitivity the other lacks, and the two lines lie on top of each other.</p>
+    <p class="lede">So where does aberrancy's advantage actually come from? Three places, none of them
+      visible on a noise-free chart. <b>Coherence stops first</b>, and stops hard — below the wavelet's
+      resolution it returns to its no-fault value and simply cannot see the feature, while the two
+      derivatives keep declining smoothly and stay usable. <b>Aberrancy puts one anomaly on the fault</b>
+      where curvature puts two beside it, which matters when the anomaly is faint and you are trying to pick
+      it. And <b>the azimuth tells you which way the ground dropped</b>, which curvature strike cannot.
+      The advantage is in the shape and the readability of the anomaly, not in how slowly it fades.</p>
 
     <canvas id="c5" aria-label="Coherence, curvature and aberrancy responses plotted against fault throw"></canvas>
 
@@ -997,6 +1012,87 @@
       + 'searched for.';
   }
 
+  /* The idea in one picture: an aberrancy is a vector, there are three of them
+     at every point, and the one you display is their sum. */
+  function drawVecCartoon() {
+    const el = $('cVec');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el), h = clamp(Math.round(w * 0.30), 210, 270);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const half = (w - 70) / 2;
+
+    /* left: a flexure seen in section, with the aberrancy vector pointing
+       across it toward the side that has dropped */
+    const L = { x: 30, y: 46, w: half, h: h - 96 };
+    const yOf = (x) => {
+      const u = (x - L.x) / L.w;
+      return L.y + L.h * (0.22 + 0.56 / (1 + Math.exp(-(u - 0.5) * 11)));
+    };
+    ctx.save();
+    ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (let x = L.x; x <= L.x + L.w; x += 2) {
+      const y = yOf(x); x === L.x ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    const mx = L.x + L.w / 2, my = yOf(mx);
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.arc(mx, my, 5, 0, 6.2832); ctx.fill(); ctx.stroke();
+    // the vector: across the flexure, toward the downthrown side
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + 62, my); ctx.stroke();
+    ctx.fillStyle = CRIM;
+    ctx.beginPath();
+    ctx.moveTo(mx + 70, my); ctx.lineTo(mx + 58, my - 6); ctx.lineTo(mx + 58, my + 6);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+    SEIS.tag(ctx, L.x, L.y - 24, 'a flexure, seen in section', INK);
+    SEIS.tag(ctx, L.x + 4, L.y + L.h + 16, 'up-thrown', SLATE);
+    SEIS.tag(ctx, L.x + L.w - 74, L.y + L.h + 16, 'down-thrown', SLATE);
+    SEIS.tag(ctx, mx + 10, my - 18, 'azimuth points this way', CRIM);
+
+    /* right: three vectors from one point, and the sum of them */
+    const cx = 40 + half + 30 + half / 2, cy = L.y + L.h * 0.5;
+    const roots = [[24, 52], [96, 44], [158, 26]];      // azimuth, length
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,25,28,.18)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, 56, 0, 6.2832); ctx.stroke();
+    let sx = 0, sy = 0;
+    roots.forEach((r, i) => {
+      const a = r[0] * DEG, dx = Math.cos(a) * r[1], dy = -Math.sin(a) * r[1];
+      sx += Math.cos(a) * r[1]; sy += -Math.sin(a) * r[1];
+      ctx.strokeStyle = TEAL; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + dx, cy + dy); ctx.stroke();
+      ctx.fillStyle = TEAL;
+      const ux = dx / r[1], uy = dy / r[1];
+      ctx.beginPath();
+      ctx.moveTo(cx + dx + ux * 7, cy + dy + uy * 7);
+      ctx.lineTo(cx + dx - uy * 4, cy + dy + ux * 4);
+      ctx.lineTo(cx + dx + uy * 4, cy + dy - ux * 4);
+      ctx.closePath(); ctx.fill();
+      SEIS.tag(ctx, cx + dx * 1.18 - 8, cy + dy * 1.18 - 6, String(i + 1), TEAL);
+    });
+    // their sum, which is what gets displayed
+    const sl = Math.hypot(sx, sy);
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 3.4;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + sx, cy + sy); ctx.stroke();
+    ctx.fillStyle = CRIM;
+    const ux = sx / sl, uy = sy / sl;
+    ctx.beginPath();
+    ctx.moveTo(cx + sx + ux * 9, cy + sy + uy * 9);
+    ctx.lineTo(cx + sx - uy * 5.5, cy + sy + ux * 5.5);
+    ctx.lineTo(cx + sx + uy * 5.5, cy + sy - ux * 5.5);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(cx, cy, 4.5, 0, 6.2832); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    SEIS.tag(ctx, cx - 90, L.y - 24, 'the three roots at one point, and their sum', INK);
+    SEIS.tag(ctx, cx + sx * 0.55 + 8, cy + sy * 0.55 - 6, 'total aberrancy', CRIM);
+    SEIS.tag(ctx, cx - 96, L.y + L.h + 16,
+      'teal: the three principal aberrancies \u00b7 crimson: what you display', SLATE);
+  }
+
   /* ------------------------------- step 3 ------------------------------ */
 
   function drawStep3() {
@@ -1068,20 +1164,29 @@
   /* ------------------------------- step 5 ------------------------------ */
 
   let LADDER = [];
+  /* The ladder has to isolate one fault. Measured on the full model, the
+     strongest curvature along fault A's trace is contributed by the crossing
+     fault and the fold, so it never moves as A's throw changes and the curve
+     comes out flat — an artifact of the measurement, not of curvature. */
   function buildLadder() {
-    const keep = S.throw;
+    const keep = { t: S.throw, t2: S.throw2, f: S.fold };
+    S.throw2 = 0; S.fold = 0;
     LADDER = [];
     for (let t = 0; t <= 60; t += 6) {
       S.throw = t; buildSurface(); computeField();
       let k = 0, a = 0;
       for (let iy = EDGE + 6; iy < NG - EDGE - 6; iy += 3) {
         const ix = Math.round(40 + 0.28 * (iy - 55));
-        k = Math.max(k, FIELD.k1[iy * NG + ix] * 1000);
-        a = Math.max(a, FIELD.totM[iy * NG + ix] * ASC);
+        for (let d = -2; d <= 2; d++) {
+          const j = iy * NG + clamp(ix + d, EDGE, NG - EDGE - 1);
+          k = Math.max(k, Math.abs(FIELD.k1[j]) * 1000);
+          a = Math.max(a, FIELD.totM[j] * ASC);
+        }
       }
       LADDER.push({ t, k, a });
     }
-    S.throw = keep; buildSurface(); computeField();
+    S.throw = keep.t; S.throw2 = keep.t2; S.fold = keep.f;
+    buildSurface(); computeField();
   }
 
   function drawStep5() {
@@ -1093,7 +1198,7 @@
     LADDER.forEach((d) => { kMax = Math.max(kMax, d.k); aMax = Math.max(aMax, d.a); });
     const X = (t) => R.x + (t / 60) * R.w;
     const Y = (u) => R.y + R.h - u * R.h;
-    SEIS.axisLeft(ctx, R, 0, 1, 'response, scaled to its own maximum', (v) => v.toFixed(1),
+    SEIS.axisLeft(ctx, R, 0, 1, 'response, as a share of its 60 m value', (v) => v.toFixed(1),
       { flip: true, grid: true, ticks: 5 });
     ctx.save();
     ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
@@ -1123,9 +1228,11 @@
     $('s5b').textContent = now.k.toFixed(3) + ' km\u207b\u00b9';
     $('s5c').textContent = now.a.toFixed(2);
     $('s5d').textContent = big.a > 0 ? (100 * now.a / big.a).toFixed(0) + '%' : '\u2014';
-    $('s5e').textContent = 'Aberrancy falls away steadily as the throw shrinks, but it is still reporting '
-      + 'about 59% of its full-throw value at 6 m. It also costs about four times what curvature does, and '
-      + 'being a third derivative it amplifies noise harder than anything else here.';
+    const kShare = big.k > 0 ? (100 * now.k / big.k).toFixed(0) : '\u2014';
+    $('s5e').textContent = 'At this throw curvature is at ' + kShare + '% of its full-throw value and '
+      + 'aberrancy at ' + (big.a > 0 ? (100 * now.a / big.a).toFixed(0) : '\u2014')
+      + '%. They track each other almost exactly, which is the point: on clean data neither decays faster. '
+      + 'The difference shows up in noise, in where the anomaly sits, and in the azimuth.';
   }
 
   /* =====================================================================
@@ -1151,7 +1258,7 @@
     drawHeader();
     if (visible('p1')) { drawStep1Maps(); drawStep1(); }
     if (visible('p2')) drawStep2();
-    if (visible('p3')) drawStep3();
+    if (visible('p3')) { drawVecCartoon(); drawStep3(); }
     if (visible('p4')) drawStep4();
     if (visible('p5')) drawStep5();
   }
