@@ -147,7 +147,7 @@
     </div>
     <p class="lede">Module 02 swept the azimuth of a section and found a single dip vector. Module 05 swept
       it again and found <em>two</em> extremes, k₁ and k₂, always ninety degrees apart. Sweep it once more
-      for aberrancy and you get <b>three</b>.</p>
+      for aberrancy and you can get <b>three</b>.</p>
     <p class="lede">The reason is the algebra. Apparent dip varies with azimuth as a first-order
       expression, apparent curvature as a second-order one, and apparent aberrancy as a third-order one —
       and a cubic can have three extrema. They are not evenly spaced, and there is no shortcut: where
@@ -162,7 +162,19 @@
       three well-separated roots. That is worth knowing before you go looking for the intermediate and
       minimum volumes in your own data.</p>
 
-    <canvas id="c2" aria-label="Apparent aberrancy against azimuth, with the three extrema marked"></canvas>
+    <p class="lede">Here is the whole reason, in one picture. Sweep the azimuth and plot what each
+      attribute reads. Dip varies as a <b>first</b>-order expression and peaks once. Curvature varies as a
+      <b>second</b>-order one and has two extremes, always ninety degrees apart. Aberrancy varies as a
+      <b>third</b>-order one, and a cubic can turn three times.</p>
+
+    <canvas id="c2cmp" aria-label="Apparent dip, curvature and aberrancy swept against azimuth"></canvas>
+    <p class="hint-line" style="margin:8px 0 20px">One derivative, one more turn in the curve. That is all
+      "three principal aberrancies" means.</p>
+
+    <p class="lede">Now the same sweep on the real model, at the point you have selected. Move the point and
+      watch the number of peaks change.</p>
+
+    <canvas id="c2" aria-label="Apparent aberrancy against azimuth, with the extrema marked"></canvas>
 
     <div class="stats" style="margin-top:14px">
       <div class="stat key"><span>The three principal aberrancies</span><b id="s2a">—</b></div>
@@ -372,7 +384,9 @@
             it.</span></details></li>
         <li><b>Count the roots.</b> In step 2, look at how many extrema the azimuth sweep has, and compare
           with what module 05 found for curvature.
-          <details class="reveal"><summary>Hint</summary><span class="ans">At the
+          <details class="reveal"><summary>Hint</summary><span class="ans">Look first at the
+            three little sweeps at the top of the step: dip turns once, curvature twice, aberrancy three
+            times &mdash; one extra turn per derivative, and that is the whole of it. At the
             starting point, near where the two faults cross, there are three: around 23°, 88° and 145°, so
             the gaps are 65° and 57° — nothing like curvature's rigid ninety. Now click elsewhere on the
             line. Over most of this surface only one root survives, because a single smoothed fault is
@@ -957,7 +971,66 @@
 
   /* ------------------------------- step 2 ------------------------------ */
 
+  /* Why there are three. The order of the derivative is the order of the
+     expression in azimuth, and the order sets how many times the curve can
+     turn: dip once, curvature twice, aberrancy three times. */
+  function drawCmp() {
+    const el = $('c2cmp');
+    if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
+    const w = pw(el), h = clamp(Math.round(w * 0.26), 190, 250);
+    const ctx = SEIS.fitCanvas(el, w, h);
+    ctx.clearRect(0, 0, w, h);
+    const cw = (w - 4 * 20) / 3;
+    const rows = [
+      { t: 'dip \u00b7 1st derivative', s: 'one peak',
+        f: (d) => Math.cos((d - 35) * DEG), col: TEAL, ext: [35] },
+      { t: 'curvature \u00b7 2nd', s: 'two, always 90\u00b0 apart',
+        f: (d) => Math.cos(2 * (d - 20) * DEG), col: SLATE, ext: [20, 110] },
+      { t: 'aberrancy \u00b7 3rd', s: 'up to three, uneven',
+        f: (d) => 0.62 * Math.cos(3 * (d - 18) * DEG) + 0.42 * Math.cos((d - 60) * DEG),
+        col: CRIM, ext: null },
+    ];
+    rows.forEach((r, i) => {
+      const R = { x: 20 + i * (cw + 20), y: 42, w: cw, h: h - 92 };
+      const X = (d) => R.x + (d / 180) * R.w;
+      const Y = (v) => R.y + R.h / 2 - v * R.h * 0.40;
+      ctx.save();
+      ctx.fillStyle = '#fff'; ctx.fillRect(R.x, R.y, R.w, R.h);
+      SEIS.dashedLine(ctx, R.x, Y(0), R.x + R.w, Y(0), 'rgba(22,25,28,.25)', [4, 3], 1);
+      ctx.strokeStyle = r.col; ctx.lineWidth = 2.6; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      for (let d = 0; d <= 180; d += 1) {
+        const y = Y(r.f(d)); d === 0 ? ctx.moveTo(X(d), y) : ctx.lineTo(X(d), y);
+      }
+      ctx.stroke();
+      // mark every turning point of |value|, which is what a root is
+      let count = 0;
+      for (let d = 1; d < 180; d++) {
+        const a = Math.abs(r.f(d - 1)), b = Math.abs(r.f(d)), c = Math.abs(r.f(d + 1));
+        if (b >= a && b >= c && b > 0.08) {
+          ctx.fillStyle = r.col;
+          ctx.beginPath(); ctx.arc(X(d), Y(r.f(d)), 4.5, 0, 6.2832); ctx.fill();
+          count++;
+        }
+      }
+      ctx.restore();
+      SEIS.frame(ctx, R);
+      SEIS.tag(ctx, R.x, R.y - 24, r.t, r.col);
+      ctx.save();
+      ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(count + ' \u00b7 ' + r.s, R.x, R.y + R.h + 8);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText('apparent value against azimuth, 0\u00b0 to 180\u00b0', 20, h - 6);
+    ctx.restore();
+  }
+
   function drawStep2() {
+    drawCmp();
     const w = pw($('c2')), h = 300;
     const ctx = SEIS.fitCanvas($('c2'), w, h);
     ctx.clearRect(0, 0, w, h);
@@ -1015,8 +1088,9 @@
       $('s2c').textContent = keep.length + ' distinct root(s) here';
     }
     $('s2d').textContent = 'Curvature always gives exactly two extrema, exactly 90\u00b0 apart, and '
-      + 'eigenvalues hand them to you. Aberrancy gives three at uneven spacing, and they have to be '
-      + 'searched for.';
+      + 'eigenvalues hand them to you. Aberrancy gives up to three, at spacing that depends on the '
+      + 'structure \u2014 ' + keep.length + ' here \u2014 so they have to be searched for rather than '
+      + 'solved for.';
   }
 
   /* The idea in one picture: an aberrancy is a vector, there are three of them
