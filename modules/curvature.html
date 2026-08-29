@@ -869,7 +869,7 @@
     let lo = Infinity, hi = -Infinity;
     for (let i = 0; i < Z.length; i++) { lo = Math.min(lo, Z[i]); hi = Math.max(hi, Z[i]); }
     const rng = Math.max(hi - lo, 1e-6);
-    mapFrame(canvasId, w, h, (ctx, R) => {
+    return mapFrame(canvasId, w, h, (ctx, R) => {
       imageInto(ctx, R, (ix, iy) => {
         const i = iy * NG + ix;
         const gx = (at(Z, ix + 1, iy) - at(Z, ix - 1, iy)) / (2 * BIN);
@@ -1108,10 +1108,10 @@
   function drawStep2() {
     const w = rowWidth('row2', 2);
     const h = clamp(Math.round(w * 0.86), 260, 360);
-    reliefMap('c2map', w, h);
-    // draw the profile line on the map
+    // use the rectangle the map actually drew into, or the line and the marker
+    // land somewhere the picture is not
+    const R = reliefMap('c2map', w, h);
     const ctx = $('c2map').getContext('2d');
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b };
     const X = (ix) => R.x + ((ix + 0.5) / NG) * R.w;
     const Y = (iy) => R.y + R.h - ((iy + 0.5) / NG) * R.h;
     ctx.save();
@@ -1123,7 +1123,6 @@
     ctx.lineTo(X(S.px + L * Math.cos(a)), Y(S.py + L * Math.sin(a)));
     ctx.stroke();
     ctx.restore();
-    markPoint(ctx, R, X, Y);
 
     // curvature against azimuth
     const i = S.py * NG + S.px;
