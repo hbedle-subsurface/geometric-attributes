@@ -42,7 +42,7 @@
       </div>
     </div>
     <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
-      <div class="hero-cap"><span>structure is what these attributes measure</span><b>dip, bend, lean</b></div></div>
+      <div class="hero-cap"><span>a folded, faulted reflector package</span><b>the structure these attributes measure</b></div></div>
    </div>
   </section>
 
@@ -216,77 +216,58 @@
 (function () {
   'use strict';
 
-  /* Hero: a folded, faulted reflector package drawn as stacked horizons.
-     Deliberately plain — no attribute panels, no labels, nothing that could
-     claim more than it shows. It is just structure, which is what the whole
-     site is about measuring. */
+  /* Hero: one fold, one fault, evenly spaced horizons. Every horizon is the
+     same shape, so the picture reads as structure rather than as noise. */
   function drawHero() {
     const c = document.getElementById('heroCanvas');
     if (!c || !c.parentElement) return;
     const w = c.parentElement.clientWidth;
-    const h = Math.max(240, Math.round(w * 0.66));
+    const h = Math.max(230, Math.round(w * 0.60));
     const ctx = SEIS.fitCanvas(c, w, h);
     ctx.clearRect(0, 0, w, h);
 
-    const pad = 0;
-    const N = 22;                       // horizons
-    const FX = 0.63 * w, FSL = 0.34;    // a fault, dipping to the right
-    const THROW = h * 0.055;
+    const N = 16;
+    const top = h * 0.17, span = h * 0.62;
+    const AMP = h * 0.085;
+    const FX = 0.62 * w, FSL = 0.20;
+    const THROW = (span / (N - 1)) * 0.72;   // just under one horizon spacing
 
-    const yOf = (x, n) => {
-      const t = n / (N - 1);
-      const base = h * 0.14 + t * h * 0.68;
-      const fold = h * 0.075 * Math.sin(2 * Math.PI * x / (w * 0.62) + 0.7)
-        + h * 0.030 * Math.sin(2 * Math.PI * x / (w * 0.27) + 2.1);
-      // the fold dies out gently with depth, the way a drape does
-      const decay = 0.45 + 0.55 * (1 - t);
-      const cut = FX + FSL * (base - h * 0.14);
-      return base + fold * decay + (x > cut ? THROW : 0);
-    };
+    const fold = (x) => AMP * Math.sin(2 * Math.PI * (x / w) * 1.25 - 0.5);
+    const cutAt = (yBase) => FX + FSL * (yBase - top);
+    const yOf = (x, yBase) => yBase + fold(x) + (x > cutAt(yBase) ? THROW : 0);
 
     for (let n = 0; n < N; n++) {
       const t = n / (N - 1);
-      // crimson at the top fading to slate with depth
-      const r = Math.round(132 + (92 - 132) * t);
-      const g = Math.round(22 + (102 - 22) * t);
-      const b = Math.round(23 + (112 - 23) * t);
-      const alpha = 0.92 - 0.35 * t;
+      const yBase = top + t * span;
+      const r = Math.round(132 + (108 - 132) * t);
+      const g = Math.round(22 + (116 - 22) * t);
+      const b = Math.round(23 + (126 - 23) * t);
       ctx.save();
-      ctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha.toFixed(3) + ')';
-      ctx.lineWidth = 2.6 - 1.1 * t;
+      ctx.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+      ctx.globalAlpha = 0.95 - 0.30 * t;
+      ctx.lineWidth = 2.4 - 0.7 * t;
       ctx.lineCap = 'round';
-      // left of the fault
-      ctx.beginPath();
-      let started = false;
-      for (let x = pad; x <= w - pad; x += 2) {
-        const cut = FX + FSL * ((n / (N - 1)) * h * 0.68);
-        if (x > cut - 1) { started = false; continue; }
-        const y = yOf(x, n);
-        started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-        started = true;
-      }
-      ctx.stroke();
-      // right of the fault, offset
-      ctx.beginPath();
-      started = false;
-      for (let x = pad; x <= w - pad; x += 2) {
-        const cut = FX + FSL * ((n / (N - 1)) * h * 0.68);
-        if (x < cut + 1) { started = false; continue; }
-        const y = yOf(x, n);
-        started ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-        started = true;
-      }
-      ctx.stroke();
+      const cut = cutAt(yBase);
+      [[0, cut - 2], [cut + 2, w]].forEach((seg) => {
+        ctx.beginPath();
+        let first = true;
+        for (let x = seg[0]; x <= seg[1]; x += 3) {
+          const y = yOf(x, yBase);
+          first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          first = false;
+        }
+        ctx.stroke();
+      });
       ctx.restore();
     }
 
-    // the fault plane itself, drawn faintly
+    // the fault plane, faint, stopping where the horizons stop
     ctx.save();
-    ctx.strokeStyle = 'rgba(22,25,28,.32)';
-    ctx.lineWidth = 1.4; ctx.setLineDash([7, 5]);
+    ctx.strokeStyle = 'rgba(22,25,28,.28)';
+    ctx.lineWidth = 1.3; ctx.setLineDash([6, 5]);
     ctx.beginPath();
-    ctx.moveTo(FX, h * 0.05);
-    ctx.lineTo(FX + FSL * h * 0.72, h * 0.95);
+    ctx.moveTo(cutAt(top), top - AMP - 10);
+    ctx.lineTo(cutAt(top + span), top + span + AMP + THROW + 10);
     ctx.stroke();
     ctx.restore();
   }
