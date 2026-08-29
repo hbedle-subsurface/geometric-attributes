@@ -83,6 +83,7 @@
     <button role="tab" data-tab="p3" aria-selected="false">3 · e_pos and e_neg</button>
     <button role="tab" data-tab="p4" aria-selected="false">4 · No circle</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · Side by side</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
     <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
@@ -264,13 +265,62 @@
     </div>
   </section>
 
+  <!-- ============================ WHY IT MATTERS ========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">?</span>Why run it at all</h3>
+      <span class="hint">The features it finds are the ones structure cannot show you</span>
+    </div>
+    <p class="lede">Every attribute up to module 06 measures the <em>shape</em> of the reflector. That works
+      beautifully for faults and folds and finds nothing at all in a flat-lying stratigraphic feature,
+      because there is nothing there to bend. Amplitude curvature is the answer to that gap: it differentiates
+      how bright the reflector is instead of where it is.</p>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      What it is used for</h2>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Channel and fan margins</b> on a flat horizon. Step 5 is the argument in two panels: set the
+        fold relief to zero and structural curvature goes blank while amplitude curvature still maps both
+        edges.</li>
+      <li><b>Facies and fluid boundaries.</b> A change of lithology, porosity or fill changes reflection
+        strength without moving the reflector. The boundary is an amplitude edge, so this is the family that
+        sees it.</li>
+      <li><b>Diagenetic fronts and gas-charged patches</b>, which are amplitude features with no structural
+        expression whatever.</li>
+      <li><b>Co-rendering with structural curvature.</b> The two together separate a feature that is
+        structural, one that is stratigraphic, and one that is both — which a single volume cannot do.</li>
+    </ul>
+
+    <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
+      Three things to know before trusting it</h2>
+    <p class="lede"><b>It maps outlines, not bodies.</b> The dim interior of a channel is flat, so its
+      second derivative is near zero and it comes out quiet — about 4 against 65 at the edge. If you want
+      the body of the channel you want an amplitude or envelope map; this attribute gives you its
+      boundary.</p>
+    <p class="lede"><b>It only sees abrupt change.</b> Soften the channel edge from 1 trace to 4 and the
+      edge and the interior become indistinguishable, because a gradational boundary has no sharp second
+      derivative anywhere. A facies change that takes a few hundred meters to happen will not appear,
+      however large the total amplitude contrast across it.</p>
+    <p class="lede"><b>Amplitude is noisier than structure, and this squares it.</b> Dip is a fitted,
+      smoothed estimate; amplitude is read straight off the trace. Differentiating that twice makes
+      amplitude curvature the most noise-sensitive attribute in this course after aberrancy, and it is
+      equally sensitive to acquisition footprint, tuning and any amplitude-altering processing step. An
+      anomaly here is only as trustworthy as the amplitudes underneath it, so it belongs on data whose
+      amplitudes you actually believe.</p>
+    <div class="legend prose">
+      <span>And the same discipline as everywhere else: a bright lineament means the amplitude turned a
+        corner. Whether that corner is a channel edge, a tuning effect or a footprint stripe is the
+        interpretation, and the attribute does not know.</span>
+    </div>
+  </section>
+
   <!-- ============================== EXERCISES ============================= -->
   <section class="tabpane" id="pe" role="tabpanel" hidden>
     <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
         <li><b>Flatten the structure completely.</b> Set the fold relief to 0 and look at step 5.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">Structural
+          <details class="reveal"><summary>Hint</summary><span class="ans">Structural
             curvature goes blank — there is nothing left to bend — while amplitude curvature is entirely
             unaffected and still maps both channel edges. This is the case that matters in practice: a
             channel or a fan on a flat-lying horizon is common, and a structural attribute has nothing to
@@ -278,7 +328,7 @@
             and now the amplitude panel is the blank one.</span></details></li>
         <li><b>Find out what actually lights up at a channel.</b> In step 3, compare the value at the
           channel edge with the value in the middle of the channel.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The middle of
+          <details class="reveal"><summary>Hint</summary><span class="ans">The middle of
             the channel reads about 4 against 65 at the edge, even though it is much dimmer than its surroundings. Amplitude curvature is
             a second derivative, so it responds to where the amplitude <em>changes</em>, not to where it is
             low. A broad dim area is flat in the second derivative and produces almost nothing. If you want
@@ -286,7 +336,7 @@
             maps its outline.</span></details></li>
         <li><b>Sharpen and soften the edge.</b> Move the edge-sharpness slider from 1 to 10 traces and watch
           the e_pos value at the edge.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">At 1 trace the
+          <details class="reveal"><summary>Hint</summary><span class="ans">At 1 trace the
             edge reads about 124 against 0.1 in the middle of the channel — a thousand to one, and the two
             edges are razor sharp. At 2 traces it is 65 against 4. By 4 traces it is 23 against 22, and the
             distinction has collapsed: the channel no longer has a flat floor and two sharp walls, it is one
@@ -297,7 +347,7 @@
             does.</span></details></li>
         <li><b>Narrow the channel until it disappears.</b> Take the channel width down toward 4 traces with
           the operator length at 7 or more.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The two edges
+          <details class="reveal"><summary>Hint</summary><span class="ans">The two edges
             move close enough together that the operator smooths across both at once and they begin to
             cancel, and the two clean lineaments merge into one weak smear. Compare it against the amplitude
             map in step 2, where the channel is still perfectly obvious. Operator length sets the smallest
@@ -306,7 +356,7 @@
             has.</span></details></li>
         <li><b>Add noise and differentiate it twice.</b> Put the noise up to about 20% with the operator
           length at 1.
-          <details class="reveal"><summary>Show what to look for</summary><span class="ans">The edges
+          <details class="reveal"><summary>Hint</summary><span class="ans">The edges
             disappear into speckle. Amplitude curvature is a second derivative of a quantity that is
             already noisier than structure — dip is a smoothed, fitted estimate, whereas amplitude is read
             straight off the trace — so it is more sensitive to noise than structural curvature is, not
@@ -481,7 +531,7 @@
       }
     }
     if (S.noise > 0) {
-      for (let i = 0; i < a.length; i++) a[i] += (S.noise / 100) * 0.4 * (rnd() * 2 - 1);
+      for (let i = 0; i < a.length; i++) a[i] += (S.noise / 100) * 1.6 * (rnd() * 2 - 1);
     }
     Z = z; AMP = a;
   }
@@ -641,7 +691,9 @@
   function mapPanel(canvasId, w, h, get, map, bar, mark) {
     const ctx = SEIS.fitCanvas($(canvasId), w, h);
     ctx.clearRect(0, 0, w, h);
-    const R = { x: M.l, y: M.t, w: w - M.l - M.r, h: h - M.t - M.b - (bar ? 52 : 0) };
+    const availW = w - M.l - M.r, availH = h - M.t - M.b - (bar ? 52 : 0);
+    const side = Math.max(40, Math.min(availW, availH));
+    const R = { x: M.l + (availW - side) / 2, y: M.t, w: side, h: side };
     imageInto(ctx, R, get, map);
     if (mark !== false) {
       const X = R.x + ((S.px + 0.5) / NG) * R.w;
@@ -930,7 +982,7 @@
 
   function drawAll() {
     syncLabels();
-    if (!$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
+    if (!$('pw').hidden || !$('pe').hidden || !$('pk').hidden || !$('pm').hidden) return;
     drawHeader();
     if (visible('p1')) drawStep1();
     if (visible('p2')) drawStep2();
@@ -939,10 +991,10 @@
     if (visible('p5')) drawStep5();
   }
 
-  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pe', 'pk', 'pm'];
+  const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
     p1: 'Two bends', p2: 'Amplitude map', p3: 'e_pos and e_neg',
-    p4: 'No circle', p5: 'Side by side',
+    p4: 'No circle', p5: 'Side by side', pw: 'Why it matters',
     pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };
 
@@ -983,7 +1035,7 @@
       b.setAttribute('aria-selected', b.dataset.tab === id);
     });
     const lab = document.querySelector('.labhead');
-    if (lab) lab.hidden = (id === 'pe' || id === 'pk' || id === 'pm');
+    if (lab) lab.hidden = (id === 'pw' || id === 'pe' || id === 'pk' || id === 'pm');
     const last = (id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !last;
     if ($('pager')) $('pager').hidden = !last;
@@ -1024,7 +1076,7 @@
     c.addEventListener('pointercancel', () => { down = false; });
   }
   attachProbe('cSec', true);
-  attachProbe('c2a');
+  ['c2z', 'c2a', 'c3a', 'c3p', 'c3n', 'c5s', 'c5a'].forEach((q) => attachProbe(q));
 
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 140); });
