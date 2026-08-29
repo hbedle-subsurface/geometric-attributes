@@ -42,7 +42,7 @@
       </div>
     </div>
     <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
-      <div class="hero-cap"><span>one faulted section, three attributes</span><b>all from the dip field</b></div></div>
+      <div class="hero-cap"><span>one folded, faulted section &mdash; three questions</span><b>all from the dip field</b></div></div>
    </div>
   </section>
 
@@ -232,12 +232,12 @@
     const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
     const rnd = SEIS.mulberry32(4);
     const beds = [];
-    for (let t = -60; t < NT + 60; t += 11) {
+    for (let t = -60; t < NT + 60; t += 16) {
       beds.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.04 + rnd() * 0.07) });
     }
     // a gentle fold, and one fault that dips rather than standing vertical
     const FX = 0.60 * NX, FSL = 1 / 4.2;
-    const fold = (ix) => 13 * Math.sin(2 * Math.PI * ix / 110);
+    const fold = (ix) => 20 * Math.sin(2 * Math.PI * ix / 80);
     const shiftAt = (ix, t0) => {
       const f = fold(ix);
       const wgt = Math.max(0, Math.min(1, ix - (FX + FSL * (t0 + f)) + 0.5));
@@ -280,12 +280,14 @@
         abr[a * gt + b] = (cur[(a + 1) * gt + b] - cur[(a - 1) * gt + b]) / 2;
       }
     }
-    const lim = (arr) => {
-      let m = 1e-9;
-      for (let q = 0; q < arr.length; q++) m = Math.max(m, Math.abs(arr[q]));
-      return m;
+    const robust = (arr, mult) => {
+      const v = [];
+      for (let q = 0; q < arr.length; q++) if (arr[q]) v.push(Math.abs(arr[q]));
+      if (!v.length) return 1e-9;
+      v.sort((x, y) => x - y);
+      return Math.max(v[Math.floor(0.5 * v.length)] * mult, 1e-9);
     };
-    const cl = lim(cur), al = lim(abr);
+    const cl = robust(cur, 3), al = robust(abr, 3);
 
     const gap = 7, capH = 0;
     const seisH = Math.round((h - capH - 3 * gap) * 0.46);
@@ -324,11 +326,11 @@
     };
 
     strip(0, (a, b) => Math.max(0, Math.min(1, (coh[a * gt + b] - 0.45) / 0.55)),
-      (u) => ATTR.MAPS.coherence(u), 'coherence \u00b7 finds the break');
+      (u) => ATTR.MAPS.coherence(u), 'coherence \u00b7 is it broken?');
     strip(1, (a, b) => cur[a * gt + b] / cl,
-      (u) => ATTR.MAPS.dip(-Math.max(-1, Math.min(1, u))), 'curvature \u00b7 finds the bend');
+      (u) => ATTR.MAPS.dip(-Math.max(-1, Math.min(1, u))), 'curvature \u00b7 is it bent?');
     strip(2, (a, b) => Math.max(0, Math.min(1, Math.abs(abr[a * gt + b]) / (al * 0.55))),
-      (u) => ATTR.MAPS.scan(u), 'aberrancy \u00b7 finds the lean');
+      (u) => ATTR.MAPS.scan(u), 'aberrancy \u00b7 does the bend lean?');
   }
 
   function thumbDip(canvas) {
