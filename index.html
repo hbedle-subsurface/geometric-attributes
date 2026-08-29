@@ -27,10 +27,12 @@
    <div class="hero-grid">
     <div class="hero-copy">
       <p class="eyebrow">AASPI &nbsp;·&nbsp; University of Oklahoma</p>
-      <h1 class="title">Geometric attributes measure the <em>shape</em> of reflectors, not their strength.</h1>
-      <p class="lede">Coherence, curvature and aberrancy all answer questions about geometry: is this
-        reflector continuous, is it bent, is it flexed. Every one of them is computed from the same starting
-        point — an estimate of which way the reflector is going at every sample in the volume.</p>
+      <h1 class="title">Every geometric attribute is built on the same measurement: <em>dip</em>.</h1>
+      <p class="lede">Coherence asks whether the reflector is broken. Curvature asks whether it is bent, and
+        aberrancy whether the bend leans one way. Amplitude curvature asks the same question of how bright
+        the reflector is rather than where it is. All of them are measured <em>along</em> the reflector,
+        which means every one rests on an estimate of which way it is going at every sample in the volume
+        &mdash; and inherits whatever that estimate got wrong.</p>
       <p class="lede">These modules open that up. Build a structure, watch the attribute being computed on it,
         change the parameters that are usually left at their defaults, and see what happens to the answer.
         Nothing to install, and nothing leaves your machine.</p>
@@ -40,7 +42,7 @@
       </div>
     </div>
     <div class="hero-panel"><canvas id="heroCanvas" aria-label="Reflector dip"></canvas>
-      <div class="hero-cap"><span>dip estimated by semblance scan</span><b>every sample</b></div></div>
+      <div class="hero-cap"><span>one faulted section, three attributes</span><b>all from the dip field</b></div></div>
    </div>
   </section>
 
@@ -214,43 +216,119 @@
 (function () {
   'use strict';
 
-  // hero: a folded, faulted section with dip bars laid over it
+  /* Hero: the argument of the whole site in one picture. A faulted, folded
+     section on top, and under it the three things the attributes make of it —
+     the fault is invisible in one, obvious in another, and located precisely
+     in the third. */
   function drawHero() {
     const c = document.getElementById('heroCanvas');
     if (!c || !c.parentElement) return;
-    const w = c.parentElement.clientWidth, h = Math.max(220, Math.round(w * 0.62));
+    const w = c.parentElement.clientWidth;
+    const h = Math.max(250, Math.round(w * 0.72));
     const ctx = SEIS.fitCanvas(c, w, h);
     ctx.clearRect(0, 0, w, h);
-    const NX = 160, NT = 220, DT = 0.002;
+
+    const NX = 170, NT = 200, DT = 0.002, BIN = 25;
     const wav = SEIS.makeWavelet({ type: 'ricker', f: 30 });
     const rnd = SEIS.mulberry32(4);
-    const refl = [];
-    for (let t = -500; t < NT + 500; t += 34) {
-      refl.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.06 + rnd() * 0.07) });
+    const beds = [];
+    for (let t = -60; t < NT + 60; t += 11) {
+      beds.push({ it: t, r: (rnd() < 0.5 ? -1 : 1) * (0.04 + rnd() * 0.07) });
     }
-    const shift = (ix) => 14 * Math.sin(2 * Math.PI * ix / 95) + (ix > 0.62 * NX ? 9 : 0);
+    // a gentle fold, and one fault that dips rather than standing vertical
+    const FX = 0.60 * NX, FSL = 1 / 4.2;
+    const fold = (ix) => 13 * Math.sin(2 * Math.PI * ix / 110);
+    const shiftAt = (ix, t0) => {
+      const f = fold(ix);
+      const wgt = Math.max(0, Math.min(1, ix - (FX + FSL * (t0 + f)) + 0.5));
+      return f + wgt * 8;
+    };
     const fld = new Float32Array(NX * NT);
     for (let ix = 0; ix < NX; ix++) {
-      const sh = shift(ix);
-      fld.set(SEIS.traceFromSpikes(refl.map((R) => ({ t: (R.it + sh) * DT, r: R.r })),
-        0, DT, NT, wav), ix * NT);
+      fld.set(SEIS.traceFromSpikes(
+        beds.map((b) => ({ t: (b.it + shiftAt(ix, b.it)) * DT, r: b.r })), 0, DT, NT, wav), ix * NT);
     }
     let pk = 1e-6;
-    for (let i = 0; i < fld.length; i++) pk = Math.max(pk, Math.abs(fld[i]));
-    SEIS.drawVarDensity(ctx, fld, NX, NT, { x: 0, y: 0, w: w, h: h },
-      { cmap: SEIS.COLORMAPS.gray, clip: pk * 0.8 });
-    // dip bars, from the same scan the modules use
-    ctx.save();
-    ctx.strokeStyle = 'rgba(196,60,45,.95)'; ctx.lineWidth = 2;
-    for (let ix = 10; ix < NX - 10; ix += 13) {
-      for (let it = 18; it < NT - 18; it += 24) {
-        const r = ATTR.dipScan(fld, NX, NT, ix, it, { half: 2, kHalf: 5, pMax: 4, nP: 25 });
-        const x = (ix / NX) * w, y = (it / NT) * h;
-        const ex = 5.5 * (w / NX), ey = r.p * 5.5 * (h / NT);
-        ctx.beginPath(); ctx.moveTo(x - ex, y - ey); ctx.lineTo(x + ex, y + ey); ctx.stroke();
+    for (let q = 0; q < fld.length; q++) pk = Math.max(pk, Math.abs(fld[q]));
+
+    const grid = ATTR.dipField(fld, NX, NT,
+      { half: 2, kHalf: 10, pMax: 4.5, nP: 33, decX: 1, decT: 2 });
+
+    // the three strips: coherence, curvature, and where the fault actually is
+    const gx = grid.gx, gt = grid.gt;
+    const coh = new Float32Array(gx * gt), cur = new Float32Array(gx * gt);
+    const buf = new Float64Array(5 * 21);
+    for (let a = 0; a < gx; a++) {
+      for (let b = 0; b < gt; b++) {
+        ATTR.gatherAlongDip(fld, NX, NT, a, b * grid.decT,
+          ATTR.sampleGrid(grid, grid.p, a, b * grid.decT), 2, 10, buf);
+        coh[a * gt + b] = ATTR.semblance(buf, 5, 21);
       }
     }
-    ctx.restore();
+    for (let a = 1; a < gx - 1; a++) {
+      for (let b = 1; b < gt - 1; b++) {
+        const pL = ATTR.sampleGrid(grid, grid.p, a - 1, b * grid.decT);
+        const pR = ATTR.sampleGrid(grid, grid.p, a + 1, b * grid.decT);
+        cur[a * gt + b] = (pR - pL) / 2;
+      }
+    }
+    // one more derivative again: the third of structure, which puts a single
+    // anomaly on the fault where curvature puts one either side of it
+    const abr = new Float32Array(gx * gt);
+    for (let a = 2; a < gx - 2; a++) {
+      for (let b = 1; b < gt - 1; b++) {
+        abr[a * gt + b] = (cur[(a + 1) * gt + b] - cur[(a - 1) * gt + b]) / 2;
+      }
+    }
+    const lim = (arr) => {
+      let m = 1e-9;
+      for (let q = 0; q < arr.length; q++) m = Math.max(m, Math.abs(arr[q]));
+      return m;
+    };
+    const cl = lim(cur), al = lim(abr);
+
+    const gap = 7, capH = 0;
+    const seisH = Math.round((h - capH - 3 * gap) * 0.46);
+    const stripH = (h - capH - 3 * gap - seisH) / 3;
+    const R0 = { x: 0, y: 0, w: w, h: seisH };
+    SEIS.drawVarDensity(ctx, fld, NX, NT, R0,
+      { cmap: SEIS.COLORMAPS.gray, clip: pk * 0.75 });
+
+    const strip = (n, get, map, label) => {
+      const R = { x: 0, y: seisH + gap + n * (stripH + gap), w: w, h: stripH };
+      const off = document.createElement('canvas');
+      off.width = gx; off.height = gt;
+      const octx = off.getContext('2d');
+      const img = octx.createImageData(gx, gt);
+      for (let b = 0; b < gt; b++) {
+        for (let a = 0; a < gx; a++) {
+          const col = map(get(a, b));
+          const q = (b * gx + a) * 4;
+          img.data[q] = col[0]; img.data[q + 1] = col[1];
+          img.data[q + 2] = col[2]; img.data[q + 3] = 255;
+        }
+      }
+      octx.putImageData(img, 0, 0);
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(off, R.x, R.y, R.w, R.h);
+      ctx.restore();
+      ctx.save();
+      ctx.font = '600 10px "IBM Plex Mono", monospace';
+      ctx.fillStyle = 'rgba(255,255,255,.94)';
+      ctx.fillRect(6, R.y + 5, ctx.measureText(label).width + 12, 15);
+      ctx.fillStyle = '#841617';
+      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      ctx.fillText(label, 12, R.y + 13);
+      ctx.restore();
+    };
+
+    strip(0, (a, b) => Math.max(0, Math.min(1, (coh[a * gt + b] - 0.45) / 0.55)),
+      (u) => ATTR.MAPS.coherence(u), 'coherence \u00b7 finds the break');
+    strip(1, (a, b) => cur[a * gt + b] / cl,
+      (u) => ATTR.MAPS.dip(-Math.max(-1, Math.min(1, u))), 'curvature \u00b7 finds the bend');
+    strip(2, (a, b) => Math.max(0, Math.min(1, Math.abs(abr[a * gt + b]) / (al * 0.55))),
+      (u) => ATTR.MAPS.scan(u), 'aberrancy \u00b7 finds the lean');
   }
 
   function thumbDip(canvas) {
