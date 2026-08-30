@@ -121,8 +121,11 @@ labeled *Hint*, so a reader can try before reading.
   attribute reads 0.786, that value was read out of the running page.
 - **One name per module.** The card on `index.html`, the `<title>` and the
   pager links all use the same short name; the `<h1>` is free to be a sentence.
-- **One license statement.** The footer block is identical on all nine pages.
-  Change it in one place and change it everywhere.
+- **One license statement, said once per page.** The module footers carry the
+  credit, the license, the citation and the privacy note, identically on all
+  eight. The landing page says all of that in its About section instead, so its
+  footer holds the citation line only — do not paste the module footer there or
+  the page says everything twice.
 
 ## Editing notes
 
