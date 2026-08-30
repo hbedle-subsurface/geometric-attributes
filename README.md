@@ -21,7 +21,7 @@ page was opened (see *Page-view counting* below).
 | 01 | `modules/dip.html` | Dip: what it is, finding it by eye, and the semblance scan |
 | 02 | `modules/dip3d.html` | Inline and crossline dip; apparent versus true dip; azimuth |
 | 03 | `modules/dipsteer.html` | Why the analysis window must follow the bed |
-| 04 | `modules/coherence.html` | Semblance, variance, eigenstructure, energy ratio, Sobel |
+| 04 | `modules/coherence.html` | Coherence, similarity and variance: semblance, eigenstructure, energy ratio, Sobel |
 | 05 | `modules/curvature.html` | Structural curvature; k₁ and k₂; wavelength |
 | 06 | `modules/shape.html` | Curvedness, shape index, shape components |
 | 07 | `modules/ampcurv.html` | Amplitude curvature: e_pos and e_neg |
@@ -29,7 +29,9 @@ page was opened (see *Page-view counting* below).
 
 They are written to be read in order — module 03 assumes 01 and 02, everything
 from 04 on assumes a dip field exists — but each one stands alone if you drop
-a student into the middle of the course.
+a student into the middle of the course. Every module links to the next and to
+the previous one at the foot of its reference tabs, so the whole set can be
+walked through without returning to the index.
 
 ## Layout
 
@@ -52,9 +54,14 @@ still works, and editing one cannot break another.
 Open `index.html` in a browser. That is the whole procedure.
 
 Modules also work opened directly from the file system, with one limitation:
-shareable-link state (the querystring that records slider positions) is disabled
-under `file://` because browsers reject `history.replaceState` there. Everything
-else behaves identically.
+shareable-link state is disabled under `file://` because browsers reject
+`history.replaceState` there. Everything else behaves identically.
+
+**Shareable links.** Every slider and toggle is written into the querystring as
+it moves, so the address bar always holds the current configuration of the
+module. Copying it from the address bar hands someone the exact setup, which is
+the intended way to distribute a worked example. There is no copy button; the
+URL is the feature.
 
 To publish, push to the `gh-pages`-enabled branch. **Push `assets/` whenever a
 module changes** — several modules depend on functions added to the shared
@@ -95,7 +102,7 @@ entire point and cannot happen if the two are never visible at once.
 in a hidden pane has zero width, so anything drawn there comes out at zero size.
 
 **Exercises** carry their answers behind a `<details class="reveal">` toggle
-labelled *Hint*, so a reader can try before reading.
+labeled *Hint*, so a reader can try before reading.
 
 **Shared components** live in `style.css`: `.labhead`, `.tabs`, `.tabpane`,
 `.stepnav`, `details.reveal`, `.thumb`. Reuse them rather than restyling.
@@ -112,6 +119,10 @@ labelled *Hint*, so a reader can try before reading.
   downward, on a datum.
 - **Numbers in the prose are measured, not estimated.** If an exercise says an
   attribute reads 0.786, that value was read out of the running page.
+- **One name per module.** The card on `index.html`, the `<title>` and the
+  pager links all use the same short name; the `<h1>` is free to be a sentence.
+- **One license statement.** The footer block is identical on all nine pages.
+  Change it in one place and change it everywhere.
 
 ## Editing notes
 
@@ -143,24 +154,29 @@ The definitions follow the AASPI program documentation for `dip3d`,
 `similarity3d` and `curvature3d`, together with the published literature —
 Marfurt et al. (1998), Gersztenkorn and Marfurt (1999), Roberts (2001),
 al-Dossary and Marfurt (2006), Chopra and Marfurt (2007), Di and Gao (2016),
-Qi and Marfurt (2018). Each module's **Method** tab cites its own sources by
-equation number where the documentation gives one, and states plainly where the
-implementation simplifies or departs from a production volume.
+Qi and Marfurt (2018). Every module's **Method** tab lists its own sources and
+states plainly where the implementation simplifies or departs from a production
+volume. Module 04, which follows the `similarity3d` documentation closely, also
+cites that document by equation number.
 
 Where a source is internally inconsistent, the module says so rather than
 quietly picking one. Two examples: the `curvature3d` documentation gives
 curvedness both with and without a factor of two, and its shape index appears
 with two opposite sign conventions.
 
-## Licence and citation
+## License and citation
 
 Free to use for teaching, demonstration, and non-commercial study, provided the
 source is credited. Please do not republish or redistribute it, modified or
 otherwise, without permission. If you use it in a course or a talk, a credit
 line and a link back are all that is asked.
 
-> H. Bedle, *How Geometric Attributes Actually Work*, University of Oklahoma.
-> SSRN: *[article link to follow]*
+> H. Bedle, *How Geometric Attributes Actually Work*, University of Oklahoma,
+> https://hbedle-subsurface.github.io/geometric-attributes/
+
+The same license and citation line appear in the footer of all nine pages. When
+the SSRN working paper is published, the link needs adding in ten places: this
+file and the citation line in each page's footer.
 
 Built for teaching by Heather Bedle, School of Geosciences, University of
 Oklahoma, with the AASPI consortium.

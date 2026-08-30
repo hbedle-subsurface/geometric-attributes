@@ -18,7 +18,7 @@
     <nav>
       <a href="../index.html">All modules</a>
       <a href="dip.html">Module 01</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
@@ -214,10 +214,10 @@
 
     <div class="legend">
       <span>Both maps look down on the volume: inline runs left to right, crossline runs up, and every
-        pixel is one trace coloured by the estimate made at that trace. The outer two traces on each side are
+        pixel is one trace colored by the estimate made at that trace. The outer two traces on each side are
         left out, because the analysis patch does not fit inside the volume there — real dip volumes have the
         same problem at survey edges. The azimuth scale is a color wheel that returns to where it started,
-        because 359° and 1° are nearly the same direction and a scale with different colours at its ends
+        because 359° and 1° are nearly the same direction and a scale with different colors at its ends
         would draw a boundary that is not there.</span>
     </div>
 
@@ -382,7 +382,7 @@
       crossline. Every combination of the two is tried.</p>
     <p class="lede">
       Press run and watch the two lines below rock back and forth. Each pair of positions they take is one
-      square on the grid, and that square is coloured by how well the traces agreed.</p>
+      square on the grid, and that square is colored by how well the traces agreed.</p>
 
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
       <button class="btn small" id="runBtn" type="button">Run the search</button>
@@ -433,13 +433,13 @@
       <div class="ctl-col">
         <h2>Where it looks</h2>
         <div class="ctl">
-          <label for="thMax">Search range <span class="val" id="thMaxV">± 8 ms</span></label>
+          <label for="thMax">Search range <span class="val" id="thMaxV">± 8 ms per trace or line</span></label>
           <input type="range" id="thMax" min="1" max="10" step="0.5" value="8">
         </div>
         <p class="hint-line" style="margin:-8px 0 14px">The width and height of the grid. A reflector outside
           this range in either direction cannot be found.</p>
         <div class="ctl">
-          <label for="dStep">Step size <span class="val" id="dStepV">1.00 ms</span></label>
+          <label for="dStep">Step size <span class="val" id="dStepV">1.00 ms per trace or line</span></label>
           <input type="range" id="dStep" min="0.25" max="4" step="0.25" value="1">
         </div>
         <p class="hint-line" style="margin:-8px 0 0">How fine the grid is. The number of squares is the
@@ -626,7 +626,7 @@
       separable form used here is what most implementations do and is accurate while the peak is not strongly
       skewed, which the elongated bright spot under noise shows it can be.</p>
     <p>Simplifications carried over from module 01, plus new ones. Semblance is computed on the plain trace
-      rather than the analytic trace. There is no Kuwahara search over shifted windows. The reflector is
+      rather than the analytic trace. There is no Kuwahara search over windows offset around the analysis point. The reflector is
       smooth, so the estimate is never fighting a fault inside the window. And the alternative family of
       estimators, which builds a gradient structure tensor and takes its principal eigenvector rather than
       trying candidates, is not shown here at all.</p>
@@ -664,12 +664,17 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma —
-        with the <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.
-        Free to use or adapt in your own courses with citation.</p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
+      <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
+        is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
+        If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
+      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -1480,7 +1485,7 @@
 
     const app = apparent(gxOf(truePx(CX)), gyOf(truePy(CY)), S.az);
     sectionPanel('c6sec', rotatedSection(S.az), NR, NT, w, h, {
-      dir: 'METRES ALONG THE SECTION \u2192',
+      dir: 'METERS ALONG THE SECTION \u2192',
       label: (i) => {
         const m = Math.round((i - (NR - 1) / 2) * RSTEP);
         return m % 150 === 0 ? String(m) : '';
@@ -1739,8 +1744,8 @@
     $('dyV').textContent = S.dy + ' m';
     $('velV').textContent = S.vel + ' m/s';
     $('azV').textContent = S.az + '\u00b0 from inline';
-    $('thMaxV').textContent = '\u00b1 ' + S.thMax + ' ms';
-    $('dStepV').textContent = S.dStep.toFixed(2) + ' ms';
+    $('thMaxV').textContent = '\u00b1 ' + S.thMax + ' ms per trace or line';
+    $('dStepV').textContent = S.dStep.toFixed(2) + ' ms per trace or line';
     $('halfV').textContent = (2 * S.half + 1) + ' \u00d7 ' + (2 * S.half + 1) + ' traces';
     $('kHalfV').textContent = '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms';
     $('noiseV').textContent = S.noise === 0 ? 'none' : S.noise + '%';
@@ -1932,6 +1937,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   let rt;

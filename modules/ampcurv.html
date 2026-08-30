@@ -17,8 +17,8 @@
     <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
     <nav>
       <a href="../index.html">All modules</a>
-      <a href="curvature.html">Module 05</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="shape.html">Module 06</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
@@ -27,8 +27,8 @@
     <h1>Amplitude curvature: bending in brightness, not in structure</h1>
     <p class="sub">Module 05 differentiated the <em>shape</em> of the reflector twice. This one differentiates
       something else entirely: how bright the reflector is as you walk along it. A channel can be perfectly
-      flat and still have edges, and no amount of structural curvature will ever find them — but the
-      amplitude changes sharply right there, and that is a bend you can measure!</p>
+      flat and still have edges, and no amount of structural curvature will ever find them. The amplitude
+      changes sharply right there, and that change is a bend the same arithmetic can measure.</p>
   </div>
 
   <div class="labhead">
@@ -232,7 +232,7 @@
       <h3><span class="stepno">5</span>The two attributes side by side</h3>
       <span class="hint">Each one sees what the other cannot</span>
     </div>
-    <p class="lede">Here is the whole argument in two panels. Structural curvature is computed on the depth
+    <p class="lede">The whole argument is in two panels. Structural curvature is computed on the depth
       map; amplitude curvature on the amplitude map. Same survey, same horizon, same operator length.</p>
     <p class="lede">The fold appears on the left and not the right. The channel appears on the right and not
       the left. Turn the fold relief up and down, and the channel dimming up and down, and watch each panel
@@ -295,8 +295,9 @@
       Three things to know before trusting it</h2>
     <p class="lede"><b>It maps outlines, not bodies.</b> The dim interior of a channel is flat, so its
       second derivative is near zero and it comes out quiet — about 4 against 65 at the edge. If you want
-      the body of the channel you want an amplitude or envelope map; this attribute gives you its
-      boundary.</p>
+      the body of the channel you want an amplitude map, or an envelope map — the strength of the
+      reflection regardless of whether it is a peak or a trough. This attribute gives you the boundary
+      instead.</p>
     <p class="lede"><b>It only sees abrupt change.</b> Soften the channel edge from 1 trace to 4 and the
       edge and the interior become indistinguishable, because a gradational boundary has no sharp second
       derivative anywhere. A facies change that takes a few hundred meters to happen will not appear,
@@ -441,15 +442,17 @@
 
   <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
-    <h3>08 · Aberrancy</h3>
+    <h3><a href="aberrancy.html">08 · Aberrancy</a></h3>
     <p>One derivative further again. Where coherence needs a break and curvature needs a bend, aberrancy
-      responds to the asymmetry of a flexure, and picks up faults whose offset is too small for either.</p>
+      responds to the asymmetry of a flexure. It puts a single anomaly on the fault where curvature puts
+      two beside it, and its azimuth says which way the ground dropped.</p>
+    <a class="btn" href="aberrancy.html">Open module 08 →</a>
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
   <div class="pager" id="pager" hidden>
-    <a class="btn ghost" href="curvature.html">← Module 05: structural curvature</a>
-    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="shape.html">← Module 06: curvedness and shape index</a>
+    <a class="btn" href="aberrancy.html">Next: aberrancy →</a>
   </div>
 
   <footer>
@@ -459,11 +462,12 @@
       <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
         is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
         If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
       <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
-        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -1049,6 +1053,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   document.addEventListener('input', (ev) => {

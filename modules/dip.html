@@ -17,8 +17,8 @@
     <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
     <nav>
       <a href="../index.html">All modules</a>
-      <a href="#why">Why it matters</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="#tabs" data-tab="pw">Why it matters</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
@@ -58,7 +58,7 @@
           steps mean fewer trials and a faster run, at the cost of precision.</p>
         <label class="check"><input type="checkbox" id="refine" checked> Fine-tune the winner</label>
         <p class="hint-line" style="margin:-4px 0 0">Fits a parabola through the winning tilt and its
-          two neighbours, so the estimate can fall between the values actually tested.</p>
+          two neighbors, so the estimate can fall between the values actually tested.</p>
       </div>
 
       <div class="ctl-col">
@@ -75,7 +75,7 @@
           <input type="range" id="kHalf" min="5" max="50" step="1" value="30">
         </div>
         <p class="hint-line" style="margin:-8px 0 0">The length of trace compared. A common guideline
-          is about one wavelength, roughly ±17 ms at 30 Hz. At ±100 ms the window spans three separate
+          is about one period of the wavelet, roughly ±17 ms at 30 Hz. At ±100 ms the window spans three separate
           reflectors.</p>
       </div>
 
@@ -246,9 +246,10 @@
     </div>
     <p class="lede">Geometric attributes are measured <b>along</b> the reflector, not horizontally across
       the display. That requires knowing the reflector orientation before you can compute anything else, and
-      because bedding is rarely flat, the orientation differs from sample to sample. So the dip field is not
-      an attribute you would normally interpret on its own — it is the coordinate system every other
-      attribute in this course is expressed in.</p>
+      because bedding is rarely flat, the orientation differs from sample to sample. So the dip field is rarely the
+      endpoint of an interpretation — it is mainly the coordinate system every other attribute in this
+      course is expressed in, though dip magnitude and azimuth maps are also read directly, as the end of
+      this page describes.</p>
     <p class="lede">Get it wrong and nothing downstream announces the fact. A coherence volume computed on a
       bad dip field still looks like a coherence volume. It is simply imaging the wrong thing, and it will
       keep doing so all the way to the interpretation.</p>
@@ -307,7 +308,7 @@
             same bed. The fault is one trace wide, but the estimate is degraded for four traces either side
             of it, because that is how far the window extends. Coherence computed on a dip field smeared this
             way produces broad, indistinct faults. Production software addresses this by testing several
-            windows offset around the sample and keeping the most confident, rather than always centring the
+            windows offset around the sample and keeping the most confident, rather than always centering the
             window.</span></details></li>
         <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then raise the window
           height from ±30 ms to ±100 ms, watching the box extend into the lower beds.
@@ -366,21 +367,25 @@
       reproduces the same one. The optional fault is a vertical step in arrival time applied to every trace
       from trace 17 rightward. The optional depth change reverses the dip of every bed below about
       290 ms.</p>
-    <p>The score is <b>semblance</b>: the energy of the summed traces divided by the summed energy of the
-      individual traces, over the analysis window. It is 1 when every trace in the window is identical and
-      falls toward 1/N when they are unrelated. Marfurt et al. (1998) introduced it as a coherence measure,
-      and it is also the quantity the dip search maximises. Coherence and dip estimation are the same
+    <p>The score is <b>semblance</b>: the energy of the average trace divided by the average of the
+      energies of the individual traces, over the analysis window. Written out for N traces, that is the
+      energy of the summed traces divided by N times the summed energy of the individual traces. It is 1
+      when every trace in the window is identical and falls toward 1/N when they are unrelated. Marfurt et
+      al. (1998) introduced it as a coherence measure, and it is also the quantity the dip search
+      maximizes. Coherence and dip estimation are the same
       calculation used to answer two different questions.</p>
     <p>The search is the discrete dip scan of Marfurt et al. (1998), offered today as one of the two
       algorithms in AASPI program <span class="k">dip3d</span>. Candidate tilts are spaced evenly across the
       range, each trace is read along the tilted line with linear interpolation between samples, and the
-      winner is refined by fitting a parabola through it and its two neighbours.</p>
+      winner is refined by fitting a parabola through it and its two neighbors.</p>
     <p>Several simplifications, each treated in a later module. This is 2D, so there is a single dip
       component rather than the inline and crossline pair, and no dip azimuth. The search range is quoted in
       milliseconds per trace, whereas production software asks for it in degrees and requires a conversion
-      velocity. Semblance is computed on the plain trace rather than the analytic trace. Dip is estimated at
-      a single point rather than at every sample in a volume. There is no Kuwahara search over shifted
-      windows, which is what keeps a production dip estimate from smearing across a fault.</p>
+      velocity. Semblance is computed on the plain trace rather than the analytic trace, meaning the trace together
+      with its Hilbert transform, which module 04 introduces. Dip is estimated at
+      a single point rather than at every sample in a volume. There is no Kuwahara search — testing several windows offset around the sample and keeping the most
+      internally consistent one — which is what keeps a production dip estimate from smearing across a
+      fault.</p>
     <ul>
       <li>Marfurt, K. J., R. L. Kirlin, S. L. Farmer, and M. S. Bahorich, 1998, 3-D seismic attributes using
         a semblance-based coherency algorithm: <em>Geophysics</em>, 63, 1150–1165.</li>
@@ -412,12 +417,17 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma —
-        with the <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.
-        Free to use or adapt in your own courses with citation.</p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
+      <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
+        is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
+        If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
+      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -599,7 +609,7 @@
   const CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670';
   const M = { l: 50, r: 14, t: 10, b: 34 };
   const EXC = 0.45;      // wiggle excursion, in trace spacings. Under 0.5 so a
-                         // full-amplitude peak cannot reach its neighbour.
+                         // full-amplitude peak cannot reach its neighbor.
 
   /* clientWidth includes padding, and a tab pane has plenty of it, so sizing a
      canvas to it pushes the panel past the right-hand edge. Measure the
@@ -1160,6 +1170,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   let rt;

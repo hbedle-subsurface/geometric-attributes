@@ -18,8 +18,8 @@
     <nav>
       <a href="../index.html">All modules</a>
       <a href="dipsteer.html">Module 03</a>
-      <a href="#terms">Terminology</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="#tabs" data-tab="pt">Terminology</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
@@ -27,8 +27,8 @@
     <p class="eyebrow">Module 04 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Coherence is not one calculation</h1>
     <p class="sub">Module <a href="dipsteer.html">03</a> got the analysis window lying along the bed, so
-      the traces inside it can finally be compared with each other. Now for the interesting part: what does
-      "compared" actually mean? At least five different calculations all get called coherence. They are not
+      the traces inside it can finally be compared with each other. The next question is what "compared"
+      means. At least five different calculations all get called coherence. They are not
       minor variations on one idea — they measure genuinely different things, and on the same piece of data
       they can disagree completely. One of them will call a window perfectly coherent while another calls it
       an edge. Knowing which is which is the difference between reading an attribute and guessing at it.</p>
@@ -71,8 +71,7 @@
           <input type="range" data-key="gain" id="gain" min="0.2" max="3" step="0.1" value="1">
         </div>
         <p class="hint-line" style="margin:-8px 0 0">Turns the whole window up or down together. Nothing
-          about the traces' agreement changes — so watch closely which numbers stay put and which do
-          not!</p>
+          about the traces' agreement changes, so watch which numbers stay put and which move.</p>
       </div>
       <div class="ctl-col">
         <h2>The window itself</h2>
@@ -175,7 +174,7 @@
       <li><b>Noise</b>, because real traces never match perfectly, and it is worth knowing how much of the
         disagreement is only noise.</li>
       <li><b>Overall amplitude</b> turns the whole window up or down together. Nothing about how well the
-        traces agree has changed — so watch closely which numbers stay put and which do not!</li>
+        traces agree has changed, so watch which numbers stay put and which move.</li>
       <li><b>Traces used</b> and <b>window height</b> set how much data each answer rests on.</li>
     </ul>
 
@@ -271,9 +270,8 @@
       that proposal accounts for. The quantity <span class="k">rᵀ C r</span> is the energy explained by your
       proposal; dividing by E turns it into a fraction between 0 and 1. So the answer is always "this share
       of the window is described by the pattern I suggested".</p>
-    <p class="lede">
-      And here is the satisfying part. Several attributes that were published separately, under different
-      names, in different decades, turn out to be this one equation with different proposals for r!</p>
+    <p class="lede">Several attributes that were published separately, under different names and in
+      different decades, turn out to be this one equation with different proposals for r.</p>
     <ul style="margin:0 0 14px;padding-left:20px;font-size:15px;color:var(--ink-soft);">
       <li style="margin-bottom:6px">Propose that every trace contributes equally — r a constant vector —
         and the answer is a <b>semblance</b> estimate of coherence. You are asking how much of the window is
@@ -320,6 +318,8 @@
     </div>
     <p class="hint-line" style="margin:-8px 0 12px;">
       <b>Energy-ratio coherence</b> is the energy of the Karhunen–Loève filtered data over the total energy.
+      The Karhunen–Loève filter rebuilds the window from its first L eigenvectors alone and throws the rest
+      away, so it is a way of keeping only the part of the window that several traces have in common.
       Because the eigenvectors are orthonormal, keeping L components retains exactly the first L
       eigenvalues, so with L = 1 it is numerically identical to eigenstructure coherence. Raise L and
       everything starts to look coherent, because you are keeping more of the window as "signal".</p>
@@ -364,7 +364,7 @@
     </div>
 
         <p class="lede">
-      Now the payoff. One synthetic line, flat-lying so that steering is not a factor, divided into five
+      One synthetic line, flat-lying so that steering is not a factor, divided into five
       zones of forty traces each. The zones are boxed and named along the top. Every zone has a sharp edge down its
       middle — vertical in zones 2, 3 and 4, and a realistically dipping fault plane in zone 5 — and every edge is a different kind of problem: zone 1 has no problem at all and is the
       control, zone 2 changes amplitude across the edge without changing the waveform, zone 3 changes the
@@ -451,9 +451,11 @@
       <li><b>Channels, fans and reef margins.</b> A channel edge is a discontinuity even where there is no
         structural relief at all, which is why a coherence time slice can show a meander belt in a single
         picture.</li>
-      <li><b>Data quality control.</b> Acquisition footprint, bad traces, migration smiles and statics
-        problems all show up as coherence anomalies, and they show up in patterns — regular stripes,
-        survey-edge effects, a single dark trace — that geology does not make.</li>
+      <li><b>Data quality control.</b> Several processing and acquisition problems show up as coherence
+        anomalies: acquisition footprint (a regular pattern left by the shot and receiver geometry), bad
+        traces, migration smiles (arcs left where migration was run with the wrong velocity) and statics
+        problems (trace-to-trace time shifts from the near surface). They show up in patterns — regular
+        stripes, survey-edge effects, a single dark trace — that geology does not make.</li>
       <li><b>As an input to other things.</b> Coherent energy from the same calculation drives amplitude
         curvature in module 07, and coherence is a standard input to fault-likelihood volumes and to
         structure-oriented filtering.</li>
@@ -565,8 +567,9 @@
         <li><b>A number without its algorithm is not interpretable.</b> "Coherence is 0.8" says nothing
           until you know which one, over what window, with what L.</li>
         <li><b>Low coherence means a local loss of waveform similarity, nothing more.</b> Faults are one
-          cause. Noise, acquisition footprint, processing artefacts, amplitude changes, tuning effects and a
-          poor dip estimate all produce it too.</li>
+          cause. Noise, acquisition footprint, processing artifacts, amplitude changes, tuning effects
+          (interference between reflections from a bed thinner than the wavelet) and a poor dip estimate
+          all produce it too.</li>
         <li><b>Do not share a color bar between attributes that do not share a range or a sign.</b> An edge
           response and a similarity are not the same quantity even when both happen to run 0 to 1.</li>
       </ul>
@@ -576,7 +579,7 @@
   <section class="tabpane" id="pt" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno ref">?</span>Terminology, and who owns which word</h3>
-      <span class="hint">These names are not standardised</span>
+      <span class="hint">These names are not standardized</span>
     </div>
 
         <p class="lede">
@@ -606,8 +609,8 @@
       substituted for something easier to implement.</p>
     <p><b>Covariance matrix</b>, equations 1a and 1b: built from 2K+1 sample vectors through the amplitude
       and a further 2K+1 through its Hilbert transform. The quadrature vectors occupy the same window, so
-      they do not change vertical resolution, but they stabilise the estimate near amplitude zero crossings
-      and suppress the artefact known as structural leakage. The optional per-sample taper of equation 1b
+      they do not change vertical resolution, but they stabilize the estimate near amplitude zero crossings
+      and suppress the artifact known as structural leakage. The optional per-sample taper of equation 1b
       and the sample-vector balancing option are not implemented here.</p>
     <p><b>Semblance</b>, equation 11: the energy of the average trace over the average of the energies of
       the individual traces. <b>Outer-product similarity</b>, equation 12: c = rᵀCr / E_tot, with the test
@@ -658,17 +661,17 @@
 
   <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
-    <h3>Where this goes</h3>
-    <p>These attributes are useful because a geological discontinuity usually reduces local waveform
-      similarity. Turning that into an interpretation is a separate problem: deciding which low-coherence
-      anomalies are faults, which are channel edges, which are unconformities and which are noise, and how
-      several attributes should be read together. Those are the modules after this one.</p>
+    <h3><a href="curvature.html">05 · Structural curvature</a></h3>
+    <p>Coherence asks whether the reflector is broken. The next module asks whether it is bent. Curvature is
+      the rate at which the dip field of modules 01 to 03 changes from trace to trace, so it responds to
+      folds and flexures that coherence is blind to, including faults too small to break a reflector.</p>
+    <a class="btn" href="curvature.html">Open module 05 →</a>
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
   <div class="pager" id="pager" hidden>
     <a class="btn ghost" href="dipsteer.html">← Module 03: dip steering</a>
-    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn" href="curvature.html">Next: structural curvature →</a>
   </div>
 
   <footer>
@@ -678,11 +681,12 @@
       <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
         is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
         If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
       <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
-        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -1729,6 +1733,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   let rt;

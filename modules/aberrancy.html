@@ -17,18 +17,19 @@
     <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
     <nav>
       <a href="../index.html">All modules</a>
-      <a href="curvature.html">Module 05</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="ampcurv.html">Module 07</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
   <div class="mod-head">
     <p class="eyebrow">Module 08 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Aberrancy: one derivative further</h1>
-    <p class="sub">Dip is the first derivative of structure. Curvature is the second. Aberrancy — also called
-      flexure — is the <b>third</b>, and it is the attribute that finds a fault whose throw is too small
-      even to bend the reflector detectably. It behaves differently from everything before it: three
-      principal values instead of two, and vectors instead of signed numbers.</p>
+    <p class="sub">Dip is the first derivative of structure. Curvature is the second. Aberrancy — also
+      called flexure — is the <b>third</b>. It responds to the asymmetry of a flexure, which lets it place
+      a single anomaly on a fault where curvature places two beside it, and its azimuth says which way the
+      ground dropped. It behaves differently from everything before it: three principal values instead of
+      two, and vectors instead of signed numbers.</p>
   </div>
 
   <div class="labhead">
@@ -288,21 +289,18 @@
     <p class="lede">Module 05 walked a fault down in throw and watched coherence go blind while curvature
       kept seeing it. Aberrancy is the next rung down. Take the main fault's throw toward zero and compare
       all three.</p>
-    <p class="lede">A large offset breaks the reflector and coherence finds it. A smaller one only bends the
-      reflector, and curvature finds that. Smaller still and the bend is gentle, but its
+    <p class="lede">A large offset breaks the reflector and coherence finds it. A smaller one only bends
+      the reflector, and curvature finds that. Smaller still and the bend is gentle, but its
       <em>asymmetry</em> survives — the flexure still leans one way — and that is what aberrancy responds
       to.</p>
-    <p class="lede"><b>The chart below is worth reading carefully, because it does not say what people
-      often assume.</b> With one fault on a flat regional and no noise, curvature and aberrancy both fall
-      away in almost exact proportion to the throw: halve the throw and you halve both. Neither has a
-      magic sensitivity the other lacks, and the two lines lie on top of each other.</p>
-    <p class="lede">So where does aberrancy's advantage actually come from? Three places, none of them
-      visible on a noise-free chart. <b>Coherence stops first</b>, and stops hard — below the wavelet's
-      resolution it returns to its no-fault value and simply cannot see the feature, while the two
-      derivatives keep declining smoothly and stay usable. <b>Aberrancy puts one anomaly on the fault</b>
-      where curvature puts two beside it, which matters when the anomaly is faint and you are trying to pick
-      it. And <b>the azimuth tells you which way the ground dropped</b>, which curvature strike cannot.
-      The advantage is in the shape and the readability of the anomaly, not in how slowly it fades.</p>
+    <p class="lede"><b>Read the chart carefully, because it does not say what people often assume.</b> With
+      one fault on a flat regional and no noise, curvature and aberrancy both fall away in almost exact
+      proportion to the throw: halve the throw and you halve both, and the two lines lie on top of each
+      other. Aberrancy does not have a sensitivity that curvature lacks. What it has is a coherence curve
+      that stops first — below the wavelet&rsquo;s resolution coherence returns to its no-fault value and
+      cannot see the feature at all, while both derivatives keep declining smoothly and stay usable — and
+      an anomaly that is easier to read once it is faint. Those advantages are set out in
+      <em>Why it matters</em>.</p>
 
     <canvas id="c5" aria-label="Coherence, curvature and aberrancy responses plotted against fault throw"></canvas>
 
@@ -335,8 +333,10 @@
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       What it buys</h2>
     <ul class="lede" style="padding-left:20px">
-      <li><b>Faults below curvature's reach.</b> The subseismic flexures that still compartmentalize a
-        reservoir, and that no coherence volume will ever show.</li>
+      <li><b>Faults below coherence's reach.</b> The subseismic flexures that still compartmentalize a
+        reservoir — that is, break it into poorly connected blocks — and that no coherence volume will ever
+        show. Step 5 measures how the three attributes fade as a fault gets smaller: coherence stops
+        abruptly, curvature and aberrancy decline together.</li>
       <li><b>One anomaly on the fault, not two beside it.</b> Curvature straddles a flexure with a positive
         and a negative lineament; aberrancy puts a single one down the middle. That is materially easier to
         autotrack and easier to hand to someone else.</li>
@@ -497,9 +497,12 @@
 
   <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
-    <h3>09 · Choosing an attribute</h3>
-    <p>One volume containing a fault, a flexure, a channel and an unconformity, with every attribute in this
-      course run over it, so you can see which ones earn their place on which feature.</p>
+    <h3>The end of the chain</h3>
+    <p>That is the last attribute in this set. Dip was estimated first, coherence asked whether the
+      reflector is broken, curvature whether it is bent, aberrancy whether the bend leans, and amplitude
+      curvature asked the bending question about brightness instead of shape. Every one of them was
+      measured in the coordinate system the dip field defines, and inherits whatever that estimate got
+      wrong. Any module in the set can be reopened from the index.</p>
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
@@ -515,11 +518,12 @@
       <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
         is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
         If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
       <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
-        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -1432,6 +1436,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   let heavy = null;

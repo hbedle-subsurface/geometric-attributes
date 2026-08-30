@@ -17,8 +17,8 @@
     <a class="brand" href="../index.html"><span class="dot"></span>How geometric attributes <b>actually</b> work</a>
     <nav>
       <a href="../index.html">All modules</a>
-      <a href="dip3d.html">Module 02</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="coherence.html">Module 04</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
@@ -28,8 +28,8 @@
     <p class="sub">Modules 01 and 02 measured which way the reflector is going. Curvature asks the next
       question: how fast is that direction changing as you move along the bed? Flat beds and uniformly
       dipping beds both have zero curvature — it is only where the dip <em>changes</em> that anything
-      happens. That makes curvature a derivative of a derivative, which is where all of its power and all
-      of its trouble come from!</p>
+      happens. That makes curvature a derivative of a derivative, which is where both its usefulness and
+      its sensitivity to noise come from.</p>
   </div>
 
   <div class="labhead">
@@ -119,8 +119,8 @@
     </ul>
     <p class="lede">So the three attributes form a sequence rather than a menu. Dip tells you the
       orientation. Coherence asks whether the reflector is broken. Curvature asks whether it is bent.
-      <b>Coherence finds breaks; curvature finds bends</b> — and a fault too small to break the reflector
-      will still bend it, which is exactly the gap curvature was brought in to fill!</p>
+      <b>Coherence finds breaks; curvature finds bends</b>, and a fault too small to break the reflector
+      will still bend it. That is the gap curvature was brought in to fill.</p>
     <p class="lede">Curvature has a pleasingly physical definition. At any point on the reflector, fit the
       circle that best hugs the bed. Curvature is <span class="k">k = 1/r</span>, one over that circle's
       radius: a tight fold is a small circle and a big number, a gentle warp is a huge circle and a small
@@ -266,8 +266,12 @@
       most-positive and most-negative curvatures skip that correction and are, in the words of the AASPI
       documentation, better read as a second-derivative map of structure than as a curvature.</p>
     <p class="lede">On flat-lying structure the two agree almost exactly. Add regional dip with the slider
-      in the header and watch them separate — <b>k_pos grows while k₁ does not</b>, because the uncorrected
-      version is partly measuring the regional tilt rather than the folding.</p>
+      in the header and watch them separate — <b>k_pos hardly moves while k₁ falls</b>. Tilting the
+      whole surface does not change its second derivatives, so k_pos, which is built from those alone,
+      barely changes. k₁ does, because fitting a circle to a dipping bed measures the bend along the bed rather
+      than against the vertical, and a dipping bed is longer than its map projection. That foreshortening
+      is the dip correction. The practical consequence is that on dipping structure k_pos reads
+      systematically high.</p>
 
     <canvas id="cCart4" aria-label="Schematic showing why the two measures differ once the structure dips"></canvas>
     <p class="hint-line" style="margin:8px 0 16px">The fold is identical on both sides. All that has changed
@@ -313,9 +317,10 @@
       <h3><span class="stepno">5</span>Long and short wavelength</h3>
       <span class="hint">The one parameter that decides what you see</span>
     </div>
-    <p class="lede">Differentiating twice does something unpleasant: it multiplies the high wavenumbers
-      twice over, so any short-wavelength wobble in the dip field — acquisition footprint, statics, migration
-      noise — comes out amplified. That is why curvature is computed with an operator length rather than a
+    <p class="lede">Differentiating twice has an unwelcome consequence: it multiplies the high wavenumbers
+      twice over, so any short-wavelength wobble in the dip field comes out amplified. The usual sources
+      are acquisition footprint, a regular pattern left by the shot and receiver geometry; statics, small
+      trace-to-trace time shifts introduced by the near surface; and migration noise. That is why curvature is computed with an operator length rather than a
       bare difference, and why the same volume computed two ways looks like two different pieces of
       geology.</p>
     <p class="lede">Turn on the short-wavelength texture and the noise in the header, then move the operator
@@ -392,8 +397,8 @@
       noise. That is the practical reason modules 01 to 03 spent so long on getting dip right.</p>
     <div class="legend prose">
       <span>And the naming trap worth carrying away: k₁ and k_pos are different attributes, not two names
-        for one. On dipping structure the uncorrected version reads systematically high, and it reads high
-        in the direction of steepest regional dip, so the bias does not average out.</span>
+        for one. On dipping structure the uncorrected version reads systematically high, and it reads
+        highest where the structure dips most steeply, so the bias does not average out.</span>
     </div>
   </section>
 
@@ -432,15 +437,17 @@
             along the ridge and falls away along its plunge, so it curves one way in one direction and the
             other way at right angles. No single number describes that, which is the whole reason two
             principal curvatures are reported instead of one average. A mean curvature here would be close
-            to zero and would tell you nothing at all. Saddles are common: over half this map is one.</span></details></li>
+            to zero and would tell you nothing at all. Saddles are common on real surfaces, and on this
+            modeled one they cover more than half the map.</span></details></li>
         <li><b>Separate k_pos from k₁.</b> In step 4, start with the regional dip at 0° and raise it to 25°,
           watching the ratio readout.
           <details class="reveal"><summary>Hint</summary><span class="ans">At 0° the two
-            agree to within a percent. By 25° k_pos reads about 1.22 times k₁, and the excess is regional
-            dip leaking into an attribute that is meant to describe folding. Notice which one moves: k_pos
-            stays put while k₁ falls, because k_pos is the raw second derivative and adding a tilt does not
-            change a second derivative at all — it is k₁ that is correctly recognizing that some of the
-            apparent bend is just the regional. On a structurally dipping
+            agree to within a percent. By 25° k_pos reads about 1.22 times k₁. Notice which one moves:
+            k_pos hardly moves while k₁ falls. Adding a tilt does not change a second derivative, and k_pos is
+            nothing but second derivatives. k₁ falls because it measures the bend along the bed, and a bed
+            dipping at 25° is longer than the map distance it covers, so the same rise is spread over more
+            reflector. Dividing that foreshortening out is what the dip correction does, and it is why
+            k_pos reads high wherever the structure dips. On a structurally dipping
             survey that difference is systematic rather than random, so it does not average out — it biases
             the whole map in the direction of steepest regional dip. If you are comparing curvature between
             two areas of a survey that dip differently, this matters.</span></details></li>
@@ -545,16 +552,17 @@
 
   <section class="nextup" id="nextup" hidden>
     <p class="eyebrow">Next up</p>
-    <h3>06 · Curvedness and shape index</h3>
+    <h3><a href="shape.html">06 · Curvedness and shape index</a></h3>
     <p>Two principal curvatures at every point is a lot of numbers to look at. Combining them into a
       magnitude and a shape lets you ask a different question: not how much is this bent, but what shape is
       it bent into — dome, ridge, saddle, valley or bowl.</p>
+    <a class="btn" href="shape.html">Open module 06 →</a>
     <a class="btn ghost" href="../index.html">All modules</a>
   </section>
 
   <div class="pager" id="pager" hidden>
-    <a class="btn ghost" href="dipsteer.html">← Module 03: dip steering</a>
-    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="coherence.html">← Module 04: coherence, similarity and variance</a>
+    <a class="btn" href="shape.html">Next: curvedness and shape index →</a>
   </div>
 
   <footer>
@@ -564,11 +572,12 @@
       <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
         is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
         If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
       <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
-        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -626,7 +635,7 @@
     try { SEIS.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
   };
 
-  let Z = null;              // depth grid, metres
+  let Z = null;              // depth grid, meters
   const at = (g, ix, iy) => g[clamp(iy, 0, NG - 1) * NG + clamp(ix, 0, NG - 1)];
 
   function buildSurface() {
@@ -1208,9 +1217,10 @@
 
   /* ------------------------------- step 4 ------------------------------ */
 
-  /* The same fold twice, flat and tilted. k₁ fits a circle to the bed, which
-     does not care about the tilt. k_pos measures the bend against the vertical,
-     which does. */
+  /* The same fold twice, flat and tilted. k_pos is built from the second
+     derivatives alone, which a tilt does not change, so it reads the same on
+     both sides. k₁ fits a circle to the bed itself, and the tilted bed is
+     longer than its map projection, so k₁ comes out smaller. */
   function drawCart4() {
     const el = $('cCart4');
     if (!el || !el.parentElement || !el.parentElement.clientWidth) return;
@@ -1263,7 +1273,7 @@
 
       SEIS.tag(ctx, R.x, R.y - 30, side ? 'the same fold, on a tilt' : 'flat-lying', INK);
       SEIS.tag(ctx, R.x, h - 34,
-        side ? 'k\u2081 unchanged \u00b7 k_pos larger' : 'k\u2081 = k_pos', side ? CRIM : SLATE);
+        side ? 'k_pos unchanged \u00b7 k\u2081 smaller' : 'k\u2081 = k_pos', side ? CRIM : SLATE);
     });
 
     SEIS.tag(ctx, 32, h - 13,
@@ -1316,7 +1326,7 @@
     $('s4e').textContent = S.reg < 2
       ? 'With the structure nearly flat the two agree, which is why the difference goes unnoticed on gentle surveys.'
       : 'k_pos now reads ' + ((a.kpos / Math.max(a.k1, 1e-9) - 1) * 100).toFixed(0) +
-        '% high, and the excess is regional dip rather than folding.';
+        '% high. The fold has not changed; k\u2081 has fallen because the bed is now dipping.';
   }
 
   // the strongest anticline on the map, measured both ways
@@ -1537,6 +1547,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   let heavy = null;

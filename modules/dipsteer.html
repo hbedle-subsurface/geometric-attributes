@@ -18,7 +18,7 @@
     <nav>
       <a href="../index.html">All modules</a>
       <a href="dip3d.html">Module 02</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
@@ -130,7 +130,7 @@
       <div class="stat wide"><span>What the horizontal window has concluded</span><b id="s1c">—</b></div>
     </div>
     <div class="legend">
-      <span>The score is semblance, the same measure the dip search maximised in module 01: 1 when every
+      <span>The score is semblance, the same measure the dip search maximized in module 01: 1 when every
         trace in the window is identical, falling toward 1/N when they are unrelated.</span>
     </div>
     </section>
@@ -206,9 +206,14 @@
     <p class="lede">
       A section shows the fault as a line, which is a hard place to judge how much damage an unsteered
       window does. A map view is much clearer. These two panels are horizontal slices through a small 3D
-      volume: a sequence of reflectors carried over a monoclinal flexure, flat on both sides and steepening
-      through the middle, cut by one planar fault. The fault is identical in both panels. Everything else on
-      the right is the structure printing itself onto the attribute.</p>
+      volume: a sequence of reflectors carried over a monoclinal flexure — a one-sided step in the
+      structure, flat on both sides and steepening through the middle — cut by one planar fault. The fault
+      is identical in both panels. Everything else on the right is the structure printing itself onto the
+      attribute.</p>
+    <p class="lede">These two panels use a fixed patch of 3 by 3 traces, not the aperture set by
+      <em>traces used</em> in the header; that slider drives the section panels above. Window height is
+      shared. The values quoted in the exercises for these maps therefore refer to a three-trace
+      window.</p>
 
     <div class="sec-row" id="rowSlice">
       <div class="panel-col">
@@ -321,7 +326,7 @@
     <p class="lede">Steering is not a switch that is either on or off. Step 4 shows a 0.5 ms per trace error
       — smaller than the cost of coarsening the dip search step in module 01 — already eating into the fault
       contrast, and a 2 ms per trace error landing in the same place as not steering at all. Since the
-      volume is still labelled dip-steered, that failure is harder to spot than the honest unsteered
+      volume is still labeled dip-steered, that failure is harder to spot than the honest unsteered
       version.</p>
     <p class="lede">Which is the practical argument for the order of this course. Modules 01 and 02 spend a
       long time on getting dip right, and this is the module that says why: the quality of the dip field is
@@ -403,6 +408,8 @@
           it removes the competing anomaly on the flanks so the fault is the only thing left dark.</li>
         <li><b>A dip-steered volume is only as good as its dip volume.</b> Error in the dip field is spent
           directly out of the contrast you were trying to measure.</li>
+        <li><b>Height matters far less than aperture.</b> The failure is lateral misalignment across the
+          window, so a shorter window does not fix an unsteered one; a narrower one does.</li>
         <li><b>This is why dip comes first.</b> Coherence, curvature, aberrancy and structure-oriented
           filtering all take the dip field as an input, and none of them can tell you it was wrong.</li>
       </ul>
@@ -423,7 +430,7 @@
       values quoted in the exercises are the darkest point found on each time row, which is what an
       interpreter or an autotracker responds to, rather than an average over a fixed band, and they assume
       the noise slider at its default 12%. The throw is applied with a sub-trace transition so that the
-      fault plane is straight rather than quantised into a staircase of whole traces.</p>
+      fault plane is straight rather than quantized into a staircase of whole traces.</p>
     <p>The two map panels come from a separate small 3D volume, 100 traces square by a slab of 81 samples,
       carrying a reflector sequence over a monoclinal flexure of 80 ms relief cut by one planar fault. The
       flexure reaches about 4 ms per trace at its steepest, above what a three-trace horizontal window
@@ -435,7 +442,8 @@
     <p>The similarity measure used throughout is semblance, computed on the real trace over a window of
       2K+1 samples and 2J+1 traces. AASPI program <span class="k">similarity3d</span> computes its
       attributes from the analytic trace, meaning the data together with its Hilbert transform, which
-      suppresses the artefact known as structural leakage near amplitude zero crossings. That refinement,
+      suppresses structural leakage: the false low-coherence stripe that appears where a reflector's
+      amplitude passes through zero and the traces have almost nothing left to compare. That refinement,
       and the several different definitions of coherence available, are the subject of the next module. The
       point being made here — that the window has to follow the bed — applies to every member of the
       family.</p>
@@ -469,17 +477,22 @@
 
   <div class="pager" id="pager" hidden>
     <a class="btn ghost" href="dip3d.html">← Module 02: inline and crossline dip</a>
-    <a class="btn" href="coherence.html">Next: the coherence family →</a>
+    <a class="btn" href="coherence.html">Next: coherence, similarity and variance →</a>
   </div>
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma —
-        with the <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.
-        Free to use or adapt in your own courses with citation.</p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
+      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+        <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
+      <p class="lic">Free to use for teaching, demonstration, and non-commercial study, provided the source
+        is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
+        If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
+      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -605,7 +618,7 @@
      fault position is evaluated at the time the reflector actually arrives,
      not at its un-shifted time, so the plane does not wobble with the fold.
      The throw uses a sub-trace transition rather than a hard switch at a trace
-     boundary, so the plane passes through a bin instead of being quantised to
+     boundary, so the plane passes through a bin instead of being quantized to
      whole traces. And the reflectors are closely spaced, because a fault can
      only express itself where it cuts one: with beds far apart the fault
      appears as a row of isolated offsets, each several traces further along
@@ -1360,6 +1373,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   let rt;

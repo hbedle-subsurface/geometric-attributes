@@ -18,7 +18,7 @@
     <nav>
       <a href="../index.html">All modules</a>
       <a href="curvature.html">Module 05</a>
-      <a href="#notes">Method &amp; references</a>
+      <a href="#tabs" data-tab="pm">Method &amp; references</a>
     </nav>
   </header>
 
@@ -353,9 +353,10 @@
             between adjacent highs, on the plunging noses of ridges, and around the rims of bowls — places
             you would not naturally call a saddle by eye, but which genuinely curve up one way and down the
             other. Saddles are far more common on real surfaces than the textbook diagram suggests, which is
-            why a saddle component often looks busier than people expect the first time they run one — on
-            this surface it claims 18% of the map, against 2.9% for the dome and 2.3% for the
-            bowl.</span></details></li>
+            why a saddle component often looks busier than people expect the first time they run one. On
+            the modeled surface in the header it claims 18% of the map, against 2.9% for the dome and 2.3%
+            for the bowl. The share depends entirely on the surface: module 05 uses a different model, on
+            which saddles cover more than half the map.</span></details></li>
         <li><b>Compare curvedness with k₁.</b> In step 3, find the bowl on both panels.
           <details class="reveal"><summary>Hint</summary><span class="ans">On the k₁ panel
             the bowl is dark, because k₁ is negative there. On the curvedness panel it is just as bright as
@@ -452,10 +453,11 @@
         is credited. Please do not republish or redistribute it, modified or otherwise, without permission.
         If you use it in a course or a talk, a credit line and a link back are all that is asked.</p>
       <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
-        Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
-      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
-        the page was opened, so that I can show the university these are being used &mdash; no cookie, no
-        account, nothing about you.</p>
+        Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
+      <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
+        trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
+        count, so that I can show the university these are being used &mdash; no cookie, no account,
+        nothing about you.</p>
     </div>
   </footer>
 </div>
@@ -1128,6 +1130,17 @@
   }
   document.querySelectorAll('#tabs button').forEach((b) => {
     b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  /* The masthead links open a reference tab rather than jumping to an anchor
+     inside a pane that is hidden until its tab is chosen. */
+  document.querySelectorAll('.masthead a[data-tab]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      showTab(a.dataset.tab);
+      const strip = $('tabs');
+      if (strip && strip.scrollIntoView) strip.scrollIntoView({ block: 'start' });
+    });
   });
 
   document.addEventListener('input', (ev) => {

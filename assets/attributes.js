@@ -3,7 +3,7 @@
    "How Geometric Attributes Actually Work"
    Heather Bedle / AASPI / University of Oklahoma
 
-   Companion to seismic.js, which supplies wavelets, convolution, colour maps,
+   Companion to seismic.js, which supplies wavelets, convolution, color maps,
    the FFT and the canvas helpers. This file holds the attribute algorithms
    themselves, written the way the textbooks describe them rather than in any
    optimised form, so the code can be read alongside the module that uses it.
@@ -28,7 +28,7 @@ const ATTR = (function () {
 
      It is 1 when every trace in the window is identical and falls toward 1/J
      when they are unrelated. Marfurt et al. (1998) introduced it as a coherence
-     measure; here it is also the thing a dip scan maximises.
+     measure; here it is also the thing a dip scan maximizes.
      --------------------------------------------------------------------- */
 
   function semblance(gather, J, K) {
@@ -50,7 +50,7 @@ const ATTR = (function () {
      SAMPLING ALONG A DIP
 
      A candidate dip p is a time shift per trace. Gathering along it means
-     reading each neighbouring trace at a time offset of p times its distance
+     reading each neighboring trace at a time offset of p times its distance
      from the centre, with linear interpolation because that offset is almost
      never a whole sample.
      --------------------------------------------------------------------- */
@@ -109,7 +109,7 @@ const ATTR = (function () {
     }
 
     // Parabolic refinement on the winning sample, so the estimate is not
-    // quantised to the candidate spacing. Real implementations do the same.
+    // quantized to the candidate spacing. Real implementations do the same.
     let p = bestP;
     if (bestI > 0 && bestI < nP - 1) {
       const a = curve[bestI - 1], b = curve[bestI], c = curve[bestI + 1];
@@ -281,7 +281,7 @@ const ATTR = (function () {
      invisible whenever the bins are square, and wrong whenever they are not.
      --------------------------------------------------------------------- */
 
-  // ms per trace -> ms per metre, given the bin spacing in that direction
+  // ms per trace -> ms per meter, given the bin spacing in that direction
   const perTraceToPerMetre = (msPerTrace, binM) => msPerTrace / binM;
 
   // magnitude and azimuth of the time-dip gradient. Azimuth is degrees
@@ -293,7 +293,7 @@ const ATTR = (function () {
     return { mag, az };
   }
 
-  // apparent time dip in a vertical section cut at a given azimuth, per metre
+  // apparent time dip in a vertical section cut at a given azimuth, per meter
   const apparentDip = (gx, gy, azDeg) => {
     const a = azDeg * Math.PI / 180;
     return gx * Math.cos(a) + gy * Math.sin(a);
@@ -320,7 +320,7 @@ const ATTR = (function () {
    * d and dH are J traces by K samples, trace-major, already gathered along
    * dip. C is J-by-J: C[m][n] sums the product of trace m and trace n over the
    * window, using the amplitude and its Hilbert transform. The quadrature
-   * terms do not change the vertical resolution but stabilise the estimate
+   * terms do not change the vertical resolution but stabilize the estimate
    * near amplitude zero crossings.
    *
    * w is an optional per-sample taper (equation 1b); omit for no taper.
@@ -489,7 +489,7 @@ const ATTR = (function () {
      Semblance over a window, computed either along a supplied dip field or
      along a flat window. This is not the energy-ratio similarity of program
      similarity3d; it is the semblance coherence of Marfurt et al. (1998),
-     which is the same thing the dip scan maximises and is therefore free
+     which is the same thing the dip scan maximizes and is therefore free
      once the scan has been run. Its only job here is to show what happens
      to a coherence volume when the window is steered and when it is not.
      --------------------------------------------------------------------- */
@@ -517,7 +517,7 @@ const ATTR = (function () {
   }
 
   /* ---------------------------------------------------------------------
-     COLOUR MAPS FOR ATTRIBUTES
+     COLOR MAPS FOR ATTRIBUTES
 
      Attribute displays have their own conventions, and they matter. Dip is
      signed, so it needs a diverging map with a neutral centre. Coherence runs
@@ -539,7 +539,7 @@ const ATTR = (function () {
   }
 
   /* Azimuth runs 0 to 360 and then starts again, so a ramp with different
-     colours at its two ends draws a discontinuity that is not in the data.
+     colors at its two ends draws a discontinuity that is not in the data.
      This one returns to where it started. */
   function cyclicRamp(stops) {
     return function (u) {
