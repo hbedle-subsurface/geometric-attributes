@@ -352,9 +352,10 @@
         <li><b>Check that the failure is about the wavelet, not the dip.</b> Try several combinations of
           frequency and aperture in step 2, and each time read the "shift as a fraction of one period"
           box at the dip where the flat curve crosses 0.8.
-          <details class="reveal"><summary>Hint</summary><span class="ans">It lands between about 15 and 22 percent every time. Nine combinations of
-            frequency and aperture give crossings ranging from 5.06 ms per trace down to 0.56, a spread of
-            nine to one, and every one of them corresponds to the same fraction of a period. That is the
+          <details class="reveal"><summary>Hint</summary><span class="ans">It lands between about 15 and 28 percent every time, averaging a little over a
+            fifth. Twenty-five combinations of frequency and aperture give crossings ranging from 7.31 ms
+            per trace down to 0.38, a spread of nineteen to one, and every one of them corresponds to
+            much the same fraction of a period. That is the
             actual rule, and it is worth carrying around: a horizontal window survives only while the time
             shift accumulated across it stays under about a fifth of a period.</span></details></li>
         <li><b>Compare the two volumes as an interpreter would.</b> In step 3, look at the steered and
@@ -434,11 +435,12 @@
     <p>The two map panels come from a separate small 3D volume, 100 traces square by a slab of 81 samples,
       carrying a reflector sequence over a monoclinal flexure of 80 ms relief cut by one planar fault. The
       flexure reaches about 4 ms per trace at its steepest, above what a three-trace horizontal window
-      tolerates at 30 Hz and below what a steered one minds at all. Steering there uses the analytic dip of the model rather
-      than an estimate, because estimation error is the subject of step 4 and mixing the two would confuse
-      which effect is which. The dip field is estimated with the discrete semblance search of
-      module 01 rather than being supplied analytically, so the steered result carries whatever error that
-      search makes.</p>
+      tolerates at 30 Hz and below what a steered one minds at all. The two families of panel are steered
+      differently, on purpose. The map panels take the analytic dip of the model, because estimation error
+      is the subject of step 4 and mixing the two would confuse which effect is which. The section panels
+      in steps 3 and 4 take a dip field estimated with the discrete semblance search of module 01, so the
+      steered sections carry whatever error that search makes — which is what lets step 4 add an error on
+      top of it and watch the cost.</p>
     <p>The similarity measure used throughout is semblance, computed on the real trace over a window of
       2K+1 samples and 2J+1 traces. AASPI program <span class="k">similarity3d</span> computes its
       attributes from the analytic trace, meaning the data together with its Hilbert transform, which
@@ -498,6 +500,7 @@
 </div>
 
 <script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
 <script src="../assets/seismic.js"></script>
 <script src="../assets/attributes.js"></script>
 <script>

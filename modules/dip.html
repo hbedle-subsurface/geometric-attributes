@@ -310,18 +310,22 @@
             way produces broad, indistinct faults. Production software addresses this by testing several
             windows offset around the sample and keeping the most confident, rather than always centering the
             window.</span></details></li>
-        <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then raise the window
-          height from ±30 ms to ±100 ms, watching the box extend into the lower beds.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Little changes until about ±80 ms, after which the score falls from 0.98 to
-            around 0.70 and the estimate moves toward an average of two unrelated dips. Switch the depth
-            change off and repeat: the same window heights now cost nothing. The data did not become harder
-            to work with; the window was simply told to treat a larger interval as one unit. Window height is
-            really a statement about how far the geology can be assumed constant, which is why it is normally
-            quoted as a fraction of a wavelength.</span></details></li>
+        <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then walk the window
+          height from ±30 ms up to ±100 ms, watching the box extend into the lower beds.
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score falls steadily once the window starts reaching the lower beds, from
+            0.98 at ±30 ms through 0.89 at ±60 and 0.77 at ±80 to 0.67 at ±100. Watch what the estimate does
+            while that happens: almost nothing. It holds within a twentieth of a millisecond of the correct
+            answer the whole way. The upper beds still outweigh the lower ones inside the window, so the
+            second dip domain enters as disagreement rather than as a competing answer. Switch the depth
+            change off and repeat: the same window heights now cost nothing at all. The data did not become
+            harder to work with; the window was simply told to treat a larger interval as one unit, and the
+            score is where it says so. Window height is really a statement about how far the geology can be
+            assumed constant, which is why it is normally quoted as a fraction of a wavelength.</span></details></li>
         <li><b>Reduce the number of traces and compare the score with the error.</b> Set noise to about
           30%, then lower "traces used" from 9 to 3, reading both figures as you go.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em>, from around 0.68 to around 0.85, while the estimate
-            becomes roughly four times worse. Three traces have less scope to disagree, so they match more
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em>, from about 0.61 to about 0.78, while the estimate
+            becomes about two and a half times worse — the error grows from 0.31 to 0.76 ms per trace.
+            Three traces have less scope to disagree, so they match more
             easily and establish much less. <b>A high score is therefore not evidence of a good
             estimate</b>, and a confidence volume has to be interpreted alongside the window size that
             produced it.</span></details></li>
@@ -433,6 +437,7 @@
 </div>
 
 <script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
 <script src="../assets/seismic.js"></script>
 <script src="../assets/attributes.js"></script>
 <script>

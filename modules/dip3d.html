@@ -568,8 +568,11 @@
             candidates.</span></details></li>
         <li><b>Shrink the patch to 3 × 3.</b> With noise at 30%, drag the patch size down from 11 × 11 and
           read the score alongside the error.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The score hardly moves: about 0.75 at 11 × 11 and about 0.77 at 3 × 3. The error
-            changes by a factor of eighteen, from roughly 0.04 ms to roughly 0.70 ms per trace. Nine traces
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em> as the patch shrinks — about 0.72 at 11 × 11, 0.83 at
+            5 × 5 and 0.89 at 3 × 3 — while the estimate falls apart underneath it. The crossline error
+            grows from about 0.04 ms to about 0.95 ms per line, a factor of more than twenty, while the
+            inline error stays near zero, so the damage is not even shared between the two components.
+            Nine traces
             support two unknowns rather than one, and they reach only a single trace either side of the
             analysis point in each direction, which is barely enough to define a plane. The score is not
             measuring how well determined the estimate is; it is measuring how well the traces inside the
@@ -658,7 +661,7 @@
   </section>
 
   <div class="pager" id="pager" hidden>
-    <a class="btn ghost" href="dip.html">← Module 01: dip in 2D</a>
+    <a class="btn ghost" href="dip.html">← Module 01: dip — the foundation</a>
     <a class="btn" href="dipsteer.html">Next: dip steering →</a>
   </div>
 
@@ -680,6 +683,7 @@
 </div>
 
 <script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
 <script src="../assets/seismic.js"></script>
 <script src="../assets/attributes.js"></script>
 <script>

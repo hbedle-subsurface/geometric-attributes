@@ -230,6 +230,13 @@
   function drawHero() {
     const c = document.getElementById('heroCanvas');
     if (!c || !c.parentElement) return;
+    /* A stale or missing assets/ must not leave a caption describing a
+       picture that is not there. Drop the panel instead. */
+    if (typeof SEIS === 'undefined' || !SEIS.fitCanvas) {
+      const panel = c.closest('.hero-panel');
+      if (panel) panel.style.display = 'none';
+      return;
+    }
     const w = c.parentElement.clientWidth;
     const h = Math.max(230, Math.round(w * 0.60));
     const ctx = SEIS.fitCanvas(c, w, h);
@@ -281,40 +288,7 @@
     ctx.restore();
   }
 
-  function thumbDip(canvas) {
-    const w = canvas.parentElement.clientWidth, h = 118;
-    const ctx = SEIS.fitCanvas(canvas, w, h);
-    ctx.clearRect(0, 0, w, h);
-    const NX = 140, NT = 160, DT = 0.002;
-    const shift = (ix) => 13 * Math.sin(2 * Math.PI * ix / 80) + (ix > 0.6 * NX ? 8 : 0);
-    const trueP = (ix) => 13 * (2 * Math.PI / 80) * Math.cos(2 * Math.PI * ix / 80);
-    const off = document.createElement('canvas');
-    off.width = NX; off.height = NT;
-    const octx = off.getContext('2d');
-    const img = octx.createImageData(NX, NT);
-    for (let it = 0; it < NT; it++) {
-      for (let ix = 0; ix < NX; ix++) {
-        const c = ATTR.MAPS.dip(trueP(ix) / 1.4);
-        const q = it * NX + ix;
-        img.data[q * 4] = c[0]; img.data[q * 4 + 1] = c[1];
-        img.data[q * 4 + 2] = c[2]; img.data[q * 4 + 3] = 255;
-      }
-    }
-    octx.putImageData(img, 0, 0);
-    ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(off, 0, 0, w, h);
-    ctx.save();
-    ctx.strokeStyle = 'rgba(22,25,28,.55)'; ctx.lineWidth = 1.4;
-    ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    ctx.moveTo(0.6 * w, 0); ctx.lineTo(0.6 * w, h);
-    ctx.stroke(); ctx.restore();
-  }
-
-  function drawThumbs() {
-  }
-
-  function all() { drawHero(); drawThumbs(); }
+  function all() { drawHero(); }
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(all, 150); });
   all();

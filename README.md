@@ -39,6 +39,7 @@ walked through without returning to the index.
 index.html          landing page: hero, module cards
 assets/
   count.js          page-view counting, and nothing else
+  popout.js         the exercises pop-out button, and nothing else
   seismic.js        SEIS — wavelets, synthetic traces, canvas drawing, colormaps
   attributes.js     ATTR — semblance, dip scans, covariance, eigen, colormaps
   style.css         the whole visual identity, shared by every page
@@ -63,8 +64,10 @@ module. Copying it from the address bar hands someone the exact setup, which is
 the intended way to distribute a worked example. There is no copy button; the
 URL is the feature.
 
-To publish, push to the `gh-pages`-enabled branch. **Push `assets/` whenever a
-module changes** — several modules depend on functions added to the shared
+To publish, push to the `gh-pages`-enabled branch. A module whose `assets/` is
+stale loses its exercises pop-out button and keeps its exercises tab, which is by
+design but is one more thing that looks like a broken page. **Push `assets/`
+whenever a module changes** — several modules depend on functions added to the shared
 libraries, and a stale `assets/` is the single most common cause of a module
 looking broken. Stylesheets in particular cache hard; if a layout change does
 not appear, open `assets/style.css` directly in the browser and check that the
@@ -89,6 +92,21 @@ what the site tells people it does — and do not add a second analytics tool.
 
 A new page needs the loader line or it is invisible in the dashboard, which
 looks exactly like a page nobody visits.
+
+## Exercise pop-out
+
+`assets/popout.js` puts an **Open in new window** button on the exercises tab of
+every module, so a student can read the exercises in a second window while
+working the controls in the first. It is loaded by every module as
+`../assets/popout.js`, next to `count.js`.
+
+It copies the text already on the page and does nothing else: no fetch, no
+storage, no cookie. It works from a `file://` copy with no network. If
+`assets/` is stale the button does not appear and the exercises tab is
+unchanged, which is why no module carries a local fallback for it.
+
+The same file goes in every teaching repository unchanged; see `ADD-POPOUT.md`
+for the procedure and the harness.
 
 ## How a module is put together
 
@@ -177,9 +195,10 @@ line and a link back are all that is asked.
 > H. Bedle, *How Geometric Attributes Actually Work*, University of Oklahoma,
 > https://hbedle-subsurface.github.io/geometric-attributes/
 
-The same license and citation line appear in the footer of all nine pages. When
-the SSRN working paper is published, the link needs adding in ten places: this
-file and the citation line in each page's footer.
+The license statement appears in the footer of all eight module pages, and the
+citation line on all nine including the landing page, whose footer holds the
+citation only. When the SSRN working paper is published, the link needs adding in
+ten places: this file and the citation line in each page's footer.
 
 Built for teaching by Heather Bedle, School of Geosciences, University of
 Oklahoma, with the AASPI consortium.

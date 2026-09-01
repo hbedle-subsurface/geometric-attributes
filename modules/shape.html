@@ -225,8 +225,8 @@
     </div>
 
     <div class="stats">
-      <div class="stat key"><span>Map area with almost no curvature</span><b id="s4a">—</b></div>
-      <div class="stat"><span>Shape index still reported there</span><b id="s4b">—</b></div>
+      <div class="stat key"><span>Map area bending at under a fifth of the peak</span><b id="s4a">—</b></div>
+      <div class="stat"><span>How loud shape index is there, against the rest</span><b id="s4b">—</b></div>
       <div class="stat wide"><span>The rule</span><b id="s4c">—</b></div>
     </div>
   </section>
@@ -343,18 +343,20 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">The shape index
             still reports a value, and it will swing wildly for tiny changes in either curvature, because it
             is a ratio of two numbers that are both nearly zero. Look at the raw panel in step 4: it is
-            fully saturated from corner to corner, including the broad quiet ground between the features
-            where there is barely any curvature to speak of. The color there is not weak or uncertain
-            looking, it is as strong as the color on the dome, and none of it means anything. This is the single most common way a shape index display
-            misleads people, and it is why the modulated version is the one worth
-            trusting.</span></details></li>
+            fully saturated from corner to corner, including the quiet ground between the features. A
+            sixth of this map is bending at less than a fifth of the rate the dome is, and the readout
+            underneath measures what the attribute does there: mean shape index 0.36, against 0.41 on the
+            strongly bent ground. The color on the quiet ground is not weak or uncertain looking, it is
+            as strong as the color on the dome, and it rests on almost nothing. This is the single most
+            common way a shape index display misleads people, and it is why the modulated version is the
+            one worth trusting.</span></details></li>
         <li><b>Find a saddle you would not have guessed at.</b> In step 5, select the saddle component.
           <details class="reveal"><summary>Hint</summary><span class="ans">Saddles turn up
             between adjacent highs, on the plunging noses of ridges, and around the rims of bowls — places
             you would not naturally call a saddle by eye, but which genuinely curve up one way and down the
             other. Saddles are far more common on real surfaces than the textbook diagram suggests, which is
             why a saddle component often looks busier than people expect the first time they run one. On
-            the modeled surface in the header it claims 18% of the map, against 2.9% for the dome and 2.3%
+            the modeled surface in the header it claims 25% of the map, against 3.0% for the dome and 2.5%
             for the bowl. The share depends entirely on the surface: module 05 uses a different model, on
             which saddles cover more than half the map.</span></details></li>
         <li><b>Compare curvedness with k₁.</b> In step 3, find the bowl on both panels.
@@ -463,6 +465,7 @@
 </div>
 
 <script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
 <script src="../assets/seismic.js"></script>
 <script src="../assets/attributes.js"></script>
 <script>
@@ -976,15 +979,26 @@
     }, (ctx, R) => colorbar(ctx, R, (u) => shapeColor(2 * u - 1),
       '\u22121 bowl', 'dome +1', 'shape, faded where flat'));
 
-    let flat = 0, tot = 0;
+    /* The quiet ground on this surface is quiet relative to the dome, not
+       dead flat — the broad swell keeps everything bending a little. So the
+       threshold is a fraction of the strongest bend on the map rather than an
+       absolute one, and the second readout measures the saturation claim
+       instead of asserting it: mean |shape index| on the weakly curved ground
+       against mean |shape index| everywhere else. They come out the same,
+       which is the whole point of the step. */
+    let weak = 0, tot = 0, wSum = 0, sSum = 0, sN = 0;
     for (let iy = EDGE; iy < NG - EDGE; iy++) {
       for (let ix = EDGE; ix < NG - EDGE; ix++) {
+        const i = iy * NG + ix;
         tot++;
-        if (FIELD.C[iy * NG + ix] < cl * 0.05) flat++;
+        if (FIELD.C[i] < cl * 0.2) { weak++; wSum += Math.abs(FIELD.SI[i]); }
+        else { sSum += Math.abs(FIELD.SI[i]); sN++; }
       }
     }
-    $('s4a').textContent = (100 * flat / tot).toFixed(0) + '% of the map';
-    $('s4b').textContent = 'yes, at full saturation';
+    const wMean = weak ? wSum / weak : 0, sMean = sN ? sSum / sN : 0;
+    $('s4a').textContent = (100 * weak / tot).toFixed(0) + '% of the map';
+    $('s4b').textContent = 'mean |shape index| ' + wMean.toFixed(2)
+      + ' there, against ' + sMean.toFixed(2) + ' on the strongly bent ground';
     $('s4c').textContent = 'Shape index is a ratio, so it returns a value wherever you ask, including '
       + 'where there is nothing to describe. Always modulate it by curvedness before believing it.';
   }

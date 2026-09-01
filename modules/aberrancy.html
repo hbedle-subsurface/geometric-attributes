@@ -297,7 +297,7 @@
       one fault on a flat regional and no noise, curvature and aberrancy both fall away in almost exact
       proportion to the throw: halve the throw and you halve both, and the two lines lie on top of each
       other. Aberrancy does not have a sensitivity that curvature lacks. What it has is a coherence curve
-      that stops first — below the wavelet&rsquo;s resolution coherence returns to its no-fault value and
+      that stops first — below the wavelet's resolution coherence returns to its no-fault value and
       cannot see the feature at all, while both derivatives keep declining smoothly and stay usable — and
       an anomaly that is easier to read once it is faint. Those advantages are set out in
       <em>Why it matters</em>.</p>
@@ -529,6 +529,7 @@
 </div>
 
 <script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
 <script src="../assets/seismic.js"></script>
 <script src="../assets/attributes.js"></script>
 <script>
@@ -706,7 +707,7 @@
       totM[i] = Math.hypot(sx, sy);
       totA[i] = Math.atan2(sy, sx) / DEG;
     }
-    FIELD = { k1, totM, totA, maxM, intM, minM, zxxx, zxxy, zxyy, zyyy, zx: zxs };
+    FIELD = { k1, totM, totA, maxM, intM, minM, zxx: xx, zxxx, zxxy, zxyy, zyyy, zx: zxs };
   }
 
   const apparent = (i, phDeg) => {
@@ -917,7 +918,7 @@
       const i = iy * NG + ix;
       zs.push(Z[i]);
       ds.push(Math.atan(FIELD.zx[i]) / DEG);
-      ks.push(FIELD.k1[i] * 1000);
+      ks.push(FIELD.zxx[i] * 1000);
       as.push(apparent(i, 0) * ASC);
     }
     const sets = [
@@ -960,9 +961,13 @@
     });
 
     const fxi = Math.round(40 + 0.28 * (iy - 55));
+    /* Panels 2, 3 and 4 are all derivatives of the same profile, so the
+       second derivative is signed and the fault's curvature pair straddles it
+       naturally. The window is kept clear of the regional fold crest. */
+    const SPAN1 = Math.min(12, Math.max(5, 2 * Math.max(1, S.width) + S.smooth));
     const near = (arr, sign) => {
       let best = sign > 0 ? -Infinity : Infinity, bi = fxi;
-      for (let ix = Math.max(EDGE, fxi - 14); ix <= Math.min(NG - EDGE, fxi + 14); ix++) {
+      for (let ix = Math.max(EDGE, fxi - SPAN1); ix <= Math.min(NG - EDGE, fxi + SPAN1); ix++) {
         if (sign > 0 ? arr[ix] > best : arr[ix] < best) { best = arr[ix]; bi = ix; }
       }
       return { v: best, i: bi };
