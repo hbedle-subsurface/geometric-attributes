@@ -293,16 +293,38 @@
       the reflector, and curvature finds that. Smaller still and the bend is gentle, but its
       <em>asymmetry</em> survives — the flexure still leans one way — and that is what aberrancy responds
       to.</p>
-    <p class="lede"><b>Read the chart carefully, because it does not say what people often assume.</b> With
-      one fault on a flat regional and no noise, curvature and aberrancy both fall away in almost exact
-      proportion to the throw: halve the throw and you halve both, and the two lines lie on top of each
-      other. Aberrancy does not have a sensitivity that curvature lacks. What it has is a coherence curve
-      that stops first — below the wavelet's resolution coherence returns to its no-fault value and
-      cannot see the feature at all, while both derivatives keep declining smoothly and stay usable — and
-      an anomaly that is easier to read once it is faint. Those advantages are set out in
-      <em>Why it matters</em>.</p>
+    <p class="lede"><b>Read the chart carefully, because it does not say what people often assume.</b>
+      Aberrancy does not have a sensitivity that curvature lacks. The two derivative curves sit on top of
+      each other, and they have to: both are linear in the throw, so halving the throw halves both. Any
+      chart of these two against throw is going to show one line. The comparison worth making is against
+      <b>coherence</b>, the teal curve.</p>
+
+    <p class="lede">Coherence behaves differently at both ends. At large throws it saturates — the
+      reflector is already fully broken, so making the fault bigger cannot break it further. At small
+      throws it does the opposite and gives up completely: once the offset drops under the wavelet's
+      resolution the traces either side of the fault look the same again, coherence returns to its
+      no-fault value, and it reports nothing at all. Watch the teal line flatten off at the top of the
+      chart and dive toward the floor at the left, while the two derivative lines climb in a straight
+      line out of the left-hand corner.</p>
+
+    <p class="lede"><b>Put the noise slider up to 6% and the gap opens properly.</b> On perfectly clean
+      data coherence never quite goes blind, because there is nothing to hide a small offset in — given
+      enough precision a semblance window can detect an arbitrarily small break. Blindness is a
+      signal-to-noise limit, not a property of the wavelet alone, so it only appears once there is noise
+      to lose the signal in. At 6% the teal curve reads zero out to about 6 m of throw while curvature
+      and aberrancy are already at a fifth of their full-throw response. That gap is the case for
+      computing a derivative attribute: not that it is more sensitive at any given throw, but that it
+      keeps working after coherence has stopped. Aberrancy's own
+      advantages over curvature are different ones — where the anomaly sits and which way it points —
+      and they are set out in <em>Why it matters</em>.</p>
 
     <canvas id="c5" aria-label="Coherence, curvature and aberrancy responses plotted against fault throw"></canvas>
+
+    <p class="legend prose">The ladder is measured on <b>one fault on a flat regional</b>: the crossing
+      fault and the regional fold are set aside and the main throw is swept from 0 to 60 m, so that what
+      the chart shows is the response to that fault alone. Those three sliders therefore do not move the
+      curves — the vertical marker and the readouts below follow the throw, but the lines do not. Noise
+      and operator length do move them, and are worth sweeping.</p>
 
     <div class="stats" style="margin-top:14px">
       <div class="stat"><span>Throw now</span><b id="s5a">—</b></div>
@@ -1290,15 +1312,69 @@
   /* ------------------------------- step 5 ------------------------------ */
 
   let LADDER = [];
+  let LADDER_KEY = '';
+
   /* The ladder has to isolate one fault. Measured on the full model, the
      strongest curvature along fault A's trace is contributed by the crossing
      fault and the fold, so it never moves as A's throw changes and the curve
-     comes out flat — an artifact of the measurement, not of curvature. */
-  function buildLadder() {
+     comes out flat — an artifact of the measurement, not of curvature.
+
+     So the crossing fault and the fold are set aside here and the main throw
+     is swept. That means the throw sliders and the fold slider cannot move
+     this chart, which the panel text says out loud. What does move it is
+     flexure width, noise and operator length, and those three are the cache
+     key: rebuilding costs eleven full field computations, so it is worth not
+     doing when the reader is only dragging a throw. */
+  function ladderKey() {
+    return [S.width, S.noise, S.smooth].join('|');
+  }
+
+  /* Coherence on the same ladder, so the chart carries the claim the module
+     actually makes. Curvature and aberrancy are both linear in the throw, so
+     on clean data their two curves are forced to be the same straight line
+     and nothing can be read off them. Coherence is the one that behaves
+     differently: below the wavelet's resolution it returns to its no-fault
+     value and stops responding at all. */
+  const LADWAV = SEIS.makeWavelet({ type: 'ricker', f: 30 });
+  function ladderCoherence() {
+    const J = 5, K = 21, half = (J - 1) / 2, kHalf = (K - 1) / 2;
+    const g = new Float32Array(J * K);
+    let worst = 1;
+    for (let iy = EDGE + 8; iy < NG - EDGE - 8; iy += 6) {
+      const ixF = Math.round(40 + 0.28 * (iy - 55));
+      const tr = [];
+      for (let j = 0; j < J; j++) {
+        const ix = clamp(ixF - half + j, 0, NG - 1);
+        const t0 = 72 + (Z[iy * NG + ix] * 2 / SVEL) * 1000 / (SDT * 1000);
+        tr.push(SEIS.traceFromSpikes([
+          { t: (t0 - 24) * SDT, r: 0.06 }, { t: t0 * SDT, r: 0.1 },
+          { t: (t0 + 28) * SDT, r: -0.07 },
+        ], 0, SDT, ST, LADWAV));
+      }
+      const tC = Math.round(72 + (Z[iy * NG + ixF] * 2 / SVEL) * 1000 / (SDT * 1000));
+      for (let j = 0; j < J; j++) {
+        for (let k = 0; k < K; k++) {
+          g[j * K + k] = tr[j][clamp(tC - kHalf + k, 0, ST - 1)];
+        }
+      }
+      worst = Math.min(worst, ATTR.semblance(g, J, K));
+    }
+    return worst;
+  }
+
+  function buildLadder(force) {
+    const key = ladderKey();
+    if (!force && key === LADDER_KEY && LADDER.length) return;
     const keep = { t: S.throw, t2: S.throw2, f: S.fold };
     S.throw2 = 0; S.fold = 0;
     LADDER = [];
-    for (let t = 0; t <= 60; t += 6) {
+    /* Unevenly spaced on purpose. Everything interesting happens below about
+       15 m, where the fault drops under the wavelet's resolution and
+       coherence stops responding, so the rungs are packed there and thinned
+       out at the top where all three curves are just large. */
+    const RUNGS = [0, 2, 4, 6, 9, 12, 16, 21, 30, 42, 60];
+    for (let n = 0; n < RUNGS.length; n++) {
+      const t = RUNGS[n];
       S.throw = t; buildSurface(); computeField();
       let k = 0, a = 0;
       for (let iy = EDGE + 6; iy < NG - EDGE - 6; iy += 3) {
@@ -1309,22 +1385,36 @@
           a = Math.max(a, FIELD.totM[j] * ASC);
         }
       }
-      LADDER.push({ t, k, a });
+      LADDER.push({ t, k, a, c: ladderCoherence() });
     }
+    /* Coherence is plotted as its departure from a flat, unfaulted reflector,
+       so that all three curves read the same way: zero means the attribute is
+       not responding to the fault, one means it responds as strongly as it
+       does at 60 m. */
+    const c0 = LADDER[0].c;
+    LADDER.forEach((d) => { d.cd = Math.max(0, c0 - d.c); });
+    LADDER_KEY = key;
     S.throw = keep.t; S.throw2 = keep.t2; S.fold = keep.f;
     buildSurface(); computeField();
   }
 
   function drawStep5() {
+    /* Built here rather than at startup: eleven field computations is most of
+       the module's load time, and a reader who never opens step 5 should not
+       pay for it. buildLadder caches on width, noise and operator length, so
+       this is a no-op on every call after the first. */
+    buildLadder();
     const w = pw($('c5')), h = 300;
     const ctx = SEIS.fitCanvas($('c5'), w, h);
     ctx.clearRect(0, 0, w, h);
     const R = { x: 62, y: 16, w: w - 78, h: h - 16 - 46 };
-    let kMax = 1e-9, aMax = 1e-9;
-    LADDER.forEach((d) => { kMax = Math.max(kMax, d.k); aMax = Math.max(aMax, d.a); });
+    let kMax = 1e-9, aMax = 1e-9, cMax = 1e-9;
+    LADDER.forEach((d) => {
+      kMax = Math.max(kMax, d.k); aMax = Math.max(aMax, d.a); cMax = Math.max(cMax, d.cd);
+    });
     const X = (t) => R.x + (t / 60) * R.w;
     const Y = (u) => R.y + R.h - u * R.h;
-    SEIS.axisLeft(ctx, R, 0, 1, 'response, as a share of its 60 m value', (v) => v.toFixed(1),
+    SEIS.axisLeft(ctx, R, 0, 1, 'response to the fault, as a share of its 60 m value', (v) => v.toFixed(1),
       { flip: true, grid: true, ticks: 5 });
     ctx.save();
     ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
@@ -1337,6 +1427,7 @@
       ctx.fillStyle = col;
       LADDER.forEach((d) => { ctx.beginPath(); ctx.arc(X(d.t), Y(d[key] / mx), 2.8, 0, 6.2832); ctx.fill(); });
     };
+    line('cd', cMax, TEAL);
     line('k', kMax, SLATE);
     line('a', aMax, CRIM);
     ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
@@ -1346,6 +1437,7 @@
     SEIS.axisBottom(ctx, R, 0, 60, 'fault throw (m)', (v) => v.toFixed(0), { ticks: 7 });
     SEIS.tag(ctx, R.x + 10, R.y + 10, 'aberrancy', CRIM);
     SEIS.tag(ctx, R.x + 10, R.y + 28, 'curvature', SLATE);
+    SEIS.tag(ctx, R.x + 10, R.y + 46, 'coherence', TEAL);
 
     const now = LADDER.reduce((p, d) => (Math.abs(d.t - S.throw) < Math.abs(p.t - S.throw) ? d : p),
       LADDER[0]);
@@ -1355,10 +1447,12 @@
     $('s5c').textContent = now.a.toFixed(2);
     $('s5d').textContent = big.a > 0 ? (100 * now.a / big.a).toFixed(0) + '%' : '\u2014';
     const kShare = big.k > 0 ? (100 * now.k / big.k).toFixed(0) : '\u2014';
-    $('s5e').textContent = 'At this throw curvature is at ' + kShare + '% of its full-throw value and '
+    const cShare = big.cd > 0 ? (100 * now.cd / big.cd).toFixed(0) : '\u2014';
+    $('s5e').textContent = 'At this throw curvature is at ' + kShare + '% of its full-throw value, '
       + 'aberrancy at ' + (big.a > 0 ? (100 * now.a / big.a).toFixed(0) : '\u2014')
-      + '%. They track each other almost exactly, which is the point: on clean data neither decays faster. '
-      + 'The difference shows up in noise, in where the anomaly sits, and in the azimuth.';
+      + '%, and coherence at ' + cShare + '%. The two derivatives track each other almost exactly, '
+      + 'because both are linear in the throw. Coherence is the one that behaves differently: watch it '
+      + 'fall away to nothing well before they do.';
   }
 
   /* =====================================================================
@@ -1462,7 +1556,6 @@
     buildSurface(); computeField(); drawAll(); saveState();
     clearTimeout(heavy);
     heavy = setTimeout(() => {
-      buildLadder();
       if (visible('p5')) drawStep5();
     }, 180);
   });
@@ -1493,7 +1586,6 @@
 
   buildSurface();
   computeField();
-  buildLadder();
   buildStepNav();
   showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
   document.fonts && document.fonts.ready.then(drawAll);
