@@ -106,12 +106,5 @@ all that is asked. The full legal text is in `LICENSE` at the repository root.
 > H. Bedle, *How Geometric Attributes Actually Work*, University of Oklahoma,
 > https://hbedle-subsurface.github.io/geometric-attributes/
 
-The license statement appears in the footer of all eight module pages, and the
-citation line on all nine including the landing page, whose footer holds the
-citation only. `LICENSE` at the root carries the full CC BY-SA 4.0 text, which is
-what GitHub reads to show the license on the repository page — the footer
-sentence on its own is not enough. When the SSRN working paper is published, the link needs adding in
-ten places: this file and the citation line in each page's footer.
-
 Built for teaching by Heather Bedle, School of Geosciences, University of
 Oklahoma, with the AASPI consortium.
