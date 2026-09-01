@@ -20,8 +20,8 @@
    button does not appear and the exercises tab works exactly as before —
    which is why no module carries a local fallback for it.
 
-   License: free to use for teaching, demonstration and non-commercial study
-   with credit. No republishing or redistribution without permission.
+   License: CC BY-SA 4.0. Free to use, adapt and share with credit; any
+   adaptation must be released under the same license.
    =========================================================================== */
 
 (function () {
