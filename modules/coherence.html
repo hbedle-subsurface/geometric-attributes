@@ -382,9 +382,18 @@
       </div>
     </div>
 
+    <p class="lede" style="margin-top:12px"><b>A note on the L slider before you reach for it.</b> The
+      window here holds five traces, so five principal components describe it completely. Keeping all five
+      reconstructs the window exactly and the energy ratio is 1.000 everywhere by definition; keeping four
+      is already within half a percent of that across the whole line. The panel goes uniformly white, and
+      that is the attribute reporting that it has stopped distinguishing anything rather than the display
+      failing. The readout under the panel gives the range, so the collapse can be watched as a number
+      rather than guessed at from a blank rectangle. L = 1 and L = 2 are where the attribute does
+      something.</p>
+
     <div class="ctl" style="margin:16px 0 10px;max-width:520px">
       <label for="npc6">Principal components kept, L
-        <span class="val" data-val="npc" id="npc6V">1</span></label>
+        <span class="val" data-val="npc" id="npc6V">1 of 5</span></label>
       <input type="range" data-key="npc" id="npc6" min="1" max="5" step="1" value="1">
     </div>
 
@@ -400,6 +409,11 @@
     </div>
 
     <canvas id="c6attr" aria-label="The selected attribute over the five-zone line"></canvas>
+
+    <div class="stats">
+      <div class="stat"><span>Range of the displayed attribute across the line</span><b id="s6d">&mdash;</b></div>
+      <div class="stat"><span>What the panel is showing</span><b id="s6e">&mdash;</b></div>
+    </div>
 
 
     <div class="legend prose">
@@ -420,7 +434,11 @@
     </div>
 
     <div class="legend prose">
-      <span>Semblance, eigenstructure and energy ratio run 0 to 1 and share a gray scale, so they can be
+      <span>This step has its own model and its own controls, which is why the analysis-window panel at the
+        top of the module is not shown here: amplitude change, phase rotation and the rest describe the
+        single window of steps 2 to 5, and there is no single window on this line. The two controls above
+        the panel are the ones that apply.
+        Semblance, eigenstructure and energy ratio run 0 to 1 and share a gray scale, so they can be
         compared directly. Variance runs the other way, dark where the others are light, because it is what
         is left when semblance is taken from one. The Sobel panel cannot: it is an edge response, high where the others
         are low, and it is plotted on its own scale. Putting a common color bar on attributes that do not
@@ -1516,9 +1534,42 @@
     SEIS.axisBottom(sctx, SR, 1, ZN, 'trace', (v) => v.toFixed(0), { ticks: 6 });
 
     const isSobel = S.attr === 'sob';
-    attrPanel('c6attr', ZATT[S.attr], w, h,
-      isSobel ? 0 : 0.2, isSobel ? 0.8 : 1,
+    const lo6 = isSobel ? 0 : 0.2, hi6 = isSobel ? 0.8 : 1;
+    attrPanel('c6attr', ZATT[S.attr], w, h, lo6, hi6,
       isSobel ? ATTR.MAPS.scan : ATTR.MAPS.coherence);
+
+    /* The range of what is actually on the panel.
+
+       Energy ratio at L close to the trace count is the case this exists for.
+       Five traces means five principal components describe the window
+       completely, so at L = 5 the attribute is 1.000 at every sample by
+       definition and at L = 4 it is within half a percent of that. The panel
+       goes uniformly white and looks broken. It is not broken; the attribute
+       has stopped separating anything, which is the most useful thing the
+       slider can demonstrate, provided the reader is told that is what they
+       are seeing. */
+    const A6 = ZATT[S.attr];
+    let mn6 = Infinity, mx6 = -Infinity, top6 = 0;
+    for (let i = 0; i < A6.length; i++) {
+      const v = A6[i];
+      if (v < mn6) mn6 = v;
+      if (v > mx6) mx6 = v;
+      if ((v - lo6) / (hi6 - lo6) > 0.97) top6++;
+    }
+    const span6 = mx6 - mn6, frac6 = 100 * top6 / A6.length;
+    $('s6d').textContent = mn6.toFixed(4) + ' to ' + mx6.toFixed(4) +
+      '   (span ' + span6.toFixed(4) + ', on a scale drawn ' +
+      lo6.toFixed(2) + ' to ' + hi6.toFixed(2) + ')';
+    const NTRACE = 2 * S.half + 1;
+    $('s6e').textContent = span6 < 0.02
+      ? 'Almost nothing. The attribute is the same value everywhere to within ' +
+        span6.toFixed(4) + ', so the panel is one flat color. With L = ' + S.npc +
+        ' of ' + NTRACE + ' principal components kept, that is the arithmetic rather than the display: ' +
+        'keeping every component reconstructs the window exactly and the ratio is 1 by definition.'
+      : frac6 > 90
+        ? 'Mostly saturated: ' + frac6.toFixed(0) + '% of the line sits in the top few percent of the ' +
+          'scale, so the features are there but compressed into almost no color range.'
+        : 'A usable range. The features separate across the scale the panel is drawn on.';
 
     const rows = zoneEdgeValues();
     const z2 = rows[1], z5 = rows[4];
@@ -1595,7 +1646,9 @@
     setVal('gain', S.gain.toFixed(1) + ' \u00d7');
     setVal('half', (2 * S.half + 1) + ' traces');
     setVal('kHalf', '\u00b1 ' + (S.kHalf * DT * 1000).toFixed(0) + ' ms');
-    setVal('npc', String(S.npc));
+    /* Show L against the number of traces, since what L means depends
+       entirely on how many components there are to keep. */
+    setVal('npc', String(S.npc) + ' of ' + (2 * S.half + 1));
     allOf('npc').forEach((el) => { el.max = 2 * S.half + 1; });
     ['dWig', 'zWig'].forEach((q) => {
       if ($(q)) $(q).setAttribute('aria-pressed', S.disp === 'wiggle');
