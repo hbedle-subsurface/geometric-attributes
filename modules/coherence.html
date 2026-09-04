@@ -349,11 +349,12 @@
     <canvas id="c5" aria-label="Sobel edge response compared with the covariance-based attributes"></canvas>
 
     <div class="legend prose">
-      <span><b>Sign convention.</b> As published, the equation gives a value near 0 where traces are
-        identical and near 1 across an edge, so it is an edge response. The AASPI output volume is named
-        <span class="k">sobel_filter_similarity</span> and is used elsewhere in the software as a similarity
-        where 1 means coherent, so the shipped attribute is presumably one minus this. Both are shown so
-        nothing is hidden. This 2D page implements the inline term only; AASPI uses inline and crossline.</span>
+      <span><b>Sign convention.</b> Written out as an edge detector, the equation gives a value near 0
+        where the traces are identical and near 1 across an edge. Displayed as a similarity, where 1 means
+        coherent, it is one minus that. Both are shown here because either can turn up under the name
+        <span class="k">sobel_filter_similarity</span>, and reading a map with the sign the wrong way round
+        turns every fault into a background and every background into a fault. This 2D page implements the
+        inline term only; a 3D implementation uses inline and crossline.</span>
     </div>
     </section>
 
@@ -407,13 +408,14 @@
         sign flipped, adding no information whatever. Energy ratio at <b>L = 1</b> is mathematically
         identical to eigenstructure &mdash; not similar, identical, agreeing to the last bit at every one of
         the 8,500 samples on this line. Raise L above 1 with the slider above and they separate: at the fault,
-        energy ratio climbs 0.851, 0.967, 1.000 for L = 1, 2, 3 while eigenstructure stays at 0.851, and
-        across the whole line their correlation falls to 0.65. Zone 2 is the exception and worth pausing on
+        energy ratio climbs toward 1 as L goes 1, 2, 3 while eigenstructure stays where it was, and across
+        the whole line their correlation falls to around two thirds. Zone 2 is the exception and worth pausing on
         &mdash; its covariance matrix is rank one, so there is no second eigenvalue for a second component
         to keep, and no value of L changes anything. Sobel is the interesting near-copy: allowing for its
-        opposite sign it tracks semblance at 0.95, because both are amplitude-sensitive, so on this data it
-        carries almost the same information by a completely different route. The genuinely independent pair
-        is semblance against eigenstructure, at 0.86. Running five attributes does not buy you five
+        opposite sign it tracks semblance at about 0.95, because both are amplitude-sensitive, so on this
+        data it carries almost the same information by a completely different route. The genuinely
+        independent pair is semblance against eigenstructure, which correlate at around 0.85 — high, but
+        the lowest figure on the page. Running five attributes does not buy you five
         opinions.</span>
     </div>
 
@@ -472,7 +474,7 @@
       <li>Mapping <b>internal architecture</b> in a thin channel, where the waveform is constant and only
         the amplitude changes: energy ratio will show you nothing and semblance will show you the edges.
         This is not a subtlety — step 6 has energy ratio reading exactly 1.000 at an amplitude edge that
-        semblance calls 0.786.</li>
+        semblance calls about 0.8.</li>
       <li>Not sure: run two and compare. Where they agree you have a discontinuity in both waveform and
         amplitude; where they disagree, the disagreement itself tells you which one it is.</li>
     </ul>
@@ -501,9 +503,9 @@
       <ol>
         <li><b>Make the two attributes disagree completely.</b> In step 2, set the amplitude change to 65%
           and leave the waveform change at zero. Then read semblance and eigenstructure in step 4.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Eigenstructure and energy ratio read exactly 1.000 while semblance reads 0.896.
-            Push the amplitude change to 80% and semblance falls to 0.818 while the other two do not move
-            at all.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Eigenstructure and energy ratio read exactly 1.000 while semblance reads about
+            0.9. Push the amplitude change to 80% and semblance falls further while the other two do not
+            move at all.
             This is not a bug in either. If every trace is the same waveform at a different size, the whole
             window is one pattern scaled trace by trace, so the covariance matrix has a single non-zero
             eigenvalue and the eigenvalue-based attributes correctly report one coherent event. Semblance
@@ -520,25 +522,26 @@
         <li><b>Turn the gain up and down.</b> First set the waveform change to about 40°, so that there is
           something for the variance to measure. Then move the overall amplitude slider from 0.2 to 3 and
           watch the three numbers underneath.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Semblance holds at 0.9405 and normalized variance at 0.0590 through the whole
-            sweep, because both are ratios of energies and the scale cancels exactly. The raw variance goes
-            from 3.5 × 10⁻⁷ to 8.0 × 10⁻⁵, a factor of 225, which is 15 squared. That is why raw statistical
+          <details class="reveal"><summary>Hint</summary><span class="ans">Semblance does not move, and neither does the normalized variance, because both
+            are ratios of energies and the scale cancels exactly. The raw variance changes by a factor of
+            225 over the sweep, which is 15 squared — the gain slider spans a factor of 15, and variance
+            goes as the square of amplitude. That is why raw statistical
             variance is not usable as a seismic attribute and why packages displaying "variance" display a
             normalized form. It is also the reminder that a bright reflector and a dim one can be equally
             coherent.</span></details></li>
         <li><b>Raise L and watch coherence appear from nowhere.</b> In step 4, set the noise in step 2 to
           about 40% and then move L from 1 to 3.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Energy ratio climbs from 0.78 at L = 1 to 0.96 at L = 2 and 0.99 at L = 3,
-            without the data changing at all. Keeping more principal components means calling more of the window "signal", so of course
+          <details class="reveal"><summary>Hint</summary><span class="ans">Energy ratio climbs from under 0.8 at L = 1 to nearly 1 by L = 3, without the
+            data changing at all. Keeping more principal components means calling more of the window "signal", so of course
             more of it looks coherent. AASPI notes that for small windows of 5 or 9 traces the first
             component usually represents more than 95% of the variability, and that L = 2 or 3 is intended
             for windows of 25 traces or more. Using a large L on a small window quietly erases the anomaly
             you were looking for.</span></details></li>
         <li><b>Find the case where they rank the opposite way round.</b> In step 6, compare zone 2 with
           zone 5 across all five attributes.
-          <details class="reveal"><summary>Hint</summary><span class="ans">At the amplitude edge semblance reads 0.79 and energy ratio 1.00: semblance sees
-            an edge, energy ratio sees nothing. At the fault semblance reads 0.46 and energy ratio 0.85:
-            both see something, but semblance far more strongly. So the two attributes do not simply differ
+          <details class="reveal"><summary>Hint</summary><span class="ans">At the amplitude edge semblance reads about 0.8 and energy ratio exactly 1.00:
+            semblance sees an edge, energy ratio sees nothing at all. At the fault semblance drops below 0.5
+            while energy ratio stays above 0.8: both see something, but semblance far more strongly. So the two attributes do not simply differ
             in sharpness, they order the two features differently. If you are mapping architectural elements
             inside a thin channel, where the waveform is constant and only amplitude changes, energy ratio
             will show you nothing and semblance will show you the edges — which is exactly the end member
@@ -623,12 +626,18 @@
       for an untapered, unbalanced window the two are numerically identical at L = 1. The extra generality
       is L > 1 and the tapered, balanced windows used for data-adaptive analysis. This page computes energy
       ratio that way; the equality is checked to nine decimal places.</p>
-    <p><b>Sobel-filter similarity</b>, equation 15, with two departures stated in step 5. This is a 2D page,
-      so only the inline derivative term exists where AASPI uses inline and crossline. And as published the
-      equation returns a value near zero for identical traces, making it an edge response rather than a
-      similarity, while the output volume of the same name is treated elsewhere in AASPI as a similarity
-      where 1 means coherent. The likely resolution is that the shipped attribute is one minus this
-      quantity, but the documentation does not say so, and rather than guess, both are displayed.</p>
+    <p><b>Sobel-filter similarity</b>, equation 15, with two departures stated in step 5. This is a 2D
+      page, so only the inline derivative term exists where a 3D implementation uses inline and crossline.
+      And the equation as written returns a value near zero for identical traces, which makes it an edge
+      response rather than a similarity; the similarity form is one minus it. Both are displayed rather
+      than picking one, because the sign a package uses is not something you can infer from the name.</p>
+    <p><b>Where the family starts.</b> Bahorich and Farmer (1995) introduced the first member of it, a
+      crosscorrelation coherence: correlate the trace at the analysis point against its inline and
+      crossline neighbors, take the peak of each correlation over a range of lags, and combine the two.
+      Using three traces made it cheap enough to run on a whole volume in 1995, and the lag search was
+      doing the job that a dip field does in every later member. It is not implemented here — the
+      semblance scan of module 01 is the same idea done better — but it is where the names in the
+      terminology table come from.</p>
     <p><b>Variance is not an AASPI attribute.</b> Program similarity3d does not output one. AASPI lists
       variance among the names the coherence family has acquired, some algorithmic and some simply renaming.
       The normalized form shown here follows the generic usage described in the SEG Wiki entry on coherence,
@@ -676,18 +685,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>
@@ -982,7 +992,14 @@
     };
   }
 
-  // raw and normalized variance about the mean trace, for step 2
+  /* Raw variance about the mean trace, for step 2.
+
+     Only the RAW number is computed here. The normalized form displayed
+     beside it is taken as 1 - semblance from the analytic covariance, which
+     is what the label says it is. Computing it separately from the real
+     trace alone, as an earlier version did, left the two numbers a few
+     ten-thousandths short of summing to one, and a student who adds them up
+     is exactly the student this module is written for. */
   function variances(w) {
     let sv = 0, se = 0;
     for (let k = 0; k < w.K; k++) {
@@ -1264,10 +1281,10 @@
     const h = barHeight(2);
     barChart('c2bar', [
       { label: 'semblance', v: A.semb, hi: true },
-      { label: 'variance', v: v.norm, map: ATTR.MAPS.coherence },
+      { label: 'variance', v: 1 - A.semb, map: ATTR.MAPS.coherence },
     ], w, h, { labW: 152 });
     $('s2a').textContent = A.semb.toFixed(4);
-    $('s2b').textContent = v.norm.toFixed(4);
+    $('s2b').textContent = (1 - A.semb).toFixed(4);
     $('s2c').textContent = v.raw.toExponential(3);
     $('s2d').textContent = 'Multiply every trace by two and the raw number goes up four times, ' +
       'though nothing about the continuity of the reflector has changed. That is why the ' +

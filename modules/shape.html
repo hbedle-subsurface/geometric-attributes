@@ -326,7 +326,7 @@
         <li><b>Check that shape index ignores size.</b> Set k₁ to +0.30 and k₂ to +0.10, note the shape
           index, then double both to +0.60 and +0.20.
           <details class="reveal"><summary>Hint</summary><span class="ans">The shape index
-            does not move — it stays at +0.70 — while curvedness doubles from 0.22 to 0.45. Shape index is built from the
+            does not move at all, while curvedness doubles exactly. Shape index is built from the
             ratio of the two curvatures, so any uniform scaling cancels out of it entirely. This is exactly
             what you want from a shape descriptor: a small gentle dome and a huge sharp dome are both domes,
             and one number should say so while a different number carries the difference in
@@ -343,11 +343,11 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">The shape index
             still reports a value, and it will swing wildly for tiny changes in either curvature, because it
             is a ratio of two numbers that are both nearly zero. Look at the raw panel in step 4: it is
-            fully saturated from corner to corner, including the quiet ground between the features. A
+            fully saturated from corner to corner, including the quiet ground between the features. Something like a
             sixth of this map is bending at less than a fifth of the rate the dome is, and the readout
-            underneath measures what the attribute does there: mean shape index 0.36, against 0.41 on the
-            strongly bent ground. The color on the quiet ground is not weak or uncertain looking, it is
-            as strong as the color on the dome, and it rests on almost nothing. This is the single most
+            underneath measures what the attribute does there: the mean |shape index| on that quiet ground
+            comes out much the same as on the strongly bent ground. The color there is not weak or
+            uncertain looking, it is as strong as the color on the dome, and it rests on almost nothing. This is the single most
             common way a shape index display misleads people, and it is why the modulated version is the
             one worth trusting.</span></details></li>
         <li><b>Find a saddle you would not have guessed at.</b> In step 5, select the saddle component.
@@ -356,9 +356,9 @@
             you would not naturally call a saddle by eye, but which genuinely curve up one way and down the
             other. Saddles are far more common on real surfaces than the textbook diagram suggests, which is
             why a saddle component often looks busier than people expect the first time they run one. On
-            the modeled surface in the header it claims 25% of the map, against 3.0% for the dome and 2.5%
-            for the bowl. The share depends entirely on the surface: module 05 uses a different model, on
-            which saddles cover more than half the map.</span></details></li>
+            the modeled surface in the header the saddle component claims something like a quarter of the
+            map, against a few percent each for the dome and the bowl. The share depends entirely on the
+            surface: module 05 uses a different model, on which saddles cover more than half the map.</span></details></li>
         <li><b>Compare curvedness with k₁.</b> In step 3, find the bowl on both panels.
           <details class="reveal"><summary>Hint</summary><span class="ans">On the k₁ panel
             the bowl is dark, because k₁ is negative there. On the curvedness panel it is just as bright as
@@ -407,12 +407,11 @@
         <b>shape components</b> are curvedness kept inside a shape index band and zeroed outside it: bowl
         below −0.75, valley from −0.75 to −0.25, saddle from −0.25 to +0.25, ridge from +0.25 to +0.75, and
         dome above +0.75.</p>
-      <p><b>A discrepancy in the source, stated plainly.</b> The AASPI <span class="k">curvature3d</span>
-        documentation gives curvedness twice, once as √(k₁² + k₂²) and once as √((k₁² + k₂²)/2). The second
-        matches Roberts (2001) and is the one used here; the two differ by a factor of √2, which matters if
-        you are comparing absolute numbers between packages and not at all if you are looking at a map.
-        The shape index likewise appears in that document with two opposite sign conventions. The one used
-        here is the one that puts domes at +1, which is the common convention, but it is worth checking
+      <p><b>Conventions differ between packages, so check before you compare.</b> Curvedness is written
+        both as √(k₁² + k₂²) and as √((k₁² + k₂²)/2) in the literature. The second is Roberts (2001) and is
+        the one used here; the two differ by a factor of √2, which matters if you are comparing absolute
+        numbers and not at all if you are looking at a map. Shape index is also published with either sign.
+        The convention here puts domes at +1, which is the more common one, but it is worth confirming
         which way round your own software has it before trusting the sign of a printed number.</p>
       <p>Because shape index is a ratio, it is undefined where the surface is planar and both curvatures
         vanish. AASPI's approach, followed here, is to modulate the display by curvedness so that the shape
@@ -449,18 +448,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>

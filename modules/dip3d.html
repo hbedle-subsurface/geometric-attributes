@@ -536,11 +536,11 @@
           dome on in step 4 and compare the two maps before and after.
           <details class="reveal"><summary>Hint</summary><span class="ans">With a plane both maps are a single flat color. Every trace returns the same
             pair, so one measurement would have described the whole volume. With the dome on a flat regional,
-            magnitude climbs from zero at the crest to about 0.39 ms/m at the edge, and azimuth runs right
-            round the color wheel, because the reflector falls away in every direction. Now put the
-            crossline dip back to 4 and switch the dome on again: magnitude runs 0.00 to 0.52 ms/m, the
-            crest shifts off center toward the south, and the azimuth pattern leans that way rather than
-            being symmetric — the dome and the regional dip are simply added, and the crest is wherever
+            magnitude climbs from zero at the crest to a few tenths of a millisecond per meter at the edge,
+            and azimuth runs right round the color wheel, because the reflector falls away in every
+            direction. Now put the crossline dip back to 4 and switch the dome on again: the magnitude
+            still reaches zero somewhere and rises to a larger maximum than before, the crest shifts off
+            center toward the south, and the azimuth pattern leans that way rather than being symmetric — the dome and the regional dip are simply added, and the crest is wherever
             the two cancel.
             Real data behaves like these two cases rather than like the plane, which is why the estimate is
             repeated at every sample instead of measured once.</span></details></li>
@@ -568,10 +568,11 @@
             candidates.</span></details></li>
         <li><b>Shrink the patch to 3 × 3.</b> With noise at 30%, drag the patch size down from 11 × 11 and
           read the score alongside the error.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em> as the patch shrinks — about 0.72 at 11 × 11, 0.83 at
-            5 × 5 and 0.89 at 3 × 3 — while the estimate falls apart underneath it. The crossline error
-            grows from about 0.04 ms to about 0.95 ms per line, a factor of more than twenty, while the
-            inline error stays near zero, so the damage is not even shared between the two components.
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em> steadily as the patch shrinks, by something like a
+            fifth from 11 × 11 down to 3 × 3, while the estimate falls apart underneath it. The crossline
+            error grows from a few hundredths of a millisecond per line to most of a millisecond, better
+            than a factor of twenty, while the inline error stays small, so the damage is not even shared
+            between the two components.
             Nine traces
             support two unknowns rather than one, and they reach only a single trace either side of the
             analysis point in each direction, which is barely enough to define a plane. The score is not
@@ -614,7 +615,7 @@
       display, at a fixed 13 by 13 grid of candidate tilts regardless of the step-7 settings, because a full
       density scan on every slider movement would stutter. The decimation is a display choice, not part of
       the method. A production run estimates at every sample of every trace.</p>
-    <p>Azimuth is measured in degrees clockwise from the inline axis and points downdip. Real surveys are
+    <p>Azimuth is measured in degrees counter-clockwise from the inline axis and points downdip, so on the maps here, which put inline to the right and crossline upward, 0° is to the right and 90° is up. Real surveys are
       rotated relative to north, so a dip azimuth volume has to be corrected by the survey rotation before it
       means anything geographic, and packages differ over whether azimuth points updip or downdip and whether
       it is measured from north or from the inline. Check the convention before comparing two volumes.</p>
@@ -667,18 +668,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>

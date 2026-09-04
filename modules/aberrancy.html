@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aberrancy | How Geometric Attributes Actually Work</title>
-<meta name="description" content="Aberrancy, also called flexure: the third derivative of structure. Why there are three principal aberrancies rather than two, why they are vectors rather than signed values, and why the total aberrancy vector is the one you display.">
+<meta name="description" content="Aberrancy, which part of the literature calls flexure: the third derivative of structure. Why there are three principal aberrancies rather than two, why they are vectors rather than signed values, and why the total aberrancy vector is the one you display.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
     <p class="eyebrow">Module 08 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Aberrancy: one derivative further</h1>
     <p class="sub">Dip is the first derivative of structure. Curvature is the second. Aberrancy — also
-      called flexure — is the <b>third</b>. It responds to the asymmetry of a flexure, which lets it place
+      some authors call flexure — is the <b>third</b>. It responds to the asymmetry of a flexure, which lets it place
       a single anomaly on a fault where curvature places two beside it, and its azimuth says which way the
       ground dropped. It behaves differently from everything before it: three principal values instead of
       two, and vectors instead of signed numbers.</p>
@@ -159,7 +159,7 @@
       watch the count change. Where the structure is locally one-dimensional — a single fault, a simple
       flank — the cubic degenerates and you get one dominant direction. All three appear only where two
       structural trends interfere, such as near the crossing of the two faults, which is where the analysis
-      point starts. On this surface that is genuinely rare: fewer than one point in three hundred shows
+      point starts. On this surface that is genuinely rare: well under one point in a hundred shows
       three well-separated roots. That is worth knowing before you go looking for the intermediate and
       minimum volumes in your own data.</p>
 
@@ -220,8 +220,10 @@
     <div class="legend prose">
       <span>The azimuth map uses a full 360° cyclic color scale, not the 180° one that dip azimuth and
         curvature strike use. That difference is the whole point: strike is an orientation and wraps at
-        180°, while an aberrancy azimuth is a direction and wraps at 360°. The two sides of a fault get
-        opposite colors here, where a strike map would give them the same one.</span>
+        180°, while an aberrancy azimuth is a direction and wraps at 360°. Along a fault the color stays
+        the same, because the ground drops the same way all along it. Across one it reverses, because the
+        central anomaly on the flexure and the weaker lobes flanking it point opposite ways. A strike map
+        gives all of that a single color and can distinguish none of it.</span>
     </div>
 
     <div class="stats">
@@ -311,8 +313,8 @@
       data coherence never quite goes blind, because there is nothing to hide a small offset in — given
       enough precision a semblance window can detect an arbitrarily small break. Blindness is a
       signal-to-noise limit, not a property of the wavelet alone, so it only appears once there is noise
-      to lose the signal in. At 6% the teal curve reads zero out to about 6 m of throw while curvature
-      and aberrancy are already at a fifth of their full-throw response. That gap is the case for
+      to lose the signal in. At that setting the teal curve reads zero out to several meters of throw while curvature
+      and aberrancy are already well up from the floor. That gap is the case for
       computing a derivative attribute: not that it is more sensitive at any given throw, but that it
       keeps working after coherence has stopped. Aberrancy's own
       advantages over curvature are different ones — where the anomaly sits and which way it points —
@@ -409,10 +411,10 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">Look first at the
             three little sweeps at the top of the step: dip turns once, curvature twice, aberrancy three
             times &mdash; one extra turn per derivative, and that is the whole of it. At the
-            starting point, near where the two faults cross, there are three: around 23°, 88° and 145°, so
-            the gaps are 65° and 57° — nothing like curvature's rigid ninety. Now click elsewhere on the
+            starting point, near where the two faults cross, there are three, and the gaps between them are
+            unequal and nothing like curvature's rigid ninety. Now click elsewhere on the
             line. Over most of this surface only one root survives, because a single smoothed fault is
-            locally one-dimensional and the cubic degenerates. Fewer than one point in three hundred here
+            locally one-dimensional and the cubic degenerates. Well under one point in a hundred here
             has three well-separated roots. That irregularity, and the fact that the number of roots is not
             even fixed, is why no eigenvalue shortcut exists and the extrema must be found by searching the
             azimuth — exactly as module 01 searched for dip.</span></details></li>
@@ -438,9 +440,9 @@
         <li><b>Find the cost.</b> Set the operator length to 3 and put the noise up to about 16%.
           <details class="reveal"><summary>Hint</summary><span class="ans">Aberrancy is the
             first attribute to fall apart, before curvature and long before coherence. On this model it goes
-            wrong quickly and quietly: by 8% noise at an operator length of 3, the aberrancy peak has moved
-            off the fault altogether &mdash; it reports trace 34 when the fault is at 39 &mdash; and it goes
-            on reporting a confident peak in the wrong place as the noise rises. A third derivative
+            wrong quickly and quietly: at an operator length of 3 it takes only a few percent of noise
+            before the peak moves off the fault altogether, landing several traces to one side of it, and
+            it goes on reporting a confident peak in that wrong place as the noise rises. A third derivative
             multiplies the high wavenumbers three times over, so any noise in the dip field arrives cubed.
             Raising the operator length rescues it, at the usual cost of losing the narrowest features. In
             practice aberrancy demands the cleanest dip volume of anything in this course, which is another
@@ -455,7 +457,8 @@
       <h3>The main points</h3>
       <ul>
         <li><b>Aberrancy is the third derivative of structure.</b> Dip is the first, curvature the second.
-          It is also called flexure.</li>
+          Part of the literature calls it flexure instead; the Method tab sets out which word means
+          which quantity.</li>
         <li><b>It puts one anomaly on the feature.</b> Curvature straddles a flexure with a positive and a
           negative anomaly; aberrancy sits on it with a single one.</li>
         <li><b>There are three principal aberrancies, not two.</b> A cubic has three roots, they are not
@@ -487,6 +490,14 @@
         vector sum of the three, which is what AASPI outputs by default as
         <span class="k">ab_tot_mag</span> and <span class="k">ab_tot_azim</span>; the individual roots are
         available there as the maximum, intermediate and minimum aberrancy magnitude and azimuth.</p>
+      <p><b>A note on the name.</b> This attribute travels under two words, and they are not used
+        consistently. Di and Gao (2016) and much of the seismic literature use <em>flexure</em> for the
+        third derivative of structure, treating it as a synonym for aberrancy. A second usage, closer to
+        where the term came from (Schot, 1978), keeps flexure for the bend itself — a second-derivative
+        word, alongside curvature — and uses aberrancy for the rate at which the bend changes, which is
+        the third derivative. This module follows the second usage, which is also the AASPI convention.
+        The distinction is worth carrying: a paper or a software menu offering "flexure" may be offering
+        either quantity, and the two differ by a derivative.</p>
       <p><b>Where this departs from AASPI.</b> This is a single horizon, so the derivatives are taken in
         map view rather than volumetrically, and the dip normalization that a full treatment carries is
         omitted. AASPI computes the 27 second derivatives volumetrically by differentiating the nine first
@@ -511,6 +522,8 @@
           <em>Interpretation</em>, 6, T349–T365.</li>
         <li>Roberts, A., 2001, Curvature attributes and their application to 3D interpreted horizons:
           <em>First Break</em>, 19, 85–100.</li>
+        <li>Schot, S. H., 1978, Aberrancy: geometry of the third derivative: <em>Mathematics Magazine</em>,
+          51, 259–275.</li>
         <li>AASPI, <em>Geometric Attributes: Program curvature3d</em>, University of Oklahoma — the
           aberrancy section, its three-root formulation and the total aberrancy vector.</li>
       </ul>
@@ -535,18 +548,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>
@@ -705,8 +719,19 @@
             if (Math.abs(val(m1)) > Math.abs(val(m2))) hi = m2; else lo = m1;
           }
           const best = (lo + hi) / 2, v = val(best);
-          // magnitude strictly positive, azimuth the direction it points
-          roots.push({ m: Math.abs(v), a: v >= 0 ? best : best + Math.PI });
+          /* Magnitude strictly positive; the azimuth carries the direction.
+             The sign is the whole point of this attribute, so it is worth
+             being explicit about which way round it is here.
+
+             Depth increases downward, so across a monoclinal flexure the
+             third derivative is NEGATIVE in the direction the ground drops.
+             Taking the azimuth of the raw extremum would therefore point at
+             the up-thrown side. The convention adopted here, and the one the
+             module describes throughout, is that the vector points DOWN the
+             flexure, from the up-thrown side toward the down-thrown one, so
+             the sign is reversed on the way in. Change this line and every
+             azimuth statement in the module has to change with it. */
+          roots.push({ m: Math.abs(v), a: v >= 0 ? best + Math.PI : best });
         }
         prev = cur; cur = next;
       }

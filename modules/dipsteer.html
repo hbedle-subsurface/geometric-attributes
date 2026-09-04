@@ -184,7 +184,7 @@
       low coherence.</p>
 
     <p class="sublabel"><b>1</b> The seismic
-      <span class="note">a gently folded sequence cut by a normal fault dipping about 65°</span></p>
+      <span class="note">a gently folded sequence cut by a normal fault whose plane leans across the section</span></p>
     <canvas id="c3seis" aria-label="Seismic section showing a folded sequence cut by a dipping fault"></canvas>
 
     <p class="sublabel" style="margin-top:16px"><b>2</b> Coherence, dip-steered
@@ -229,7 +229,8 @@
     </div>
 
     <div class="legend">
-      <span>Inline runs across, crossline runs up. On the left the fault is the only feature worth picking.
+      <span>Both panels use the same gray scale as the sections above, black at 0.5 and white at 1.0.
+        Inline runs across, crossline runs up. On the left the fault is the only feature worth picking.
         On the right a broad dark band has appeared along the flexure, running at a different angle from the
         fault: wherever the bed dips more steeply than the horizontal window tolerates, the attribute
         darkens, and what it draws is the structure rather than a discontinuity. The band reaches about
@@ -307,7 +308,7 @@
       What it changes in practice</h2>
     <ul class="lede" style="padding-left:20px">
       <li><b>Fault picking.</b> On the unsteered volume in step 3, the darkest thing on a row is the fault
-        only 45% of the time. Anyone auto-tracking it extracts fold flanks as faults for more than half its
+        only about half the time. Anyone auto-tracking it extracts fold flanks as faults over much of its
         length, and those picks look like perfectly good faults until someone checks them against the
         seismic.</li>
       <li><b>Stratigraphic work.</b> Bleed-through in map view follows the structural grain, which is
@@ -323,9 +324,10 @@
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       And why the dip volume deserves real effort</h2>
-    <p class="lede">Steering is not a switch that is either on or off. Step 4 shows a 0.5 ms per trace error
-      — smaller than the cost of coarsening the dip search step in module 01 — already eating into the fault
-      contrast, and a 2 ms per trace error landing in the same place as not steering at all. Since the
+    <p class="lede">Steering is not a switch that is either on or off. Step 4 shows a half-millisecond
+      per trace error — smaller than the cost of coarsening the dip search step in module 01 — already
+      eating into the fault contrast, and a 2 ms per trace error landing in the same place as not steering
+      at all. Since the
       volume is still labeled dip-steered, that failure is harder to spot than the honest unsteered
       version.</p>
     <p class="lede">Which is the practical argument for the order of this course. Modules 01 and 02 spend a
@@ -345,53 +347,56 @@
         <li><b>Find the tolerance of an unsteered window.</b> In step 2, leave the frequency at 30 Hz and
           five traces, and read the dip at which the flat window drops below 0.8. Then double the frequency
           and read it again.
-          <details class="reveal"><summary>Hint</summary><span class="ans">1.69 ms per trace at 30 Hz and 0.94 at 60 Hz, so doubling the frequency roughly
-            halves the tolerance. At 25 m bins and 3000 m/s those are geological dips of 5.8 and 3.2
-            degrees. An unsteered coherence volume is therefore usable on almost nothing: gentle regional
+          <details class="reveal"><summary>Hint</summary><span class="ans">About 1.7 ms per trace at 30 Hz and about 0.9 at 60 Hz, so doubling the
+            frequency roughly halves the tolerance. At 25 m bins and 3000 m/s those are geological dips of
+            roughly six and three degrees. An unsteered coherence volume is therefore usable on almost nothing: gentle regional
             dip is already enough to break it, and better data makes it worse rather than better.</span></details></li>
         <li><b>Check that the failure is about the wavelet, not the dip.</b> Try several combinations of
           frequency and aperture in step 2, and each time read the "shift as a fraction of one period"
           box at the dip where the flat curve crosses 0.8.
-          <details class="reveal"><summary>Hint</summary><span class="ans">It lands between about 15 and 28 percent every time, averaging a little over a
-            fifth. Twenty-five combinations of frequency and aperture give crossings ranging from 7.31 ms
-            per trace down to 0.38, a spread of nineteen to one, and every one of them corresponds to
-            much the same fraction of a period. That is the
+          <details class="reveal"><summary>Hint</summary><span class="ans">It lands between about 15 and 30 percent every time, averaging a little over a
+            fifth. Sweeping frequency and aperture together moves the crossing dip over a range of nearly
+            twenty to one — from several milliseconds per trace down to a few tenths — and every one of
+            those crossings corresponds to much the same fraction of a period. That is the
             actual rule, and it is worth carrying around: a horizontal window survives only while the time
             shift accumulated across it stays under about a fifth of a period.</span></details></li>
         <li><b>Compare the two volumes as an interpreter would.</b> In step 3, look at the steered and
           unsteered panels and ask which anomalies you would pick as faults.
-          <details class="reveal"><summary>Hint</summary><span class="ans">With the noise slider at its default 12%, the steered panel has bedding at
-            0.924 against a fault at 0.49, and the darkest point on a row is the fault 90% of the time. The
-            unsteered panel has bedding averaging 0.78 and falling to 0.47 on the steepest flanks, and the
-            darkest point is the fault only 45% of the time. So on more than half the rows of the unsteered
-            volume the darkest thing available to pick is a fold flank, not the fault. Turn the noise off
+          <details class="reveal"><summary>Hint</summary><span class="ans">With the noise slider at its default 12%, the steered panel sits at better than
+            0.9 on the bedding against roughly 0.5 at the fault, and the darkest point on a row is the fault
+            about nine times in ten. The unsteered panel has bedding averaging under 0.8 and falling on the
+            steepest flanks to about what the fault reads, and the darkest point is the fault only about
+            half the time. So on many rows of the unsteered volume the darkest thing available to pick is a
+            fold flank, not the fault. Turn the noise off
             and the steered background climbs to a flat 1.0 while the unsteered one still bands: the flanks
             are not a noise problem, they are a steering problem.</span></details></li>
         <li><b>Give the steering a small, plausible error.</b> In step 4, step the error through 0.25, 0.5
           and 1 ms per trace and watch the bedding value.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Bedding coherence falls 0.924, 0.918, 0.899, 0.831 as the error goes 0, 0.25,
-            0.5, 1 ms per trace, while the fault only moves from 0.488 to 0.442. The cost comes out of the
-            background rather than out of the anomaly, and the separation narrows from 0.435 to 0.389.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Bedding coherence falls steadily as the error goes 0, 0.25, 0.5, 1 ms per
+            trace, losing the best part of a tenth by the end, while the fault value barely moves. The cost
+            comes out of the background rather than out of the anomaly, so the separation between the two
+            narrows by around a tenth of itself.
             These are small errors by the standards of module 01 — 0.5 ms per trace is less than the cost of
             coarsening the dip search step to 2 ms — and they are already being spent.</span></details></li>
         <li><b>Read the two time slices.</b> In step 3, look at the map pair rather than the sections and
           ask what the broad dark band on the right is, and why it runs at a different angle from the fault.
           <details class="reveal"><summary>Hint</summary><span class="ans">It is the flexure. Wherever the bed dips more steeply than a three-trace
             horizontal window tolerates, the attribute darkens, so the feature it draws is the structure
-            itself. The band falls to about 0.55 against a fault at about 0.48, so the two anomalies are
-            comparable in strength and no threshold separates them. On the steered slice the background
-            sits near 0.95 across the whole map, flexure included, and the fault is the only linear feature
+            itself. The band goes about as dark as the fault does, so the two anomalies are comparable in
+            strength and no threshold separates them. On the steered slice the background stays high across
+            the whole map, flexure included, and the fault is the only linear feature
             on it. This is the clearest view of the problem, because in map view the
             bleed-through has a shape, and that shape looks like stratigraphy to anyone who has not seen the
             steered version.</span></details></li>
         <li><b>Push the error past the structure itself.</b> Set the error to 2 ms per trace and compare it
           with the steepest dip in the section, shown in the readout.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The steepest true dip is 1.96 ms per trace, so an error of 2 is a hundred
-            percent error. Bedding coherence collapses to 0.614, well below the 0.78 the unsteered window
-            managed, and the darkest point on a row is the fault only 41% of the time rather than 90%.
+          <details class="reveal"><summary>Hint</summary><span class="ans">The steepest true dip in this section is just under 2 ms per trace, so an
+            error of 2 is a hundred percent error. Bedding coherence collapses to well below what the
+            unsteered window managed, and the fault is the darkest point on a row less than half the time
+            rather than nine times in ten.
             Steering by a badly wrong dip is therefore worse than not steering at all, and more dangerous,
-            because the volume is labeled as dip-steered. Push on to 4 ms per trace and the fault is found
-            on 10% of rows: the attribute is imaging the error.</span></details></li>
+            because the volume is labeled as dip-steered. Push on to 4 ms per trace and the fault is found on
+            barely one row in ten: the attribute is imaging the error.</span></details></li>
       </ol>
     </div>
   </section>
@@ -423,7 +428,8 @@
     <p>Steps 1 and 2 use a single reflector across a small patch of traces, built by convolving one
       reflection coefficient with a Ricker wavelet and shifting each trace by the bed dip. Steps 3 and 4 use
       a 160-trace section at 2 ms sampling containing a gently folded sequence with a regional dip, cut by
-      a normal fault of 20 ms throw dipping about 65 degrees. The reflectors are closely spaced, at 9
+      a normal fault of 20 ms throw whose plane descends 7.8 ms of two-way
+      time per trace, about 25 degrees at 25 m bins and 3000 m/s. The reflectors are closely spaced, at 9
       samples, for a reason: a fault is only visible where it cuts a reflector, so with widely spaced
       beds its expression becomes a row of isolated offsets several traces apart, which reads as a
       staircase rather than a plane. Because the fault plane is oblique to the
@@ -484,18 +490,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>
@@ -563,10 +570,13 @@
   const NX = 160, NT = 220;                        // the section, steps 3 and 4
   const THROW = 20, FOLDA = 22, FOLDL = 130, REG = 0.9;
 
-  /* A real fault is not vertical. This one dips about 65 degrees, which at
-     25 m bins and 3000 m/s is 7.8 ms of throw position per trace, so the
-     fault plane moves right by one trace every four samples as it goes down.
-     Where it cuts each reflector therefore depends on that reflector's time. */
+  /* A real fault is not vertical. This plane descends 7.8 ms of two-way time
+     for every trace it moves right, so it moves right by one trace every four
+     samples as it goes down. At 25 m bins and 3000 m/s that is 11.7 m of depth
+     per 25 m across, a dip of about 25 degrees — deliberately shallower than
+     most normal faults, so that the plane crosses plenty of reflectors inside
+     a 220-sample section instead of running off the bottom. Where it cuts each
+     reflector therefore depends on that reflector's time. */
   const FAULT_SLOPE = 1 / 3.9;                     // traces per sample
   const FAULT_X0 = 52;                             // trace at the top of the section
   const faultTraceAt = (t0) => FAULT_X0 + FAULT_SLOPE * t0;

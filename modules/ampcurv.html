@@ -294,7 +294,7 @@
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       Three things to know before trusting it</h2>
     <p class="lede"><b>It maps outlines, not bodies.</b> The dim interior of a channel is flat, so its
-      second derivative is near zero and it comes out quiet — about 4 against 65 at the edge. If you want
+      second derivative is near zero and it comes out quiet, an order of magnitude below the edge. If you want
       the body of the channel you want an amplitude map, or an envelope map — the strength of the
       reflection regardless of whether it is a peak or a trough. This attribute gives you the boundary
       instead.</p>
@@ -330,7 +330,8 @@
         <li><b>Find out what actually lights up at a channel.</b> In step 3, compare the value at the
           channel edge with the value in the middle of the channel.
           <details class="reveal"><summary>Hint</summary><span class="ans">The middle of
-            the channel reads about 4 against 65 at the edge, even though it is much dimmer than its surroundings. Amplitude curvature is
+            the channel reads an order of magnitude less than the edge does, even though it is much dimmer
+            than its surroundings. Amplitude curvature is
             a second derivative, so it responds to where the amplitude <em>changes</em>, not to where it is
             low. A broad dim area is flat in the second derivative and produces almost nothing. If you want
             to map the body of a channel you want an amplitude or envelope attribute; amplitude curvature
@@ -338,9 +339,9 @@
         <li><b>Sharpen and soften the edge.</b> Move the edge-sharpness slider from 1 to 10 traces and watch
           the e_pos value at the edge.
           <details class="reveal"><summary>Hint</summary><span class="ans">At 1 trace the
-            edge reads about 124 against 0.1 in the middle of the channel — a thousand to one, and the two
-            edges are razor sharp. At 2 traces it is 65 against 4. By 4 traces it is 23 against 22, and the
-            distinction has collapsed: the channel no longer has a flat floor and two sharp walls, it is one
+            edge reads something like a thousand times the value in the middle of the channel, and the two
+            edges are razor sharp. At 2 traces the ratio is down to about fifteen to one. By 4 traces the
+            edge and the middle read the same and the distinction has collapsed: the channel no longer has a flat floor and two sharp walls, it is one
             broad smooth low, so its second derivative is spread right across it instead of concentrated at
             the boundaries. The lesson is not simply that the anomaly gets weaker. It is that amplitude
             curvature stops mapping an <em>outline</em> and starts mapping a <em>blur</em>, and a
@@ -457,18 +458,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>

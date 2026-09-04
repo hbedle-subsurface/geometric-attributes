@@ -215,21 +215,25 @@
       <h3><span class="stepno">3</span>k₁ and k₂ across the whole map</h3>
       <span class="hint">Two volumes, and the strike that goes with them</span>
     </div>
-    <p class="lede">Now compute those two numbers at every point rather than one. Most-positive curvature
-      picks out anticlines, ridges and the upthrown edges of faults; most-negative picks out synclines,
-      valleys and the downthrown edges. Run them together and a fault shows as a paired bright and dark
-      lineament, which is the signature interpreters look for.</p>
+    <p class="lede">Now compute those two numbers at every point rather than one. k₁ picks out
+      anticlines, ridges and the upthrown edges of faults; k₂ picks out synclines, valleys and the
+      downthrown edges. Run them together and a fault shows as a paired bright and dark lineament, which
+      is the signature interpreters look for.</p>
+    <p class="lede">Software menus often label these two <span class="k">most-positive</span> and
+      <span class="k">most-negative</span> curvature. Those names belong to a related pair of attributes
+      that is not quite the same thing, and step 4 is about the difference. Everything on this page is
+      k₁ and k₂.</p>
 
     <div class="sec-row" id="row3">
       <div class="panel-col">
-        <p class="sublabel"><b>1</b> k₁, most-positive
+        <p class="sublabel"><b>1</b> k₁, the more positive
           <span class="note">crests and ridges</span></p>
-        <canvas id="c3k1" aria-label="Map of most-positive principal curvature"></canvas>
+        <canvas id="c3k1" aria-label="Map of the more positive principal curvature"></canvas>
       </div>
       <div class="panel-col">
-        <p class="sublabel"><b>2</b> k₂, most-negative
+        <p class="sublabel"><b>2</b> k₂, the more negative
           <span class="note">troughs and valleys</span></p>
-        <canvas id="c3k2" aria-label="Map of most-negative principal curvature"></canvas>
+        <canvas id="c3k2" aria-label="Map of the more negative principal curvature"></canvas>
       </div>
       <div class="panel-col">
         <p class="sublabel"><b>3</b> Strike of k₂
@@ -281,7 +285,7 @@
       <div class="panel-col">
         <p class="sublabel"><b>1</b> k₁, dip corrected
           <span class="note">a true principal curvature</span></p>
-        <canvas id="c4k1" aria-label="Map of most-positive principal curvature"></canvas>
+        <canvas id="c4k1" aria-label="Map of the more positive principal curvature, dip corrected"></canvas>
       </div>
       <div class="panel-col">
         <p class="sublabel"><b>2</b> k_pos, not corrected
@@ -332,12 +336,12 @@
       <div class="panel-col">
         <p class="sublabel"><b>1</b> k₁ at the operator length you chose
           <span class="note">the header slider drives this</span></p>
-        <canvas id="c5a" aria-label="Most-positive curvature at the chosen operator length"></canvas>
+        <canvas id="c5a" aria-label="Principal curvature k1 at the chosen operator length"></canvas>
       </div>
       <div class="panel-col">
         <p class="sublabel"><b>2</b> k₁ with a long operator
           <span class="note">fixed at 15 traces, for comparison</span></p>
-        <canvas id="c5b" aria-label="Most-positive curvature computed with a long operator"></canvas>
+        <canvas id="c5b" aria-label="Principal curvature k1 computed with a long operator"></canvas>
       </div>
     </div>
 
@@ -377,24 +381,24 @@
         cleanly, so you can see a body you cannot see directly.</li>
       <li><b>Karst and collapse.</b> Sinkholes and collapsed chimneys show as tight closed lows, which is
         exactly the shape module 06's bowl component isolates.</li>
-      <li><b>Structural framework.</b> Most-positive and most-negative run together give the paired bright
-        and dark lineament that reads as a fault, with the upthrown and downthrown sides labeled for you.</li>
+      <li><b>Structural framework.</b> k₁ and k₂ run together give the paired bright and dark lineament
+        that reads as a fault, with the upthrown and downthrown sides labeled for you.</li>
     </ul>
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       The three ways it will mislead you</h2>
     <p class="lede"><b>Bright does not mean steep.</b> Curvature peaks where the bed is momentarily flat, at
       a crest or a trough, and passes through zero where the bed is steepest — because a steeply dipping bed
-      at its inflection is momentarily straight, and straight means not bending. On the default structure that
-      is 0.013 km⁻¹ at the steepest point against 0.913 at the crest, a factor of seventy the other way from
-      most people's intuition.</p>
+      at its inflection is momentarily straight, and straight means not bending. On the default structure the steepest point reads
+      a hundredth of a reciprocal kilometer against nearly one at the crest, a factor of some seventy the
+      other way from most people's intuition.</p>
     <p class="lede"><b>Operator length is an interpretation, not a setting.</b> Long-wavelength curvature
       maps folds and short-wavelength curvature maps fabric, and the same surface honestly gives both. Which
       one you chose should travel with the volume, because nothing in the data says which is right.</p>
     <p class="lede"><b>It inherits everything the dip field got wrong, doubled.</b> Curvature is a second
       derivative, so short-wavelength error in dip is amplified twice over. Put the noise slider to 30% at
-      an operator length of 3 and the typical curvature reads six times its clean value, almost all of it
-      noise. That is the practical reason modules 01 to 03 spent so long on getting dip right.</p>
+      an operator length of 3 and the typical curvature reads several times what a long operator gives on
+      the same surface, almost all of it noise. That is the practical reason modules 01 to 03 spent so long on getting dip right.</p>
     <div class="legend prose">
       <span>And the naming trap worth carrying away: k₁ and k_pos are different attributes, not two names
         for one. On dipping structure the uncorrected version reads systematically high, and it reads
@@ -409,21 +413,22 @@
       <ol>
         <li><b>Shrink the fault until only curvature can see it.</b> In step 1, walk the fault throw down
           from 60 m to 5 m, reading the coherence value and the fault curvature at each stop.
-          <details class="reveal"><summary>Hint</summary><span class="ans">At 60 m throw coherence reads 0.36 and the fault
-            is unmistakable. At 25 m it is 0.84. At 10 m it is 0.97, and at 5 m it is 0.992 — which is
-            exactly the value it reads with no fault at all. Coherence has gone completely blind. Curvature
-            meanwhile goes 8.30, 3.96, 1.75, 0.98 km⁻¹: reduced, but still clearly there at every step. Once
+          <details class="reveal"><summary>Hint</summary><span class="ans">At 60 m throw coherence sits around 0.36 and the fault
+            is unmistakable. By 10 m it has climbed to about 0.97, and at 5 m it reaches exactly the value
+            it reads with no fault at all. Coherence has gone completely blind. Curvature meanwhile falls
+            roughly in step with the throw, by about a factor of eight over the same range: reduced, but
+            still clearly there at every stop. Once
             the offset drops below what the wavelet can resolve, the reflector is no longer broken, it is
             bent, and only an attribute that measures bending will find it. This is the classic progression
             — large offsets to coherence, small offsets to curvature, and offsets below even that to
-            aberrancy, which has a module of its own. Notice too that the fold sits at 0.91 km⁻¹ throughout
-            and coherence never sees it at any setting.</span></details></li>
+            aberrancy, which has a module of its own. Notice too that the fold sits at the same curvature throughout,
+            near 0.9 km⁻¹, and coherence never sees it at any setting.</span></details></li>
         <li><b>Find where curvature is zero on a steeply dipping bed.</b> In step 1, set the fold relief to
           about 100 m and look at where the middle and bottom panels cross zero.
           <details class="reveal"><summary>Hint</summary><span class="ans">The dip curve
             and the curvature curve cross zero in completely different places, a quarter of a wavelength
-            apart. On the default structure, curvature at the steepest point on the fold is 0.013 km⁻¹
-            against 0.913 km⁻¹ at the crest — a factor of seventy. Curvature is zero exactly where the bed
+            apart. On the default structure, curvature at the steepest point on the fold is a hundredth
+            of a reciprocal kilometer against nearly one at the crest, a factor of some seventy. Curvature is zero exactly where the bed
             is steepest, and largest where the bed is level at a crest or a trough. The reason is worth
             saying carefully: at the steepest point the bed is momentarily <em>straight</em>, not level.
             It is dipping hard, but it is not bending, and bending is the only thing curvature measures. This is the single most common misreading of a curvature volume: a bright
@@ -432,8 +437,9 @@
         <li><b>Find a saddle.</b> In step 2, click near the plunging nose at the north end of one of the
           ridges, then rotate the profile through 180°.
           <details class="reveal"><summary>Hint</summary><span class="ans">The curve
-            crosses zero twice, and k₁ comes out positive while k₂ comes out negative at the same point —
-            around +0.15 and −0.12 km⁻¹ at the strongest saddle on this surface. The reflector arches up
+            crosses zero twice, and k₁ comes out positive while k₂ comes out negative at the same point.
+            How large each one is depends on exactly where you clicked; what matters is the pair of signs,
+            and on the strongest saddles here the two are comparable in size. The reflector arches up
             along the ridge and falls away along its plunge, so it curves one way in one direction and the
             other way at right angles. No single number describes that, which is the whole reason two
             principal curvatures are reported instead of one average. A mean curvature here would be close
@@ -442,8 +448,8 @@
         <li><b>Separate k_pos from k₁.</b> In step 4, start with the regional dip at 0° and raise it to 25°,
           watching the ratio readout.
           <details class="reveal"><summary>Hint</summary><span class="ans">At 0° the two
-            agree to within a percent. By 25° k_pos reads about 1.22 times k₁. Notice which one moves:
-            k_pos hardly moves while k₁ falls. Adding a tilt does not change a second derivative, and k_pos is
+            agree to within a percent. By 25° k_pos reads about half again what k₁ does. Notice which one
+            moves: k_pos does not budge at all while k₁ falls away steadily. Adding a tilt does not change a second derivative, and k_pos is
             nothing but second derivatives. k₁ falls because it measures the bend along the bed, and a bed
             dipping at 25° is longer than the map distance it covers, so the same rise is spread over more
             reflector. Dividing that foreshortening out is what the dip correction does, and it is why
@@ -455,8 +461,8 @@
           then put the dip-field noise up to about 15%.
           <details class="reveal"><summary>Hint</summary><span class="ans">The fold almost
             disappears under speckle. Now take the operator length up to 15 and the fold returns while the
-            speckle goes. At an operator length of 1 the typical curvature reads about 11 times what the
-            same surface gives at 15 traces, and almost all of that is noise rather than geology. Noise in
+            speckle goes. At an operator length of 1 the typical curvature reads an order of magnitude more
+            than the same surface gives at 15 traces, and almost all of that is noise rather than geology. Noise in
             a dip field is not a cosmetic problem for curvature — differentiating
             twice multiplies short-wavelength content twice over, so a dip volume that looked acceptable in
             module 01 can be unusable once it has been differentiated. This is the practical reason modules
@@ -521,11 +527,6 @@
       <p>Apparent curvature at an arbitrary azimuth uses Euler's theorem,
         <span class="k">k(φ) = k₁cos²(φ − ψ) + k₂sin²(φ − ψ)</span>. That the two principal directions are
         always perpendicular is a property of smooth surfaces, not an assumption made here.</p>
-      <p>A note on the source. The AASPI <span class="k">curvature3d</span> documentation gives curvedness
-        twice, once as √(k₁² + k₂²) and once as √((k₁² + k₂²)/2); the second matches Roberts (2001) and is
-        the one used in the next module. Its shape index likewise appears with two opposite sign
-        conventions. Neither affects this module, which does not use either quantity, but both are worth
-        knowing about before comparing numbers between packages.</p>
       <p>Simplifications. This is a single surface rather than a volume, so there is no vertical derivative
         and none of the attributes that need one: reflector convergence, rotation about the normal, and the
         vertical smoothing that <span class="k">curvature3d</span> applies. The operator here is a simple
@@ -567,18 +568,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>
@@ -1331,16 +1333,23 @@
         '% high. The fold has not changed; k\u2081 has fallen because the bed is now dipping.';
   }
 
-  // the strongest anticline on the map, measured both ways
-  /* Measured on the fold. The fault is a far sharper bend and would otherwise
-     be the answer to every question about the strongest anticline. */
+  /* The strongest anticline, measured both ways at the SAME sample.
+     Measured on the fold: the fault is a far sharper bend and would otherwise
+     be the answer to every question about the strongest anticline.
+
+     The crest is located on k_pos rather than on k₁, and that choice matters.
+     k_pos is built from second derivatives alone, so adding a regional tilt
+     cannot move it — which is exactly the claim step 4 is making. Locating on
+     k₁ instead lets the sample point migrate off the crest as the tilt grows,
+     and k_pos then appears to fall by about a tenth for no physical reason,
+     quietly contradicting the step. */
   function crestOf(f) {
     let best = -Infinity, bi = 0;
     for (let iy = EDGE; iy < NG - EDGE; iy++) {
       for (let ix = EDGE; ix < NG - EDGE; ix++) {
         if (Math.abs(ix - FAULTX) <= FAULTW * 3) continue;
         const i = iy * NG + ix;
-        if (f.k1[i] > best) { best = f.k1[i]; bi = i; }
+        if (f.kpos[i] > best) { best = f.kpos[i]; bi = i; }
       }
     }
     return { k1: f.k1[bi], kpos: f.kpos[bi], i: bi };

@@ -81,7 +81,7 @@
 
       <div class="ctl-col">
         <h2>The data, and the display</h2>
-        <label class="check"><input type="checkbox" id="fault"> Put a fault four traces away</label>
+        <label class="check"><input type="checkbox" id="fault"> Put a fault five traces away</label>
         <p class="hint-line" style="margin:-4px 0 12px">No effect while the window stays narrow. Beyond
           nine traces the window reaches across the fault.</p>
         <label class="check"><input type="checkbox" id="split"> Make the bed dip change with depth</label>
@@ -303,17 +303,17 @@
             needs the peak to be sampled, and five tilts across the range do not sample it.</span></details></li>
         <li><b>Widen the window across a fault.</b> Switch the fault on and change nothing else; at nine
           traces the window still clears it. Now increase "traces used" to 21.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The score drops from about 0.98 to about 0.51 as soon as the tilted box reaches
-            across the break, and the winning tilt becomes a compromise between two beds that are not the
-            same bed. The fault is one trace wide, but the estimate is degraded for four traces either side
-            of it, because that is how far the window extends. Coherence computed on a dip field smeared this
-            way produces broad, indistinct faults. Production software addresses this by testing several
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score roughly halves the moment the tilted box reaches across the break,
+            and the winning tilt becomes a compromise between two beds that are not the same bed. The break
+            itself is one trace wide, but the estimate is degraded as far either side of it as the window
+            reaches — ten traces at this setting, four at the default nine. Coherence computed on a dip
+            field smeared this way produces broad, indistinct faults. Production software addresses this by testing several
             windows offset around the sample and keeping the most confident, rather than always centering the
             window.</span></details></li>
         <li><b>Make the window too tall.</b> Switch on "bed dip changes with depth", then walk the window
           height from ±30 ms up to ±100 ms, watching the box extend into the lower beds.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The score falls steadily once the window starts reaching the lower beds, from
-            0.98 at ±30 ms through 0.89 at ±60 and 0.77 at ±80 to 0.67 at ±100. Watch what the estimate does
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score falls steadily once the window starts reaching the lower beds,
+            from near 0.98 at ±30 ms to around two thirds of that by ±100. Watch what the estimate does
             while that happens: almost nothing. It holds within a twentieth of a millisecond of the correct
             answer the whole way. The upper beds still outweigh the lower ones inside the window, so the
             second dip domain enters as disagreement rather than as a competing answer. Switch the depth
@@ -323,9 +323,9 @@
             assumed constant, which is why it is normally quoted as a fraction of a wavelength.</span></details></li>
         <li><b>Reduce the number of traces and compare the score with the error.</b> Set noise to about
           30%, then lower "traces used" from 9 to 3, reading both figures as you go.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em>, from about 0.61 to about 0.78, while the estimate
-            becomes about two and a half times worse — the error grows from 0.31 to 0.76 ms per trace.
-            Three traces have less scope to disagree, so they match more
+          <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em> by roughly a quarter while the estimate becomes about
+            two and a half times worse: the error grows from a few tenths of a millisecond per trace to
+            most of a millisecond. Three traces have less scope to disagree, so they match more
             easily and establish much less. <b>A high score is therefore not evidence of a good
             estimate</b>, and a confidence volume has to be interpreted alongside the window size that
             produced it.</span></details></li>
@@ -333,8 +333,8 @@
           pressing "new hidden dip" several times at each level.
           <details class="reveal"><summary>Hint</summary><span class="ans">The estimate degrades gradually: barely affected at 20%, a few tenths of a
             millisecond out at 40%. Past 50% the bars lose their single clear peak and the winner sometimes
-            settles on the wrong one. The <em>score</em> falls well before the estimate does, from 0.99 to
-            below 0.6. That difference is the reason attribute software writes a confidence volume alongside
+            settles on the wrong one. The <em>score</em> falls well before the estimate does, from near 1 at
+            no noise to well under two thirds by 60%. That difference is the reason attribute software writes a confidence volume alongside
             the dip: it registers the problem while the dip values still look plausible.</span></details></li>
       </ol>
     </div>
@@ -368,8 +368,8 @@
     <p>Twenty-five traces sampled every 2 ms, formed by convolving a set of reflection coefficients with a
       30 Hz Ricker wavelet and shifting each trace according to the dip. The hidden dip is drawn from a
       seeded random number, so "new hidden dip" produces a different case each time while a shared link
-      reproduces the same one. The optional fault is a vertical step in arrival time applied to every trace
-      from trace 17 rightward. The optional depth change reverses the dip of every bed below about
+      reproduces the same one. The optional fault is a step in arrival time applied to every trace
+      from trace 18 rightward, five traces from the analysis point at trace 13. The optional depth change reverses the dip of every bed below about
       290 ms.</p>
     <p>The score is <b>semblance</b>: the energy of the average trace divided by the average of the
       energies of the individual traces, over the analysis window. Written out for N traces, that is the
@@ -421,18 +421,19 @@
 
   <footer>
     <div class="foot-grid">
-      <p>Built for teaching by Heather Bedle, School of Geosciences, University of Oklahoma, with the
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of Geosciences,
+        University of Oklahoma, with the
         <a href="https://www.ou.edu/mcee/labs/aaspi">AASPI</a> consortium.</p>
       <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
         Free to use, adapt and share, including in teaching, provided the source is credited and any
         adaptation is released under the same license. If you use it in a course or a talk, a credit line
         and a link back are all that is asked.</p>
-      <p class="lic">To cite: H. Bedle, <i>How Geometric Attributes Actually Work</i>, University of
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, <i>How Geometric Attributes Actually Work</i>, University of
         Oklahoma, <span class="k">hbedle-subsurface.github.io/geometric-attributes</span>.</p>
       <p class="lic">Nothing you do inside this module leaves your browser: no slider, no click and no
         trace you generate is transmitted anywhere. The one request the page itself makes is a page-view
-        count, so that I can show the university these are being used &mdash; no cookie, no account,
-        nothing about you.</p>
+        count, so that we can show the university these are being used &mdash; no cookie and no
+        identifier, and nothing about what you did on the page.</p>
     </div>
   </footer>
 </div>

@@ -95,6 +95,24 @@ states plainly where the implementation simplifies or departs from a production
 volume. Module 04, which follows the `similarity3d` documentation closely, also
 cites that document by equation number.
 
+## Numbers in the exercise hints
+
+The hints describe what the readouts do rather than quoting them to three
+decimal places. A hint says the score roughly halves, or that one value is an
+order of magnitude above another, or that a ratio is about half again — not
+that it is 0.512.
+
+The reason is maintenance. Change a default window, a bed spacing or a noise
+seed and every quoted decimal somewhere in the set becomes wrong, silently,
+with nothing to catch it. Relative statements survive that; exact ones do not.
+
+Exact figures are still used where the arithmetic guarantees them and no model
+constant can move them: the shape index landmarks (+1, +0.5, 0, −0.5, −1), the
+candidate counts in a dip search, energy ratio reading exactly 1.000 on a
+rank-one covariance matrix, and the identity between energy ratio at L = 1 and
+eigenstructure. Those are properties of the definitions, not of the models, and
+they are worth stating precisely.
+
 ## License and citation
 
 Licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Free
@@ -103,8 +121,9 @@ provided the source is credited and any adaptation is released under the same
 license. If you use it in a course or a talk, a credit line and a link back are
 all that is asked. The full legal text is in `LICENSE` at the repository root.
 
-> H. Bedle, *How Geometric Attributes Actually Work*, University of Oklahoma,
+> H. Bedle and A. Moreno-Ward, *How Geometric Attributes Actually Work*, University of
+> Oklahoma,
 > https://hbedle-subsurface.github.io/geometric-attributes/
 
-Built for teaching by Heather Bedle, School of Geosciences, University of
-Oklahoma, with the AASPI consortium.
+Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, School of
+Geosciences, University of Oklahoma, with the AASPI consortium.
