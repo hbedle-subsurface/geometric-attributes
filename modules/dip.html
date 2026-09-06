@@ -250,7 +250,7 @@
       endpoint of an interpretation — it is mainly the coordinate system every other attribute in this
       course is expressed in, though dip magnitude and azimuth maps are also read directly, as the end of
       this page describes.</p>
-    <p class="lede">Get it wrong and nothing downstream announces the fact. A coherence volume computed on a
+    <p class="lede">An error in the dip field is not reported by anything downstream. A coherence volume computed on a
       bad dip field still looks like a coherence volume. It is simply imaging the wrong thing, and it will
       keep doing so all the way to the interpretation.</p>
 
@@ -262,11 +262,8 @@
         rather than faults. Module 03 measures exactly how bad that gets.</li>
       <li><b>Curvature</b> is the derivative of the dip field, so its quality is limited by the dip
         estimate's — and differentiating amplifies whatever error is there.</li>
-      <li><b>Aberrancy</b> takes a further derivative again, so the same error arrives cubed. It is the
-        attribute that demands the cleanest dip volume of anything here.</li>
-      <li><b>Structure-oriented filtering</b> smooths along bedding. Given the wrong orientation it smooths
-        <em>across</em> reflectors instead, quietly destroying the very discontinuities you were about to go
-        looking for, and the result still looks clean.</li>
+      <li><b>Aberrancy</b> takes a further derivative again, so the same error is amplified once more. It requires the cleanest dip volume of anything here.</li>
+      <li><b>Structure-oriented filtering</b> smooths along bedding. Given the wrong orientation it smooths <em>across</em> reflectors instead, removing the discontinuities the filtering was meant to preserve, and the result still looks clean.</li>
       <li><b>Horizon auto-tracking</b> follows the local dip from seed point to seed point, so a poor dip
         field sends the tracker across a fault or onto the wrong loop.</li>
     </ul>
@@ -276,11 +273,10 @@
     <p class="lede">Dip azimuth and dip magnitude do get displayed in their own right. A dip magnitude map
       highlights fault planes and steep flanks; a dip azimuth map shows structural grain and picks out
       lineaments that are hard to see on amplitude, which is why the two are often co-rendered. But the main
-      reason to spend real effort here is the one above: dip is the foundation, and a foundation error
-      propagates into every attribute built on top of it without ever raising a flag.</p>
+      reason to spend real effort here is the one above: every attribute is built on the dip field, and an error in it propagates into all of them with nothing in the output to record that it happened.</p>
     <div class="legend prose">
       <span>This is also why modules 01 to 03 come before any of the discontinuity or curvature attributes.
-        The order is not arbitrary — it is the order the computation actually happens in.</span>
+        That is the order in which the computation happens.</span>
     </div>
   </section>
 
@@ -318,9 +314,7 @@
             answer the whole way. The upper beds still outweigh the lower ones inside the window, so the
             second dip domain enters as disagreement rather than as a competing answer. Switch the depth
             change off and repeat: the same window heights now cost nothing at all. The data did not become
-            harder to work with; the window was simply told to treat a larger interval as one unit, and the
-            score is where it says so. Window height is really a statement about how far the geology can be
-            assumed constant, which is why it is normally quoted as a fraction of a wavelength.</span></details></li>
+            harder to work with; the window was set to treat a larger interval as one unit, and the fall in score is the record of that. Window height sets the interval over which the geology is assumed constant, which is why it is normally quoted as a fraction of a wavelength.</span></details></li>
         <li><b>Reduce the number of traces and compare the score with the error.</b> Set noise to about
           30%, then lower "traces used" from 9 to 3, reading both figures as you go.
           <details class="reveal"><summary>Hint</summary><span class="ans">The score <em>rises</em> by roughly a quarter while the estimate becomes about

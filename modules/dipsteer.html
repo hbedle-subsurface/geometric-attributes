@@ -26,8 +26,7 @@
     <p class="eyebrow">Module 03 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Dip steering: why the window has to follow the bed</h1>
     <p class="sub">Modules <a href="dip.html">01</a> and <a href="dip3d.html">02</a> produced a reflector
-      orientation at every sample. This module is about what that orientation is <em>for</em>. Every
-      attribute that compares neighboring traces has to decide where to look on each of them, and the
+      orientation at every sample. Every attribute that compares neighboring traces has to decide where to look on each of them, and the
       difference between looking along the bed and looking straight across the screen decides what the
       attribute ends up imaging.</p>
   </div>
@@ -142,14 +141,11 @@
     </div>
 
         <p class="lede">
-      Think of it as two lengths of time competing. The first is how much the reflector's arrival time
-      changes from one end of the window to the other — the dip multiplied by the width of the aperture. The
+      Two intervals of time decide the outcome. The first is how much the reflector's arrival time changes from one end of the window to the other — the dip multiplied by the width of the aperture. The
       second is the period of the wavelet, the time from one peak to the next.</p>
     <p class="lede">
       While the first is a small fraction of the second, the traces still broadly overlap and the window
-      sees one event. As it grows toward half a period, the far end of the window is reading a trough where
-      the near end reads a peak, and the window is being shown two opposite things and asked whether they
-      agree. That is the whole mechanism, and it explains why the failure point depends on the
+      sees one event. As it grows toward half a period, the far end of the window is reading a trough where the near end reads a peak, so the window is comparing a peak against a trough. That is the whole mechanism, and it explains why the failure point depends on the
       <em>wavelet</em> rather than on anything geological.</p>
     <p class="lede">
       Below are five snapshots of the same five traces, read <b>straight across</b> at five different bed
@@ -208,8 +204,7 @@
       window does. A map view is much clearer. These two panels are horizontal slices through a small 3D
       volume: a sequence of reflectors carried over a monoclinal flexure — a one-sided step in the
       structure, flat on both sides and steepening through the middle — cut by one planar fault. The fault
-      is identical in both panels. Everything else on the right is the structure printing itself onto the
-      attribute.</p>
+      is identical in both panels. Everything else on the right is the structure appearing in the attribute.</p>
     <p class="lede">These two panels use a fixed patch of 3 by 3 traces, not the aperture set by
       <em>traces used</em> in the header; that slider drives the section panels above. Window height is
       shared. The values quoted in the exercises for these maps therefore refer to a three-trace
@@ -258,12 +253,11 @@
   <section class="tabpane" id="p4" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno">4</span>Steering with the wrong dip</h3>
-      <span class="hint">Steering is not a switch; it is only as good as the dip volume</span>
+      <span class="hint">Steering is only as good as the dip volume it uses</span>
     </div>
 
         <p class="lede">
-      Modules 01 and 02 spent a good deal of effort on how a dip estimate goes wrong. This is the bill for
-      it. The slider adds a fixed error to every dip estimate before the window is steered by it, so the
+      Modules 01 and 02 spent a good deal of effort on how a dip estimate goes wrong. The cost of that error is measured here. The slider adds a fixed error to every dip estimate before the window is steered by it, so the
       window still tilts, just not by the right amount.</p>
 
     <div class="ctl" style="max-width:520px;margin-bottom:14px">
@@ -299,10 +293,9 @@
       <h3><span class="stepno">?</span>Why steering is not optional</h3>
       <span class="hint">The difference between imaging geology and imaging the display</span>
     </div>
-    <p class="lede">An unsteered attribute does not fail loudly. It produces a volume that looks entirely
+    <p class="lede">An unsteered attribute does not fail visibly. It produces a volume that looks entirely
       plausible, full of lineaments and fabric, and the lineaments are contours of the structure rather than
-      anything broken. That is the danger: there is no error message, no obvious artifact, just a confident
-      picture of the wrong thing.</p>
+      anything broken. There is no error message and no obvious artifact, only a plausible image of the wrong thing.</p>
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       What it changes in practice</h2>
@@ -317,9 +310,7 @@
       <li><b>Every attribute above coherence.</b> Curvature, shape index, amplitude curvature and aberrancy
         are all computed in the steered frame. The dip volume is not just an input to them; it is the
         coordinate system they are expressed in.</li>
-      <li><b>Structure-oriented filtering.</b> Steered, it smooths along bedding and sharpens faults. Wrongly
-        steered, it smooths across bedding, removing the discontinuities you were about to go looking for,
-        and the output looks cleaner rather than worse.</li>
+      <li><b>Structure-oriented filtering.</b> Steered, it smooths along bedding and sharpens faults. Wrongly steered, it smooths across bedding, removing the discontinuities it was meant to preserve, and the output looks cleaner rather than worse.</li>
     </ul>
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
@@ -330,9 +321,7 @@
       at all. Since the
       volume is still labeled dip-steered, that failure is harder to spot than the honest unsteered
       version.</p>
-    <p class="lede">Which is the practical argument for the order of this course. Modules 01 and 02 spend a
-      long time on getting dip right, and this is the module that says why: the quality of the dip field is
-      carried, undiminished, into everything computed from it.</p>
+    <p class="lede">That is the practical argument for the order of this course. Modules 01 and 02 spend a long time on getting dip right because the quality of the dip field is carried, undiminished, into everything computed from it.</p>
     <div class="legend prose">
       <span>One rule of thumb worth taking away: a horizontal window survives only while the time shift
         accumulated across it stays under about a fifth of a period. At ordinary frequencies that is a few
@@ -349,8 +338,7 @@
           and read it again.
           <details class="reveal"><summary>Hint</summary><span class="ans">About 1.7 ms per trace at 30 Hz and about 0.9 at 60 Hz, so doubling the
             frequency roughly halves the tolerance. At 25 m bins and 3000 m/s those are geological dips of
-            roughly six and three degrees. An unsteered coherence volume is therefore usable on almost nothing: gentle regional
-            dip is already enough to break it, and better data makes it worse rather than better.</span></details></li>
+            roughly six and three degrees. An unsteered coherence volume is therefore usable on almost nothing: gentle regional dip is already enough to break it, and a higher-frequency dataset tightens the tolerance rather than loosening it.</span></details></li>
         <li><b>Check that the failure is about the wavelet, not the dip.</b> Try several combinations of
           frequency and aperture in step 2, and each time read the "shift as a fraction of one period"
           box at the dip where the flat curve crosses 0.8.
@@ -440,8 +428,7 @@
       fault plane is straight rather than quantized into a staircase of whole traces.</p>
     <p>The two map panels come from a separate small 3D volume, 100 traces square by a slab of 81 samples,
       carrying a reflector sequence over a monoclinal flexure of 80 ms relief cut by one planar fault. The
-      flexure reaches about 4 ms per trace at its steepest, above what a three-trace horizontal window
-      tolerates at 30 Hz and below what a steered one minds at all. The two families of panel are steered
+      flexure reaches about 4 ms per trace at its steepest, above what a three-trace horizontal window tolerates at 30 Hz and well within what a steered window handles. The two families of panel are steered
       differently, on purpose. The map panels take the analytic dip of the model, because estimation error
       is the subject of step 4 and mixing the two would confuse which effect is which. The section panels
       in steps 3 and 4 take a dip field estimated with the discrete semblance search of module 01, so the

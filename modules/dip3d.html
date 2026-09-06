@@ -26,9 +26,7 @@
     <p class="eyebrow">Module 02 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Inline and crossline dip: one trace, two numbers</h1>
     <p class="sub">In <a href="dip.html">module 01</a> we estimated dip along a single seismic line by
-      finding the tilt that best aligned neighboring traces. A 3D volume allows that measurement in two
-      directions, and one direction turns out not to be enough. This module is about what changes between a
-      line and a volume.</p>
+      finding the tilt that best aligned neighboring traces. A 3D volume allows that measurement in two directions, and one direction is not enough. In a volume the orientation of a reflector at a trace takes two numbers rather than one.</p>
   </div>
 
   <!-- ============================== STEP ONE ============================== -->
@@ -161,8 +159,7 @@
 
         <p class="lede">
       The same question, turned ninety degrees, at the same trace. Step one line in the crossline direction
-      and read how far the reflector moves. This is <span class="k">&part;t/&part;y</span>. It is measured
-      independently of the inline answer, and neither section knows what the other one found.</p>
+      and read how far the reflector moves. This is <span class="k">&part;t/&part;y</span>. It is measured independently of the inline answer, and neither section carries any information about the other.</p>
 
     <canvas id="c3" aria-label="Crossline section with the crossline dip annotated at the analysis trace"></canvas>
 
@@ -242,13 +239,10 @@
     <p class="lede">
       The diagram below shows why that map is useful. A horizontal cut through a dipping reflector meets it
       along a straight line. On one side of that line the slice sits above the reflector, on the other side
-      below it, and along the line itself it is passing straight through the peak. So the reflector prints
-      itself onto the map as a band, and the band runs along strike.</p>
+      below it, and along the line itself it is passing straight through the peak. So the reflector appears on the map as a band, and the band runs along strike.</p>
     <p class="lede">Switch the dome on and the same argument gives a different shape. A horizontal cut
       through a domed reflector meets it along a <b>closed ring</b> rather than a straight line, and that is
-      exactly the ring you see on the slice. The diagram redraws itself to match, so you can check that the
-      picture on the left and the sketch above it are telling the same story — the band and the ring are the
-      same intersection, drawn on two different reflector shapes.</p>
+      exactly the ring you see on the slice. The diagram redraws itself to match, so the picture on the left and the sketch above it can be checked against each other: the band and the ring are the same intersection, drawn on two different reflector shapes.</p>
 
     <canvas id="c5cube" aria-label="Diagram of a horizontal time slice cutting a dipping reflector"></canvas>
 
@@ -481,12 +475,12 @@
   <section class="tabpane" id="pw" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno">?</span>Why two components and not one number</h3>
-      <span class="hint">What the dip vector buys you downstream</span>
+      <span class="hint">What the dip vector makes possible downstream</span>
     </div>
     <p class="lede">Module 01 found dip on a single line. Real surveys are volumes, and the moment you leave
       one line the question changes: a reflector does not have <em>a</em> dip, it has a direction it goes
       down and a steepness in that direction. Two numbers per sample, not one.</p>
-    <p class="lede">That extra number is not bookkeeping. Here is what it buys.</p>
+    <p class="lede">The second component is not bookkeeping. The following all depend on having both.</p>
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       What needs the full vector</h2>
@@ -513,11 +507,9 @@
       scale for this reason, and it is worth checking what your own software does before you interpret an
       azimuth map.</p>
     <p class="lede">The same trap returns twice more in this course: curvature strike wraps at 180° because
-      it is an orientation, and aberrancy azimuth wraps at 360° because it is a direction. Three attributes,
-      three different wrapping rules, and each one draws a false edge if you get it wrong.</p>
+      it is an orientation, and aberrancy azimuth wraps at 360° because it is a direction. Each of the three wraps at a different value, and a color scale that does not match the rule draws a false edge.</p>
     <div class="legend prose">
-      <span>The practical summary: apparent dip belongs to the section you happened to shoot, and true dip
-        belongs to the rock. Every attribute after this one is computed in the rock's frame, which is why
+      <span>Apparent dip is a property of the section; true dip is a property of the reflector. Every attribute after this one is computed in the rock's frame, which is why
         this module exists before any of them.</span>
     </div>
   </section>

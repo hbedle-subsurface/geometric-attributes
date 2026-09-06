@@ -25,8 +25,7 @@
   <div class="mod-head">
     <p class="eyebrow">Module 08 &nbsp;·&nbsp; Geometric attributes</p>
     <h1>Aberrancy: one derivative further</h1>
-    <p class="sub">Dip is the first derivative of structure. Curvature is the second. Aberrancy — also
-      some authors call flexure — is the <b>third</b>. It responds to the asymmetry of a flexure, which lets it place
+    <p class="sub">Dip is the first derivative of structure. Curvature is the second. Aberrancy, which some authors call flexure, is the <b>third</b>. It responds to the asymmetry of a flexure, which lets it place
       a single anomaly on a fault where curvature places two beside it, and its azimuth says which way the
       ground dropped. It behaves differently from everything before it: three principal values instead of
       two, and vectors instead of signed numbers.</p>
@@ -79,7 +78,7 @@
   <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
     Method and references are there when you want them.</p>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
-    <button role="tab" data-tab="p1" aria-selected="false">1 · The ladder</button>
+    <button role="tab" data-tab="p1" aria-selected="false">1 · The sequence</button>
     <button role="tab" data-tab="p2" aria-selected="false">2 · Three roots</button>
     <button role="tab" data-tab="p3" aria-selected="false">3 · Vectors</button>
     <button role="tab" data-tab="p4" aria-selected="false">4 · Total aberrancy</button>
@@ -97,10 +96,7 @@
       <h3><span class="stepno">1</span>Dip, curvature, aberrancy</h3>
       <span class="hint">The same profile differentiated once, twice and three times</span>
     </div>
-    <p class="lede">You have built the first two rungs of this ladder already. Dip is how fast the reflector
-      is changing depth. Curvature is how fast the dip is changing. Aberrancy is how fast the
-      <em>curvature</em> is changing, and each step up the ladder moves the anomaly to a different place on
-      the structure.</p>
+    <p class="lede">The first two of these have already been built. Dip is how fast the reflector is changing depth. Curvature is how fast the dip is changing. Aberrancy is how fast the <em>curvature</em> is changing, and each further derivative moves the anomaly to a different place on the structure.</p>
     <p class="lede">Watch the four panels line up. At the middle of a flexure the reflector is steepest, so
       <b>dip</b> peaks there. Curvature peaks at the two corners, one positive and one negative, where the
       bed turns into and out of the flexure. And <b>aberrancy</b> peaks between them, right at the middle,
@@ -153,8 +149,7 @@
       expression, apparent curvature as a second-order one, and apparent aberrancy as a third-order one —
       and a cubic can have three extrema. They are not evenly spaced, and there is no shortcut: where
       curvature hands you k₁ and k₂ through eigenvalues, no equivalent has been found for aberrancy, so the
-      extrema have to be <em>searched</em> for. If that sounds familiar, it is exactly what module 01 did to
-      find dip.</p>
+      extrema have to be <em>searched</em> for. That is the same approach module 01 used to find dip.</p>
     <p class="lede"><b>Up to three, and often fewer.</b> Click around the seismic line in the header and
       watch the count change. Where the structure is locally one-dimensional — a single fault, a simple
       flank — the cubic degenerates and you get one dominant direction. All three appear only where two
@@ -163,14 +158,12 @@
       three well-separated roots. That is worth knowing before you go looking for the intermediate and
       minimum volumes in your own data.</p>
 
-    <p class="lede">Here is the whole reason, in one picture. Sweep the azimuth and plot what each
-      attribute reads. Dip varies as a <b>first</b>-order expression and peaks once. Curvature varies as a
+    <p class="lede">The reason is in the sweep below. Sweep the azimuth and plot what each attribute reads. Dip varies as a <b>first</b>-order expression and peaks once. Curvature varies as a
       <b>second</b>-order one and has two extremes, always ninety degrees apart. Aberrancy varies as a
       <b>third</b>-order one, and a cubic can turn three times.</p>
 
     <canvas id="c2cmp" aria-label="Apparent dip, curvature and aberrancy swept against azimuth"></canvas>
-    <p class="hint-line" style="margin:8px 0 20px">One derivative, one more turn in the curve. That is all
-      "three principal aberrancies" means.</p>
+    <p class="hint-line" style="margin:8px 0 20px">Each derivative adds one more turn to the curve, and that is what "three principal aberrancies" refers to.</p>
 
     <p class="lede">Now the same sweep on the real model, at the point you have selected. Move the point and
       watch the number of peaks change.</p>
@@ -286,10 +279,10 @@
   <section class="tabpane" id="p5" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno">5</span>Where aberrancy sits in the toolkit</h3>
-      <span class="hint">The end of the ladder that started with coherence</span>
+      <span class="hint">The end of the sequence that started with coherence</span>
     </div>
     <p class="lede">Module 05 walked a fault down in throw and watched coherence go blind while curvature
-      kept seeing it. Aberrancy is the next rung down. Take the main fault's throw toward zero and compare
+      kept seeing it. Aberrancy continues that sequence. Take the main fault's throw toward zero and compare
       all three.</p>
     <p class="lede">A large offset breaks the reflector and coherence finds it. A smaller one only bends
       the reflector, and curvature finds that. Smaller still and the bend is gentle, but its
@@ -309,10 +302,8 @@
       chart and dive toward the floor at the left, while the two derivative lines climb in a straight
       line out of the left-hand corner.</p>
 
-    <p class="lede"><b>Put the noise slider up to 6% and the gap opens properly.</b> On perfectly clean
-      data coherence never quite goes blind, because there is nothing to hide a small offset in — given
-      enough precision a semblance window can detect an arbitrarily small break. Blindness is a
-      signal-to-noise limit, not a property of the wavelet alone, so it only appears once there is noise
+    <p class="lede"><b>Put the noise slider up to 6% and the gap opens properly.</b> On perfectly clean data coherence never entirely stops responding, because there is nothing to hide a small offset in — given
+      enough precision a semblance window can detect an arbitrarily small break. That limit is set by signal-to-noise rather than by the wavelet alone, so it only appears once there is noise
       to lose the signal in. At that setting the teal curve reads zero out to several meters of throw while curvature
       and aberrancy are already well up from the floor. That gap is the case for
       computing a derivative attribute: not that it is more sensitive at any given throw, but that it
@@ -322,7 +313,7 @@
 
     <canvas id="c5" aria-label="Coherence, curvature and aberrancy responses plotted against fault throw"></canvas>
 
-    <p class="legend prose">The ladder is measured on <b>one fault on a flat regional</b>: the crossing
+    <p class="legend prose">The comparison is measured on <b>one fault on a flat regional</b>: the crossing
       fault and the regional fold are set aside and the main throw is swept from 0 to 60 m, so that what
       the chart shows is the response to that fault alone. Those three sliders therefore do not move the
       curves — the vertical marker and the readouts below follow the throw, but the lines do not. Noise
@@ -339,7 +330,7 @@
       <span>None of this comes free. Aberrancy needs 27 second derivatives, taken from the nine first
         derivatives that curvature already uses, so it runs about four times longer than curvature on its
         own. And being a third derivative it amplifies short-wavelength noise harder than anything else in
-        this course — turn the noise slider up with a short operator and watch it drown.</span>
+        this course — turn the noise slider up with a short operator and watch it break down.</span>
     </div>
   </section>
 
@@ -347,9 +338,9 @@
   <section class="tabpane" id="pw" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno">?</span>Why go a derivative further</h3>
-      <span class="hint">The last rung, and what it costs to stand on it</span>
+      <span class="hint">The last step, and what it costs</span>
     </div>
-    <p class="lede">There is a ladder running through this whole course. Coherence needs the reflector to be
+    <p class="lede">A sequence runs through this whole course. Coherence needs the reflector to be
       <b>broken</b>. Curvature only needs it <b>bent</b>. Aberrancy needs only that the bend be
       <b>asymmetric</b> — that the flexure leans one way rather than being a symmetric fold — and that is
       the faintest trace a fault leaves before it disappears entirely.</p>
@@ -378,14 +369,13 @@
       curvature already needs, so roughly four times the run time of curvature on its own, plus the disk to
       hold three vector volumes instead of two scalar ones.</p>
     <p class="lede"><b>Noise, worse than anything else here.</b> A third derivative multiplies the high
-      wavenumbers three times over. Put the noise slider up with a short operator and aberrancy falls apart
-      while curvature is still readable and coherence has barely noticed. In practice it demands the
+      wavenumbers three times over. Put the noise slider up with a short operator and aberrancy falls apart while curvature is still readable and coherence is barely affected. In practice it demands the
       cleanest dip volume of any attribute in this course, which is the last and strongest argument for the
       care modules 01 to 03 spent on getting dip right.</p>
     <p class="lede"><b>And a habit worth taking from step 4.</b> Sorting components by magnitude breaks
       features wherever the ranking changes, and the break is an artifact of the sorting rather than the
       geology. That applies well beyond aberrancy — any time an attribute hands you a "maximum" volume made
-      of several ranked pieces, ask what happened to the pieces that lost.</p>
+      of several ranked pieces, ask what happened to the components that were not ranked first.</p>
     <div class="legend prose">
       <span>Aberrancy is a specialist tool rather than a default. Run coherence and curvature first; reach
         for this when you have reason to believe there is structure below what they can resolve, and when
@@ -439,11 +429,10 @@
             answers.</span></details></li>
         <li><b>Find the cost.</b> Set the operator length to 3 and put the noise up to about 16%.
           <details class="reveal"><summary>Hint</summary><span class="ans">Aberrancy is the
-            first attribute to fall apart, before curvature and long before coherence. On this model it goes
-            wrong quickly and quietly: at an operator length of 3 it takes only a few percent of noise
+            first attribute to fall apart, before curvature and long before coherence. On this model it fails quickly and with no sign in the output: at an operator length of 3 it takes only a few percent of noise
             before the peak moves off the fault altogether, landing several traces to one side of it, and
             it goes on reporting a confident peak in that wrong place as the noise rises. A third derivative
-            multiplies the high wavenumbers three times over, so any noise in the dip field arrives cubed.
+            multiplies the high wavenumbers three times over, so noise in the dip field is amplified a third time.
             Raising the operator length rescues it, at the usual cost of losing the narrowest features. In
             practice aberrancy demands the cleanest dip volume of anything in this course, which is another
             reason modules 01 to 03 spent so long on getting dip right.</span></details></li>
@@ -1511,7 +1500,7 @@
 
   const PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
   const STEPNAMES = {
-    p1: 'The ladder', p2: 'Three roots', p3: 'Vectors',
+    p1: 'The sequence', p2: 'Three roots', p3: 'Vectors',
     p4: 'Total aberrancy', p5: 'What for', pw: 'Why it matters',
     pe: 'Exercises', pk: 'Key points', pm: 'Method',
   };

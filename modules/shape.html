@@ -136,8 +136,7 @@
     <p class="lede">Shape index runs from −1 to +1 and every value along it has a name. Walk the preset
       buttons in the header from Dome to Bowl and watch the marker travel down the scale while the little
       surface in the header morphs from one shape into the next.</p>
-    <p class="lede">The useful thing about this scale is that it is <b>continuous</b>. Real geology is not
-      obligingly one of five shapes; it sits somewhere between them, and the number tells you where. A value
+    <p class="lede">The useful thing about this scale is that it is <b>continuous</b>. Real geology is not restricted to five shapes; it sits somewhere between them, and the number tells you where. A value
       of +0.7 is a dome that has been stretched a bit, +0.3 is a ridge with a slight bowl to it, and so on.
       The five names are landmarks on a continuum, not boxes.</p>
 
@@ -203,18 +202,16 @@
       <h3><span class="stepno">4</span>Shape index on its own is misleading</h3>
       <span class="hint">The trap, and the standard fix</span>
     </div>
-    <p class="lede">Here is the problem. Shape index is built from a ratio, and on a flat piece of reflector
-      both curvatures are essentially zero, so the ratio is noise divided by noise. The attribute happily
-      returns a confident-looking value of +0.5 or −1 for a patch of ground that has no shape whatsoever.</p>
-    <p class="lede">Displayed raw, a shape index map is therefore <b>loud everywhere</b>, and the loudest
-      areas are often the flattest ones. The standard fix is to modulate it by curvedness, so that shape is
+    <p class="lede">Shape index is built from a ratio, and on a flat piece of reflector
+      both curvatures are essentially zero, so the ratio is noise divided by noise. The attribute still returns a definite value of +0.5 or −1 for a patch of ground that has no shape at all.</p>
+    <p class="lede">Displayed raw, a shape index map is therefore <b>fully saturated everywhere</b>, and the strongest colors are often on the flattest ground. The standard fix is to modulate it by curvedness, so that shape is
       only allowed to show where there is enough bend for the question to mean anything. Compare the two
       panels — the second is the same attribute with its brightness governed by curvedness.</p>
 
     <div class="sec-row" id="row4">
       <div class="panel-col">
         <p class="sublabel"><b>1</b> Shape index, raw
-          <span class="note">confident nonsense on the flats</span></p>
+          <span class="note">saturated even where there is no shape</span></p>
         <canvas id="c4raw" aria-label="Shape index displayed without modulation"></canvas>
       </div>
       <div class="panel-col">
@@ -226,7 +223,7 @@
 
     <div class="stats">
       <div class="stat key"><span>Map area bending at under a fifth of the peak</span><b id="s4a">—</b></div>
-      <div class="stat"><span>How loud shape index is there, against the rest</span><b id="s4b">—</b></div>
+      <div class="stat"><span>Mean |shape index| there, against the rest</span><b id="s4b">—</b></div>
       <div class="stat wide"><span>The rule</span><b id="s4c">—</b></div>
     </div>
   </section>
@@ -281,11 +278,8 @@
       <h3><span class="stepno">?</span>Why anyone bothers</h3>
       <span class="hint">What the shape is actually telling you about the rock</span>
     </div>
-    <p class="lede">Everything so far has been geometry. Here is why an interpreter reaches for these two
-      attributes rather than staying with k₁ and k₂.</p>
-    <p class="lede"><b>Shape carries a process.</b> The five shapes are not just descriptions — different
-      geological processes make different shapes, so the shape index is a first, cheap guess at
-      <em>mechanism</em>:</p>
+    <p class="lede">Everything so far has been geometry. These two attributes are used in place of k₁ and k₂ for the following reasons.</p>
+    <p class="lede"><b>Shape relates to process.</b> Different geological processes make different shapes, so the shape index is a first, cheap indication of <em>mechanism</em>:</p>
     <ul class="lede" style="padding-left:20px">
       <li><b>Bowls</b> are collapse features. Karst sinkholes, dissolution of evaporites, collapsed reef
         cores, and the tops of chimneys all give closed circular lows. A bowl component map is one of the
@@ -294,8 +288,7 @@
       <li><b>Domes</b> close in every direction, so they are the classic four-way structural trap, and also
         the signature of a buried mound, a reef, or a shallow gas pocket pushing a reflector up.</li>
       <li><b>Ridges and valleys</b> are elongated, so they follow a structural or depositional grain: fold
-        hinges, fault-drag rollovers, differential compaction over a channel or a bar. A ridge over a
-        channel is compaction, not structure, and knowing which shape you are looking at is the clue.</li>
+        hinges, fault-drag rollovers, differential compaction over a channel or a bar. A ridge over a channel records compaction rather than structure.</li>
       <li><b>Saddles</b> mark where two trends interfere. They are where fold axes cross, where a structure
         plunges between two culminations, and where the strain is most complicated — which is often where
         the fracturing is.</li>
@@ -312,7 +305,7 @@
       brightness and mechanism in the color, which is one image instead of two, and the shape components
       turn it into a set of yes-or-no maps that can be handed to someone else without a tutorial.</p>
     <div class="legend prose">
-      <span>The honest caveat: all of this is geometry computed from a dip field. A shape index map does not
+      <span>All of this is geometry computed from a dip field. A shape index map does not
         know about lithology, and a bowl in the attribute might be a sinkhole, a processing artifact, or a
         patch of bad velocities. The shape narrows the list of explanations; it does not close it.</span>
     </div>
@@ -377,14 +370,12 @@
       <ul>
         <li><b>Curvedness and shape index are k₁ and k₂ in polar form.</b> Distance from the origin is how
           much it bends; direction is what shape it bends into.</li>
-        <li><b>Shape index ignores magnitude entirely.</b> It is built from a ratio, so a gentle dome and a
-          violent one give the same number.</li>
+        <li><b>Shape index ignores magnitude entirely.</b> It is built from a ratio, so a gentle dome and a sharply bent one give the same number.</li>
         <li><b>Curvedness ignores shape entirely.</b> A dome and a bowl of the same intensity are
           indistinguishable on it.</li>
         <li><b>The five names are landmarks, not boxes.</b> Dome +1, ridge +0.5, saddle 0, valley −0.5,
           bowl −1, with everything in between perfectly legitimate.</li>
-        <li><b>Never display shape index raw.</b> On flat ground it is a ratio of noise to noise and returns
-          confident nonsense. Modulate it by curvedness.</li>
+        <li><b>Never display shape index raw.</b> On flat ground it is a ratio of noise to noise, and the value it returns rests on nothing. Modulate it by curvedness.</li>
         <li><b>Shape components are the practical form.</b> Curvedness gated by shape band, one volume per
           shape, easy to co-render and hard to misread.</li>
       </ul>
@@ -935,7 +926,7 @@
     $('s2b').textContent = nameFor(sVal);
     $('s2c').textContent = Math.abs(K1()) < 1e-6 ? 'undefined' : ratio.toFixed(2);
     $('s2d').textContent = 'Shape index is built from (k\u2081+k\u2082)/(k\u2081\u2212k\u2082), which is a '
-      + 'ratio, so scaling both curvatures leaves it untouched. Size lives in curvedness instead.';
+      + 'ratio, so scaling both curvatures leaves it untouched. Size is carried by curvedness instead.';
   }
 
   /* ------------------------------- step 3 ------------------------------ */

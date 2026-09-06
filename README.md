@@ -49,8 +49,7 @@ modules/*.html      one self-contained module per file
 **Shareable links.** Every slider and toggle is written into the querystring as
 it moves, so the address bar always holds the current configuration of the
 module. Copying it from the address bar hands someone the exact setup, which is
-the intended way to distribute a worked example. There is no copy button; the
-URL is the feature.
+the intended way to distribute a worked example. There is no copy button, because the address bar already holds the link.
 
 ## Page-view counting
 
@@ -65,9 +64,7 @@ https://hbedle.goatcounter.com. No cookie is set and no identifier is stored.
 
 The script does not count `file://`, `localhost` or `127.0.0.1`, and honors Do
 Not Track. If it fails to load the page carries on unchanged. **Do not modify
-those guards, do not add event tracking** — counting page loads is a visitor
-log, counting slider moves is watching someone work, and it would contradict
-what the site tells people it does — and do not add a second analytics tool.
+those guards, do not add event tracking** — counting page loads is a visitor log, while counting slider moves would record how someone works, which is not what the site tells people it does — and do not add a second analytics tool.
 
 ## Exercise pop-out
 
@@ -104,7 +101,7 @@ that it is 0.512.
 
 The reason is maintenance. Change a default window, a bed spacing or a noise
 seed and every quoted decimal somewhere in the set becomes wrong, silently,
-with nothing to catch it. Relative statements survive that; exact ones do not.
+with nothing to catch it. Relative statements stay correct through such a change; exact ones do not.
 
 Exact figures are still used where the arithmetic guarantees them and no model
 constant can move them: the shape index landmarks (+1, +0.5, 0, −0.5, −1), the

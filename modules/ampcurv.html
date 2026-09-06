@@ -102,8 +102,7 @@
       depth, and the second derivative of <em>that</em> is amplitude curvature.</p>
     <p class="lede">The line in the header has both. There is a gentle fold, and there is a channel cut
       across it whose fill is dimmer than the surrounding rock. Notice that the channel has no structural
-      expression at all — the reflector does not step or bend where the channel edge is, it simply goes
-      quiet. A structural attribute is blind to it by construction.</p>
+      expression at all — the reflector does not step or bend where the channel edge is, it simply dims. A structural attribute is blind to it by construction.</p>
 
     <canvas id="c1" aria-label="Structure and amplitude along the reflector, plotted separately"></canvas>
 
@@ -147,8 +146,7 @@
     </div>
 
     <div class="legend prose">
-      <span>Both maps look down on the same patch of ground. The left one knows where the reflector is; the
-        right one knows how loud it is. Everything in this module is the second derivative of the map on the
+      <span>Both maps look down on the same patch of ground. The left one records where the reflector is; the right one records how strong the reflection is there. Everything in this module is the second derivative of the map on the
         right, in the same way that module 05 worked on the map on the left.</span>
     </div>
   </section>
@@ -163,10 +161,8 @@
       differentiate again. The two eigenvalues of that second derivative are the most-positive and
       most-negative amplitude curvatures, written <span class="k">e_pos</span> and
       <span class="k">e_neg</span>.</p>
-    <p class="lede">Look at where they land. The channel <em>interior</em> is dim but flat, so its second
-      derivative is near zero and it comes out quiet. What lights up is the pair of <b>edges</b>, where the
-      amplitude turns a corner. One edge is a crest of the amplitude surface and the other is a trough, so a
-      channel prints as one bright lineament on e_pos beside one on e_neg — the same paired signature a
+    <p class="lede">Look at where they land. The channel <em>interior</em> is dim but flat, so its second derivative is near zero and the response there is close to nothing. What lights up is the pair of <b>edges</b>, where the
+      amplitude turns a corner. One edge is a crest of the amplitude surface and the other is a trough, so a channel appears as one bright lineament on e_pos beside one on e_neg — the same paired signature a
       fault gives in structural curvature, for exactly the same reason.</p>
 
     <div class="sec-row" id="row3">
@@ -271,10 +267,7 @@
       <h3><span class="stepno">?</span>Why run it at all</h3>
       <span class="hint">The features it finds are the ones structure cannot show you</span>
     </div>
-    <p class="lede">Every attribute up to module 06 measures the <em>shape</em> of the reflector. That works
-      beautifully for faults and folds and finds nothing at all in a flat-lying stratigraphic feature,
-      because there is nothing there to bend. Amplitude curvature is the answer to that gap: it differentiates
-      how bright the reflector is instead of where it is.</p>
+    <p class="lede">Every attribute up to module 06 measures the <em>shape</em> of the reflector. That works well for faults and folds and finds nothing at all in a flat-lying stratigraphic feature, because there is nothing there to bend. Amplitude curvature addresses that case by differentiating how bright the reflector is instead of where it is.</p>
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       What it is used for</h2>
@@ -293,8 +286,7 @@
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       Three things to know before trusting it</h2>
-    <p class="lede"><b>It maps outlines, not bodies.</b> The dim interior of a channel is flat, so its
-      second derivative is near zero and it comes out quiet, an order of magnitude below the edge. If you want
+    <p class="lede"><b>It maps outlines, not bodies.</b> The dim interior of a channel is flat, so its second derivative is near zero and it reads an order of magnitude below the edge. If you want
       the body of the channel you want an amplitude map, or an envelope map — the strength of the
       reflection regardless of whether it is a peak or a trough. This attribute gives you the boundary
       instead.</p>
@@ -302,16 +294,14 @@
       edge and the interior become indistinguishable, because a gradational boundary has no sharp second
       derivative anywhere. A facies change that takes a few hundred meters to happen will not appear,
       however large the total amplitude contrast across it.</p>
-    <p class="lede"><b>Amplitude is noisier than structure, and this squares it.</b> Dip is a fitted,
+    <p class="lede"><b>Amplitude is noisier than structure, and differentiating twice amplifies that noise.</b> Dip is a fitted,
       smoothed estimate; amplitude is read straight off the trace. Differentiating that twice makes
       amplitude curvature the most noise-sensitive attribute in this course after aberrancy, and it is
       equally sensitive to acquisition footprint, tuning and any amplitude-altering processing step. An
       anomaly here is only as trustworthy as the amplitudes underneath it, so it belongs on data whose
       amplitudes you actually believe.</p>
     <div class="legend prose">
-      <span>And the same discipline as everywhere else: a bright lineament means the amplitude turned a
-        corner. Whether that corner is a channel edge, a tuning effect or a footprint stripe is the
-        interpretation, and the attribute does not know.</span>
+      <span>The same discipline applies as everywhere else: a bright lineament means the amplitude changed abruptly. Whether that change is a channel edge, a tuning effect or a footprint stripe is the interpretation, and the attribute carries no information about which.</span>
     </div>
   </section>
 
@@ -339,12 +329,10 @@
         <li><b>Sharpen and soften the edge.</b> Move the edge-sharpness slider from 1 to 10 traces and watch
           the e_pos value at the edge.
           <details class="reveal"><summary>Hint</summary><span class="ans">At 1 trace the
-            edge reads something like a thousand times the value in the middle of the channel, and the two
-            edges are razor sharp. At 2 traces the ratio is down to about fifteen to one. By 4 traces the
+            edge reads something like a thousand times the value in the middle of the channel, and the two edges are sharply defined. At 2 traces the ratio is down to about fifteen to one. By 4 traces the
             edge and the middle read the same and the distinction has collapsed: the channel no longer has a flat floor and two sharp walls, it is one
             broad smooth low, so its second derivative is spread right across it instead of concentrated at
-            the boundaries. The lesson is not simply that the anomaly gets weaker. It is that amplitude
-            curvature stops mapping an <em>outline</em> and starts mapping a <em>blur</em>, and a
+            the boundaries. The anomaly does not simply get weaker: amplitude curvature stops mapping an <em>outline</em> and maps a broad <em>smear</em> instead, and a
             gradational facies boundary will never give you the crisp lineament a scoured edge
             does.</span></details></li>
         <li><b>Narrow the channel until it disappears.</b> Take the channel width down toward 4 traces with
@@ -353,9 +341,7 @@
             move close enough together that the operator smooths across both at once and they begin to
             cancel, and the two clean lineaments merge into one weak smear. Compare it against the amplitude
             map in step 2, where the channel is still perfectly obvious. Operator length sets the smallest
-            feature you can resolve, so a long operator chosen to suppress noise will also quietly erase the
-            narrow features you may have been looking for — and nothing in the attribute warns you that it
-            has.</span></details></li>
+            feature you can resolve, so a long operator chosen to suppress noise also removes the narrow features, with nothing in the output to record that it has.</span></details></li>
         <li><b>Add noise and differentiate it twice.</b> Put the noise up to about 20% with the operator
           length at 1.
           <details class="reveal"><summary>Hint</summary><span class="ans">The edges
@@ -378,8 +364,7 @@
           calculation is the same.</li>
         <li><b>It finds features with no structural expression.</b> A flat-lying channel, a fan edge, a
           diagenetic boundary — all invisible to structural curvature, all visible here.</li>
-        <li><b>It maps edges, not bodies.</b> The dim interior of a channel is quiet because it is flat. The
-          anomaly is at the boundary, where the amplitude turns a corner.</li>
+        <li><b>It maps edges, not bodies.</b> The dim interior of a channel is quiet because it is flat. The anomaly is at the boundary, where the amplitude changes abruptly.</li>
         <li><b>There is no circle and no k₁.</b> The two axes are not the same kind of quantity, so a
           radius is meaningless and there is no dip to correct for. You get e_pos, e_neg and their strike,
           and nothing that depends on fitting a circle.</li>
@@ -887,9 +872,7 @@
     $('s3c').textContent = edge > 1e-12
       ? (edge * ESC).toFixed(2) + ' at the edge vs ' + (mid * ESC).toFixed(2) + ' in the middle'
       : 'nothing to measure';
-    $('s3d').textContent = 'A channel prints as two lineaments, one on each attribute, because one edge is '
-      + 'a crest of the amplitude surface and the other is a trough. The dim interior is quiet because it '
-      + 'is flat.';
+    $('s3d').textContent = 'A channel appears as two lineaments, one on each attribute, because one edge is ' + 'a crest of the amplitude surface and the other is a trough. The dim interior gives almost no ' + 'response because it is flat.';
   }
 
   /* ------------------------------- step 4 ------------------------------ */

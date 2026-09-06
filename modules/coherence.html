@@ -28,10 +28,7 @@
     <h1>Coherence is not one calculation</h1>
     <p class="sub">Module <a href="dipsteer.html">03</a> got the analysis window lying along the bed, so
       the traces inside it can finally be compared with each other. The next question is what "compared"
-      means. At least five different calculations all get called coherence. They are not
-      minor variations on one idea — they measure genuinely different things, and on the same piece of data
-      they can disagree completely. One of them will call a window perfectly coherent while another calls it
-      an edge. Knowing which is which is the difference between reading an attribute and guessing at it.</p>
+      means. At least five different calculations all get called coherence. They measure different things, and on the same piece of data they can disagree completely: one will report a window as fully coherent where another reports an edge. Which calculation produced a volume has to be known before the volume can be read.</p>
   </div>
 
   <div class="labhead">
@@ -57,8 +54,7 @@
           <input type="range" data-key="phase" id="phase" min="0" max="180" step="5" value="0">
         </div>
         <p class="hint-line" style="margin:-8px 0 0">Now the wavelet is rotated a little more on each
-          trace, so the traces are genuinely different shapes rather than different sizes. Watch which
-          attributes care about this and which cared about the slider above.</p>
+          trace, so the traces are genuinely different shapes rather than different sizes. Watch which attributes respond to this and which responded to the slider above.</p>
       </div>
       <div class="ctl-col">
         <h2>Noise and gain</h2>
@@ -122,9 +118,7 @@
 
         <p class="lede">
       Four pairs of traces. Look at each one and decide, before you read a single number, whether you would
-      call them similar. Take case 3 seriously — the shape is identical and only the size differs. Is that
-      similar or not? There is no right answer, and that is exactly the point: your instinct about case 3
-      decides which attribute you ought to be running.</p>
+      call them similar. Case 3 is the one to weigh: the shape is identical and only the size differs. Whether that counts as similar has no single answer, and the answer a reader gives decides which attribute suits their purpose.</p>
 
     <div class="ctl" style="margin-bottom:14px">
       <label>The case</label>
@@ -148,8 +142,7 @@
     </div>
     <div class="legend prose">
       <span>Crosscorrelation is normalized by the energy of each trace separately, so it ignores a change of
-        scale. Semblance is not, so it does not. Neither is right; they answer different questions. That
-        distinction is the whole of this module.</span>
+        scale. Semblance is not, so it does not. Neither is right; they answer different questions, and that difference runs through everything below.</span>
     </div>
     </section>
 
@@ -168,9 +161,7 @@
       <li><b>Amplitude changes sideways.</b> The shape of the wavelet stays exactly the same; only how big
         it is changes from trace to trace. This happens constantly in real data — a bed thins, porosity
         changes, the reflection gets weaker.</li>
-      <li><b>The shape itself changes.</b> Now the wavelet is rotated a little more on each trace, so the
-        traces are genuinely different shapes rather than different sizes. Watch which attributes care about
-        this and which cared about the slider above.</li>
+      <li><b>The shape itself changes.</b> Now the wavelet is rotated a little more on each trace, so the traces are genuinely different shapes rather than different sizes. Watch which attributes respond to this and which responded to the slider above.</li>
       <li><b>Noise</b>, because real traces never match perfectly, and it is worth knowing how much of the
         disagreement is only noise.</li>
       <li><b>Overall amplitude</b> turns the whole window up or down together. Nothing about how well the
@@ -429,8 +420,7 @@
         opposite sign it tracks semblance at about 0.95, because both are amplitude-sensitive, so on this
         data it carries almost the same information by a completely different route. The genuinely
         independent pair is semblance against eigenstructure, which correlate at around 0.85 — high, but
-        the lowest figure on the page. Running five attributes does not buy you five
-        opinions.</span>
+        the lowest figure on the page. Running five of them does not give five independent measurements.</span>
     </div>
 
     <div class="legend prose">
@@ -457,7 +447,7 @@
       <h3><span class="stepno">?</span>Why the choice of algorithm is yours to make</h3>
       <span class="hint">What these attributes are used for, and how they mislead</span>
     </div>
-    <p class="lede">Coherence is the workhorse of structural interpretation. It is what turns a volume into
+    <p class="lede">Coherence is the most heavily used discontinuity attribute in structural interpretation. It is what turns a volume into
       a fault map, and on a time slice it does something no vertical section can: it shows a fault's
       <em>trace</em>, the line it makes in map view, so you can follow it, see where it branches, and see
       how it relates to its neighbors.</p>
@@ -483,7 +473,7 @@
 
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       Which one to run</h2>
-    <p class="lede">This is the practical payoff of the whole module. The dividing line is
+    <p class="lede">The practical question is which one to run. The dividing line is
       <b>amplitude</b>. Energy ratio and eigenstructure are blind to a pure change of amplitude; semblance
       and Sobel are not. So:</p>
     <ul class="lede" style="padding-left:20px">
@@ -491,8 +481,7 @@
         eigenvalue-based attributes hold the edge together where semblance blurs it.</li>
       <li>Mapping <b>internal architecture</b> in a thin channel, where the waveform is constant and only
         the amplitude changes: energy ratio will show you nothing and semblance will show you the edges.
-        This is not a subtlety — step 6 has energy ratio reading exactly 1.000 at an amplitude edge that
-        semblance calls about 0.8.</li>
+        Step 6 has energy ratio reading exactly 1.000 at an amplitude edge that semblance calls about 0.8.</li>
       <li>Not sure: run two and compare. Where they agree you have a discontinuity in both waveform and
         amplitude; where they disagree, the disagreement itself tells you which one it is.</li>
     </ul>
@@ -500,16 +489,15 @@
     <h2 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--crimson);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)">
       And the discipline that goes with it</h2>
     <p class="lede">Low coherence means one thing only: the traces in this window stopped looking alike.
-      Zone 4 in step 6 is a reminder worth keeping — every attribute goes dark there, and there is no fault,
+      Zone 4 in step 6 shows why: every attribute goes dark there, and there is no fault,
       no stratigraphic edge and no geology of any kind, only noise. Nothing in the number distinguishes it
       from the fault two zones along.</p>
     <p class="lede">So a dark lineament earns its interpretation from context rather than from its value:
       whether it is planar, whether it persists across many time slices, whether it lines up with structure
       you can see on the section, and whether it behaves the way the different algorithms predict it should.
-      A number without its algorithm, its window and its dip field is not interpretable, which is the
-      sentence this whole module exists to earn.</p>
+      A number without its algorithm, its window and its dip field is not interpretable.</p>
     <div class="legend prose">
-      <span>Worth saying plainly: none of these attributes finds faults. They find places where neighboring
+      <span>None of these attributes finds faults. They find places where neighboring
         traces disagree. Deciding which of those places are faults is the interpretation, and it is
         yours.</span>
     </div>
@@ -535,8 +523,7 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">λ₁ holds essentially all the energy and λ₂ onwards are at the level of rounding
             error: the readout shows λ₁ holding 100.00% of the energy and λ₂ holding 0.00%. The matrix is
             rank one. That is the mathematical statement of "same waveform, different size", and it is why
-            the ratio λ₁ / Σλ cannot see the amplitude change. Now add a waveform
-            change and a second eigenvalue lifts off the floor immediately.</span></details></li>
+            the ratio λ₁ / Σλ cannot see the amplitude change. Now add a waveform change and a second eigenvalue becomes non-zero immediately.</span></details></li>
         <li><b>Turn the gain up and down.</b> First set the waveform change to about 40°, so that there is
           something for the variance to measure. Then move the overall amplitude slider from 0.2 to 3 and
           watch the three numbers underneath.
@@ -553,8 +540,7 @@
             data changing at all. Keeping more principal components means calling more of the window "signal", so of course
             more of it looks coherent. AASPI notes that for small windows of 5 or 9 traces the first
             component usually represents more than 95% of the variability, and that L = 2 or 3 is intended
-            for windows of 25 traces or more. Using a large L on a small window quietly erases the anomaly
-            you were looking for.</span></details></li>
+            for windows of 25 traces or more. Using a large L on a small window removes the anomaly being looked for.</span></details></li>
         <li><b>Find the case where they rank the opposite way round.</b> In step 6, compare zone 2 with
           zone 5 across all five attributes.
           <details class="reveal"><summary>Hint</summary><span class="ans">At the amplitude edge semblance reads about 0.8 and energy ratio exactly 1.00:
