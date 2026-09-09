@@ -52,52 +52,6 @@ it moves, so the address bar always holds the current configuration of the
 module. Copying it from the address bar hands someone the exact setup, which is
 the intended way to distribute a worked example. There is no copy button, because the address bar already holds the link.
 
-## Page-view counting
-
-`assets/count.js` records that a page was opened, and nothing else. It is loaded
-by every page — `assets/count.js` from the root, `../assets/count.js` from
-`modules/` — as the first script at the foot of the body.
-
-Counts go to GoatCounter under the account code `hbedle`, shared with the other
-teaching repositories served from `hbedle-subsurface.github.io`; the path
-distinguishes them, so every module gets its own row at
-https://hbedle.goatcounter.com. No cookie is set and no identifier is stored.
-
-The script does not count `file://`, `localhost` or `127.0.0.1`, and honors Do
-Not Track. If it fails to load the page carries on unchanged. **Do not modify
-those guards, do not add event tracking** — counting page loads is a visitor log, while counting slider moves would record how someone works, which is not what the site tells people it does — and do not add a second analytics tool.
-
-## Exercise pop-out
-
-`assets/popout.js` puts an **Open in new window** button on the exercises tab of
-every module, so a student can read the exercises in a second window while
-working the controls in the first. It is loaded by every module as
-`../assets/popout.js`, next to `count.js`.
-
-It copies the text already on the page and does nothing else: no fetch, no
-storage, no cookie. It works from a `file://` copy with no network. If
-`assets/` is stale the button does not appear and the exercises tab is
-unchanged, which is why no module carries a local fallback for it.
-
-## Control-panel pop-out
-
-`assets/panelout.js` puts an **Open controls in a window** button on the header
-panel of every module, so the sliders can sit beside the panels they drive
-instead of scrolling off the top of the page. It is loaded by every module as
-`../assets/panelout.js`, next to `popout.js`.
-
-Where the exercise copy is static, this one is connected. The second window
-holds a working copy of the panel: moving a slider there copies the value onto
-the real control in the first window and fires the event the module already
-listens for, and the header canvas is mirrored back so the copy shows what the
-module drew. A press on the copied canvas is forwarded at the same fractional
-position, so picking a point on a map still works from the second window. It
-fetches nothing, stores nothing and sets no cookie, and it works from a
-`file://` copy with no network. Installing it is covered in `ADD-PANELOUT.md`.
-
-The same file goes in every teaching repository unchanged; see `ADD-POPOUT.md`
-for the procedure and the harness.
-
 ## Sources
 
 The definitions follow the AASPI program documentation for `dip3d`,
@@ -109,23 +63,6 @@ states plainly where the implementation simplifies or departs from a production
 volume. Module 04, which follows the `similarity3d` documentation closely, also
 cites that document by equation number.
 
-## Numbers in the exercise hints
-
-The hints describe what the readouts do rather than quoting them to three
-decimal places. A hint says the score roughly halves, or that one value is an
-order of magnitude above another, or that a ratio is about half again — not
-that it is 0.512.
-
-The reason is maintenance. Change a default window, a bed spacing or a noise
-seed and every quoted decimal somewhere in the set becomes wrong, silently,
-with nothing to catch it. Relative statements stay correct through such a change; exact ones do not.
-
-Exact figures are still used where the arithmetic guarantees them and no model
-constant can move them: the shape index landmarks (+1, +0.5, 0, −0.5, −1), the
-candidate counts in a dip search, energy ratio reading exactly 1.000 on a
-rank-one covariance matrix, and the identity between energy ratio at L = 1 and
-eigenstructure. Those are properties of the definitions, not of the models, and
-they are worth stating precisely.
 
 ## License and citation
 
