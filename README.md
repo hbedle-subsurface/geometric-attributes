@@ -40,6 +40,7 @@ index.html          landing page: hero, module cards
 assets/
   count.js          page-view counting, and nothing else
   popout.js         the exercises pop-out button, and nothing else
+  panelout.js       the control-panel pop-out button, and nothing else
   seismic.js        SEIS — wavelets, synthetic traces, canvas drawing, colormaps
   attributes.js     ATTR — semblance, dip scans, covariance, eigen, colormaps
   style.css         the whole visual identity, shared by every page
@@ -77,6 +78,22 @@ It copies the text already on the page and does nothing else: no fetch, no
 storage, no cookie. It works from a `file://` copy with no network. If
 `assets/` is stale the button does not appear and the exercises tab is
 unchanged, which is why no module carries a local fallback for it.
+
+## Control-panel pop-out
+
+`assets/panelout.js` puts an **Open controls in a window** button on the header
+panel of every module, so the sliders can sit beside the panels they drive
+instead of scrolling off the top of the page. It is loaded by every module as
+`../assets/panelout.js`, next to `popout.js`.
+
+Where the exercise copy is static, this one is connected. The second window
+holds a working copy of the panel: moving a slider there copies the value onto
+the real control in the first window and fires the event the module already
+listens for, and the header canvas is mirrored back so the copy shows what the
+module drew. A press on the copied canvas is forwarded at the same fractional
+position, so picking a point on a map still works from the second window. It
+fetches nothing, stores nothing and sets no cookie, and it works from a
+`file://` copy with no network. Installing it is covered in `ADD-PANELOUT.md`.
 
 The same file goes in every teaching repository unchanged; see `ADD-POPOUT.md`
 for the procedure and the harness.
